@@ -1,0 +1,22 @@
+export component MainWindow inherits Window {
+    title: "计数器";
+    in-out property <int> counter: 0;
+
+    VerticalLayout {
+        spacing: 8px;
+        Text {
+            text: "计数: {counter}";
+            font-size: 24px;
+        }
+        HorizontalLayout {
+            Button {
+                text: "-1";
+                clicked => { counter -= 1; }
+            }
+            Button {
+                text: "+1";
+                clicked => { counter += 1; }
+            }
+        }
+    }
+}

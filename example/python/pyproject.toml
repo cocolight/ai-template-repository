@@ -1,0 +1,25 @@
+[project]
+name = "py-task-cli"
+version = "0.1.0"
+description = "命令行任务管理工具"
+requires-python = ">=3.10"
+dependencies = ["rich>=13.0", "typer>=0.12"]
+
+[project.scripts]
+task = "py_task_cli.main:app"
+
+[project.optional-dependencies]
+dev = ["ruff>=0.5", "pytest>=8.0"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/py_task_cli"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

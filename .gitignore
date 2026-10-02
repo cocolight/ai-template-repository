@@ -1,0 +1,21 @@
+# 依赖 / 构建产物
+node_modules/
+__pycache__/
+target/
+dist/
+build/
+out/
+
+# 临时 / 日志
+*.tmp
+*.log
+
+# OS
+.DS_Store
+
+# 密钥（绝不提交）
+*.key
+*.pem
+.env
+.env.*
+!*.example.env
