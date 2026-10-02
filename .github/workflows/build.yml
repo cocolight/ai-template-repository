@@ -14,17 +14,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # TODO: 按本项目技术栈补全环境与安装 / lint / 测试命令，例如：
-      #   Python:
-      #     - uses: actions/setup-python@v5
-      #       with: { python-version: "3.12" }
-      #     - run: pip install -e ".[dev]"
-      #     - run: ruff check . && pytest
-      #   Rust:
-      #     - uses: Swatinem/rust-cache@v2
-      #     - run: cargo fmt --check
-      #     - run: cargo clippy --all-targets -- -D warnings
-      #     - run: cargo test
+      # TODO: 按本项目技术栈补全以下三步（缺任一步，门禁即形同虚设）：
+      #   1) 安装依赖
+      #   2) lint / 格式检查
+      #   3) 测试（不得改成 `|| true`，不得把失败降级为警告）
 
       - name: Test
         run: |

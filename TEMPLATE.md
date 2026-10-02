@@ -63,12 +63,12 @@ cd my-project
 
 | # | 文件 | 改什么 | 怎么算改对 |
 |---|------|--------|-----------|
-| 1 | 技术栈自带的清单文件（`Cargo.toml` / `pyproject.toml` / `package.json` …） | 先落代码骨架（`cargo init` / `uv init` 等），把项目名、版本、`description`、`license` 填成真实值 | 项目能编译 / 启动 |
+| 1 | 代码骨架与依赖清单 | 用本项目技术栈的初始化方式落下骨架，再把项目名、版本、描述、许可证等元信息填成真实值 | 项目能构建 / 启动 |
 | 2 | `AGENTS.md` | §0 把「一句话说明本项目做什么」写实；**§2 五行命令全部填上**（安装依赖 / 运行 / 测试 / Lint / 格式化检查） | 表里不再有「（待填）」 |
 | 3 | `README.md` | 开头的简介、`## 功能` 列表，以及 3 处 `<!-- TODO -->`（安装 / 运行 / 测试命令） | 文件里不再有 `TODO` |
 | 4 | `ROADMAP.md` | 写首批功能；每条「验收标准」必须**能被命令或明确检查验证** | 每条你都能说出"怎么验证它完成了" |
-| 5 | `.github/workflows/build.yml` | 把占位 step 换成真实命令（文件里已附 Rust / Python 的 TODO 注释可抄） | 本地跑一遍同样的命令，全绿 |
-| 6 | `docs/architecture.md` | §1 补目录分层；§3 补该语言的错误处理策略 | 与代码实际结构一致 |
+| 5 | `.github/workflows/build.yml` | 把占位 step 换成真实命令（文件里的 TODO 注释已列出要填哪几步） | 本地跑一遍同样的命令，全绿 |
+| 6 | `docs/architecture.md` | §1 补目录分层；§3 补本项目技术栈的错误处理策略 | 与代码实际结构一致 |
 | 7 | `CONTRIBUTING.md` | 「本地检查」那一行填成本项目的真实命令 | 与 `AGENTS.md` §2 完全一致 |
 | 8 | 占位文件 `*.gitkeep` | 目录里有了真实文件后，删 `src/.gitkeep`、`tests/.gitkeep`、`docs/.gitkeep`；**`scripts/.gitkeep` 保留**（否则 `scripts/` 目录会消失） | `git ls-files '*gitkeep'` 只剩 `scripts/.gitkeep` |
 | 9 | GitHub 仓库设置（不是文件） | 启用 Actions → 收紧 Workflow permissions → 为 `main` 开分支保护 + required status checks | 见 [docs/configuration.md](docs/configuration.md) §4 |
@@ -130,6 +130,7 @@ git ls-files -s scripts/
 
 | 性质 | 原因 | 检查 |
 |------|------|------|
+| 通用文件不绑定具体技术栈 | 本模板对所有技术栈通用；语言 / 工具的具体示例**只放 `example/`**，不写进 README、AGENTS、ROADMAP、CONTRIBUTING、docs/、build.yml。通用文件里只写"该填什么"，不写"用什么填" | 见下方"通用文件技术栈中性自检" |
 | 库内一律 LF | Windows 检出脚本变 CRLF 会导致 `bad interpreter` | `git check-attr eol -- scripts/template-init.sh` → `eol: lf` |
 | `scripts/*.sh` 索引模式 `100755` | 否则 CI 的 `./scripts/template-init.sh` 报 `Permission denied`（Windows 上 `core.filemode=false`，本地测不出） | `git ls-files -s scripts/` |
 | 交付文件里不写占位符字面 | 生成新项目时，**所有被复制的文件**都会参与占位符替换，文档里写占位符字面会被改写 | 见下方"改完模板后的自检" |
@@ -138,6 +139,14 @@ git ls-files -s scripts/
 
 ```bash
 git update-index --chmod=+x scripts/template-init.sh
+```
+
+**通用文件技术栈中性自检**（下列交付文件用于指导任何技术栈的新项目，不得出现具体语言 / 工具名；示例一律放 `example/`）：
+
+```bash
+grep -rn -i -e cargo -e pyproject -e pytest -e ruff -e "npm " -e "pip " \
+  README.md AGENTS.md ROADMAP.md CONTRIBUTING.md docs/ .github/workflows/build.yml \
+  || echo "OK: 通用文件保持技术栈中性"
 ```
 
 **改完模板后的自检**（在生成产物上检查，模板自用文件本身含占位符，直接 grep 仓库会误报）：

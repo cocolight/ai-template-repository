@@ -20,7 +20,7 @@
 
 ## 本地检查
 
-（按技术栈补充，例如：`shellcheck scripts/*.sh` / `ruff check . && pytest` / `cargo fmt --check && cargo clippy --all-targets -- -D warnings && cargo test`）
+（按本项目技术栈填写，须与 `AGENTS.md` §2「常用命令」完全一致）
 
 ## 红线与完成定义
 

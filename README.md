@@ -10,7 +10,7 @@
 
 ## 安装
 
-<!-- TODO: 填写安装命令，例如 pip install . / cargo build -->
+<!-- TODO: 填写安装依赖的命令 -->
 
 ## 运行
 
@@ -18,7 +18,7 @@
 
 ## 测试 / 检查
 
-<!-- TODO: 填写测试与 lint 命令，例如 pytest / cargo test / ruff check . -->
+<!-- TODO: 填写测试与静态检查命令 -->
 
 ## 目录结构
 

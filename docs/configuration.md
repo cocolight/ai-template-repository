@@ -86,14 +86,7 @@ git update-index --chmod=+x scripts/x.sh       # 修复
 
 在填好 `build.yml` 的真实命令之前，required check 是空转的（永远成功）。
 
-本地执行同一套检查（示例，按技术栈替换）：
-
-```bash
-# Python
-pip install -e ".[dev]" && ruff check . && ruff format --check . && pytest
-# Rust
-cargo fmt --check && cargo clippy --all-targets -- -D warnings && cargo test
-```
+本地检查至少覆盖三步，且与 `AGENTS.md` §2 保持完全一致：**安装依赖 → lint / 格式检查 → 测试**。
 
 ## 5. 落地配置清单
 
