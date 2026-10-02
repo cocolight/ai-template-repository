@@ -1,6 +1,9 @@
-# 功能清单（ROADMAP）
+# {{PROJECT_NAME}} 功能清单（ROADMAP）
 
-| # | 功能 | 分支 | 状态 | 依赖 |
-|---|------|------|------|------|
-| 1 | （第一个功能） | feature/xxx | planned | - |
-| 2 | （第二个功能） | feature/yyy | planned | 1 |
+> 状态取值：`planned` / `in-progress` / `done` / `dropped`。
+> 「验收标准」须**可判定**（能被命令或明确检查验证），AI 助手据此判断功能是否完成。
+
+| # | 功能 | 分支 | 状态 | 依赖 | 验收标准 |
+|---|------|------|------|------|----------|
+| 1 | （第一个功能） | feature/xxx | planned | - | （可判定条件，例如：`pytest tests/test_x.py::test_y` 通过） |
+| 2 | （第二个功能） | feature/yyy | planned | 1 | （可判定条件） |
