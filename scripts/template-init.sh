@@ -6,7 +6,8 @@
 #
 # 行为:
 #   - 复制模板内容（排除 .git / .workbuddy / example / TEMPLATE.md / 本脚本自身 / 模板仓库 CI）
-#   - 不带 .gitkeep 占位文件；模板约定的空目录（src / tests / scripts）用 mkdir 显式创建
+#   - 复制阶段即跳过 .gitkeep 占位文件（模板仓库自身保留它们）；
+#     只含占位文件的空目录（src / tests / scripts）仍会保留，只是里面没有占位文件
 #   - 把 {{PROJECT_NAME}} 与 {{YEAR}} 占位符替换为实际值
 #   - 在新目录初始化独立 git 仓库（默认分支 main）并做首次提交
 set -eu
@@ -101,32 +102,31 @@ if [ "$DRY_RUN" -eq 1 ]; then
   exit 0
 fi
 
-# ---- 复制（跳过模板自用内容：.git / .workbuddy / example / TEMPLATE.md）----
-# .workbuddy 是本地 AI 工具数据（通常未纳入版本控制），排除它以保证
-# "本地直接生成"与"克隆后生成"得到一致的结果。
+# ---- 复制目录树（复制阶段即跳过模板自用内容与占位文件）----
+# 排除清单：
+#   .git / .workbuddy       模板仓库自身的版本库、本地 AI 工具数据
+#                           （.workbuddy 通常未纳入版本控制，排除它可保证
+#                            "本地直接生成"与"克隆后生成"得到一致结果）
+#   example / TEMPLATE.md   模板自用的示例与说明
+#   .gitkeep                占位文件只服务于模板仓库自身（让 Git 能跟踪空目录）；
+#                           这里在复制阶段就跳过，所以模板仓库里保留、产物里没有
+#   scripts/template-init.sh / .github/workflows/ci.yml   仅模板仓库自用
+# 实现说明：按目录树逐项复制（find 先输出目录、后输出其中的文件），
+# 因此"只含占位文件的空目录"（src/、tests/、scripts/）依然会被 mkdir 出来 ——
+# 目录约定留在产物里，占位文件不留。
 mkdir -p "$DST"
-for entry in "$SRC"/* "$SRC"/.[!.]* "$SRC"/..?*; do
-  [ -e "$entry" ] || continue
-  case "$(basename "$entry")" in
-    .git|.workbuddy|example|TEMPLATE.md) continue ;;
-  esac
-  cp -a "$entry" "$DST"/
-done
-# 去掉只属于模板仓库自身、不应进入新项目的文件
-rm -f "$DST/scripts/template-init.sh" "$DST/.github/workflows/ci.yml"
-
-# ---- 清掉占位文件，改为显式保留空目录 ----
-# .gitkeep 只是"让 Git 能跟踪空目录"的道具，服务的是模板仓库自身，新项目不需要它。
-# 但删掉之后，只含 .gitkeep 的目录会因"Git 不跟踪空目录"而整个消失，
-# 所以这里用 mkdir 把模板约定的目录显式建回来，三个目标同时达成：
-#   - 产物里不再有占位文件（原先要在新项目里手工删）
-#   - 目录约定依然存在（README / docs/architecture.md 都在引用 src/、tests/、scripts/）
-#   - "本地直接生成"与"克隆后生成"结果一致
-# 模板若新增"应当始终存在的空目录"，请一并加进 KEEP_DIRS。
-KEEP_DIRS="src tests scripts"
-find "$DST" -name '.gitkeep' -type f -exec rm -f {} +
-for d in $KEEP_DIRS; do
-  mkdir -p "$DST/$d"
+(
+  cd "$SRC" && find . \
+    \( -name .git -o -name .workbuddy -o -name example -o -name TEMPLATE.md \
+       -o -name .gitkeep \
+       -o -path ./scripts/template-init.sh \
+       -o -path ./.github/workflows/ci.yml \) -prune -o -print
+) | while IFS= read -r rel; do
+  if [ -d "$SRC/$rel" ]; then
+    mkdir -p "$DST/$rel"
+  else
+    cp -a "$SRC/$rel" "$DST/$rel"
+  fi
 done
 
 # ---- 替换占位符（awk 字面替换：免转义、跨平台、无需 perl）----
