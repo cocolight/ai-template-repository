@@ -88,6 +88,10 @@ git update-index --chmod=+x scripts/x.sh       # 修复
 
 本地检查至少覆盖三步，且与 `AGENTS.md` §2 保持完全一致：**安装依赖 → lint / 格式检查 → 测试**。
 
+**runner 镜像**：`build.yml` 的 `runs-on` 显式写成 `ubuntu-24.04`，而不是 `ubuntu-latest`。跟随 latest 会在 GitHub
+切换镜像时（例如迁移到 Ubuntu 26）让 CI 行为突变——系统依赖的包名可能变化，CI 会在你毫无改动的一天突然变红。
+钉住版本后，升级时机由你决定，且升级前可以先在分支上验证。
+
 ## 5. 落地配置清单
 
 - [ ] 填写 `AGENTS.md` §2「常用命令」表（AI 依赖它）

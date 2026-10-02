@@ -59,7 +59,9 @@ cd my-project
 
 ## 新项目开工清单
 
-按顺序做。第 1–8 步是「改文件」，第 9 步是「改外部设置」。每条写明 **改哪个文件 / 改什么 / 怎么算改对**。
+按顺序做。第 1–7 步是「改文件」，第 8 步是「改外部设置」。每条写明 **改哪个文件 / 改什么 / 怎么算改对**。
+
+> `.gitkeep` 占位文件已由 `template-init.sh` 处理：产物里**不含任何 `.gitkeep`**，而模板约定的空目录（`src/`、`tests/`、`scripts/`）由脚本自动创建，所以新项目里不用再手工清理占位文件。
 
 | # | 文件 | 改什么 | 怎么算改对 |
 |---|------|--------|-----------|
@@ -70,10 +72,9 @@ cd my-project
 | 5 | `.github/workflows/build.yml` | 把占位 step 换成真实命令（文件里的 TODO 注释已列出要填哪几步） | 本地跑一遍同样的命令，全绿 |
 | 6 | `docs/architecture.md` | §1 补目录分层；§3 补本项目技术栈的错误处理策略 | 与代码实际结构一致 |
 | 7 | `CONTRIBUTING.md` | 「本地检查」那一行填成本项目的真实命令 | 与 `AGENTS.md` §2 完全一致 |
-| 8 | 占位文件 `*.gitkeep` | 目录里有了真实文件后，删 `src/.gitkeep`、`tests/.gitkeep`、`docs/.gitkeep`；**`scripts/.gitkeep` 保留**（否则 `scripts/` 目录会消失） | `git ls-files '*gitkeep'` 只剩 `scripts/.gitkeep` |
-| 9 | GitHub 仓库设置（不是文件） | 启用 Actions → 收紧 Workflow permissions → 为 `main` 开分支保护 + required status checks | 见 [docs/configuration.md](docs/configuration.md) §4 |
+| 8 | GitHub 仓库设置（不是文件） | 启用 Actions → 收紧 Workflow permissions → 为 `main` 开分支保护 + required status checks | 见 [docs/configuration.md](docs/configuration.md) §4 |
 
-第 9 步的坑：required status checks 的名字**必须等于 workflow 里的 job 名**。`build.yml` 的 job id 是 `test` 且未设 `name`，所以在列表里搜 `test`；一旦改了 job 名，这里要同步改。
+第 8 步的坑：required status checks 的名字**必须等于 workflow 里的 job 名**。`build.yml` 的 job id 是 `test` 且未设 `name`，所以在列表里搜 `test`；一旦改了 job 名，这里要同步改。
 
 **开工前先跑这两条自检**：
 
