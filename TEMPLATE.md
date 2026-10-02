@@ -59,13 +59,67 @@ cd my-project
 
 ## 新项目开工清单
 
-- [ ] 运行 `template-init.sh` 生成项目
-- [ ] 填写 `AGENTS.md` §2 常用命令表
-- [ ] 填写 `README.md` 的安装 / 运行 / 测试命令
-- [ ] 在 `ROADMAP.md` 写入首批功能与**可判定的**验收标准
-- [ ] 按技术栈补全 `.github/workflows/build.yml`
-- [ ] 在 GitHub 上把 `main` 设为保护分支、开启 required status checks
-- [ ] 按 [docs/configuration.md](docs/configuration.md) §5 逐项核对配置
+按顺序做。第 1–8 步是「改文件」，第 9 步是「改外部设置」。每条写明 **改哪个文件 / 改什么 / 怎么算改对**。
+
+| # | 文件 | 改什么 | 怎么算改对 |
+|---|------|--------|-----------|
+| 1 | 技术栈自带的清单文件（`Cargo.toml` / `pyproject.toml` / `package.json` …） | 先落代码骨架（`cargo init` / `uv init` 等），把项目名、版本、`description`、`license` 填成真实值 | 项目能编译 / 启动 |
+| 2 | `AGENTS.md` | §0 把「一句话说明本项目做什么」写实；**§2 五行命令全部填上**（安装依赖 / 运行 / 测试 / Lint / 格式化检查） | 表里不再有「（待填）」 |
+| 3 | `README.md` | 开头的简介、`## 功能` 列表，以及 3 处 `<!-- TODO -->`（安装 / 运行 / 测试命令） | 文件里不再有 `TODO` |
+| 4 | `ROADMAP.md` | 写首批功能；每条「验收标准」必须**能被命令或明确检查验证** | 每条你都能说出"怎么验证它完成了" |
+| 5 | `.github/workflows/build.yml` | 把占位 step 换成真实命令（文件里已附 Rust / Python 的 TODO 注释可抄） | 本地跑一遍同样的命令，全绿 |
+| 6 | `docs/architecture.md` | §1 补目录分层；§3 补该语言的错误处理策略 | 与代码实际结构一致 |
+| 7 | `CONTRIBUTING.md` | 「本地检查」那一行填成本项目的真实命令 | 与 `AGENTS.md` §2 完全一致 |
+| 8 | 占位文件 `*.gitkeep` | 目录里有了真实文件后，删 `src/.gitkeep`、`tests/.gitkeep`、`docs/.gitkeep`；**`scripts/.gitkeep` 保留**（否则 `scripts/` 目录会消失） | `git ls-files '*gitkeep'` 只剩 `scripts/.gitkeep` |
+| 9 | GitHub 仓库设置（不是文件） | 启用 Actions → 收紧 Workflow permissions → 为 `main` 开分支保护 + required status checks | 见 [docs/configuration.md](docs/configuration.md) §4 |
+
+第 9 步的坑：required status checks 的名字**必须等于 workflow 里的 job 名**。`build.yml` 的 job id 是 `test` 且未设 `name`，所以在列表里搜 `test`；一旦改了 job 名，这里要同步改。
+
+**开工前先跑这两条自检**：
+
+```bash
+# 1) 占位符应已被脚本全部替换 —— 无输出即为干净
+grep -rn "{{" . --exclude-dir=.git
+
+# 2) 脚本索引权限（Linux / macOS 克隆后 ./x.sh 才不会 Permission denied）
+git ls-files -s scripts/
+```
+
+环境 / Git / 行尾 / CI / 分支保护的完整核对清单见 [docs/configuration.md](docs/configuration.md) §5。
+
+## 哪些文件不要改
+
+新项目里有几处内容是「判定基准」或「安全底线」，改了整套规范就失效。分四类。
+
+### 一、完全不要动
+
+| 文件 | 为什么不能改 | 要变怎么办 |
+|------|------------|-----------|
+| `LICENSE` | MIT 正文是法律文本，逐字固定；开头的年份与项目名已由脚本填好 | 换许可证 = 整体替换成另一份官方文本，不做局部编辑 |
+| `.gitattributes` | 它强制库内 LF；改了会让 Windows 检出脚本变成 CRLF（报 `bad interpreter`） | 只增不改，且必须保留 `*.sh text eol=lf` |
+| `docs/adr/` 中「已接受」的记录 | 决策记录的价值就在于不可篡改，改了就无从回溯当时为什么这样定 | 新增一条 ADR 说明变更，旧记录原样保留 |
+
+### 二、可以补，但不得削弱
+
+| 文件 / 位置 | 不许做的事 |
+|------------|-----------|
+| `AGENTS.md` §1 上下文入口、§3 工作流、§4 红线、§5 DoD、§7 安全 | 不得删条目、不得放宽（例如把"不得删除测试"删掉）。§0 与 §2 是留给项目搭建者填的，随意改 |
+| `docs/definition-of-done.md` | 不得为了让某个功能"达标"而放宽条件 —— 这正是模板定义的「伪完成」 |
+| `.github/workflows/build.yml` | 要填真实命令，但不得删掉 lint / test 步骤、不得改成 `|| true`、不得把失败降级成警告 |
+| `.gitignore` | 可以追加语言相关规则，但不得删除密钥段（`.env`、`*.key`、`*.pem`） |
+
+确需调整流程类条文（例如 `CONTRIBUTING.md` 的分支策略）时，请在 PR 里写明理由，并同步 `AGENTS.md`，避免两份文档互相打架。
+
+### 三、只追加，不回头改
+
+| 文件 | 规则 |
+|------|------|
+| `CHANGELOG.md` | 已发布版本的条目不再修改；新改动追加到 `Unreleased` |
+| `ROADMAP.md` 中已标 `done` 的行 | 状态可回溯，但不要删行，也不要改写已完成功能的验收标准 |
+
+### 四、不在你的项目里（别去找）
+
+`TEMPLATE.md`、`scripts/template-init.sh`、`.github/workflows/ci.yml`、`example/`、`.workbuddy/` 是模板仓库的自用文件，生成新项目时已被排除，新项目里**根本不存在**。
 
 ## 维护模板仓库自身
 
