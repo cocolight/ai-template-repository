@@ -2,6 +2,8 @@
 name = "rust-slint-counter"
 version = "0.1.0"
 edition = "2021"
+description = "用 Slint 构建的跨平台桌面计数器（模板示例）"
+license = "MIT"
 build = "build.rs"
 
 [dependencies]

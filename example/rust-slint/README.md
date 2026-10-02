@@ -11,11 +11,19 @@
 - Slint 1.8
 
 ## 构建与运行
+
+```bash
+cargo run
+```
+
+需要优化构建时：
+
 ```bash
 cargo run --release
 ```
 
 ## 检查
+
 ```bash
 cargo fmt --check
 cargo clippy --all-targets -- -D warnings
@@ -24,7 +32,8 @@ cargo test
 
 ## 目录
 - `ui/` — Slint 界面定义（`*.slint`）
-- `src/` — Rust 逻辑
+- `src/` — Rust 逻辑（`src/main.rs` 含单元测试）
+- `tests/` — 集成测试目录（当前为占位）
 - `build.rs` — 编译 `.slint` 并生成 Rust 绑定
 
 ## 许可证

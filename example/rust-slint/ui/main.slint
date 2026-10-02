@@ -1,6 +1,10 @@
+import { Button } from "std-widgets.slint";
+
 export component MainWindow inherits Window {
     title: "计数器";
     in-out property <int> counter: 0;
+    // UI 只负责「请求增减」，真正的计数逻辑在 Rust 侧（见 src/main.rs）。
+    callback increment(int);
 
     VerticalLayout {
         spacing: 8px;
@@ -11,11 +15,11 @@ export component MainWindow inherits Window {
         HorizontalLayout {
             Button {
                 text: "-1";
-                clicked => { counter -= 1; }
+                clicked => { root.increment(-1); }
             }
             Button {
                 text: "+1";
-                clicked => { counter += 1; }
+                clicked => { root.increment(1); }
             }
         }
     }
