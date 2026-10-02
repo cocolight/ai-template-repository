@@ -5,8 +5,8 @@
 ## 生成新项目（推荐）
 
 ```bash
-# ① 克隆模板仓库到本地（目录名自取，示例为 my-project）
-git clone <本仓库地址> my-project
+# ① 克隆模板仓库到本地（目录名自取，示例为 my-project；HTTPS 形式无需配置 SSH key）
+git clone https://github.com/cocolight/ai-template-repository.git my-project
 
 # ② 进入克隆下来的模板仓库
 cd my-project
@@ -18,11 +18,13 @@ cd my-project
 
 | 命令 | 作用 |
 |------|------|
-| `git clone <本仓库地址> my-project` | 把模板仓库克隆到本地 `my-project/`（此目录只是"蓝本"，用完可删） |
+| `git clone https://github.com/cocolight/ai-template-repository.git my-project` | 把模板仓库克隆到本地 `my-project/`（此目录只是"蓝本"，用完可删） |
 | `cd my-project` | 进入模板仓库；脚本按当前所在的仓库定位模板根，**必须在仓库内执行** |
 | `./scripts/template-init.sh ../my-app` | 以模板为蓝本，在 `../my-app` 生成新项目：复制文件（排除模板自用内容）、替换 `{{PROJECT_NAME}}`/`{{YEAR}}`、`git init -b main` 并创建首次提交 |
 
 上面第 ③ 步里的路径就是新项目的位置，**不要**填在模板仓库内部——脚本会拒绝并报错（防止自我复制、误删模板的 `.git`）。
+
+> 若你 fork 或改名了本模板，请把上面的克隆地址换成你自己的仓库地址。
 
 `template-init.sh` 会：
 
