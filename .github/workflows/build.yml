@@ -1,5 +1,8 @@
 name: build
 
+# 新项目的 CI 门禁骨架。生成后请把下面的占位步骤换成真实命令。
+# 未填写前，required status checks 是空转的（永远成功）。
+
 on:
   push:
     branches: [main]
@@ -8,11 +11,13 @@ on:
 permissions:
   contents: read
 
+# runner 镜像显式钉版本，不跟随 ubuntu-latest：隐式跟随会在 GitHub 切换镜像时
+# 让 CI 行为突变（例如系统依赖的包名变化）。升级镜像前请先在分支上验证依赖。
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # TODO: 按本项目技术栈补全以下三步（缺任一步，门禁即形同虚设）：
       #   1) 安装依赖

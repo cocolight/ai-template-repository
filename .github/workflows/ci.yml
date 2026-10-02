@@ -11,12 +11,15 @@ on:
 permissions:
   contents: read
 
+# runner 镜像显式钉版本，不跟随 ubuntu-latest：
+# GitHub 计划于 2026-10-19 把 ubuntu-latest 迁移到 Ubuntu 26，隐式跟随会让 CI
+# 在镜像切换当天突然改变行为。升级镜像前请先在分支上验证系统依赖。
 jobs:
   template:
     name: Template (shellcheck + init dry-run)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: ShellCheck
         run: shellcheck scripts/*.sh
       - name: template-init dry-run smoke test
@@ -24,13 +27,13 @@ jobs:
 
   python-example:
     name: Python example (ruff + pytest)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: example/python
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
       - name: Install
@@ -44,12 +47,12 @@ jobs:
 
   rust-example:
     name: Rust example (fmt + clippy + test)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: example/rust-slint
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: System deps (Slint)
         run: |
           sudo apt-get update
