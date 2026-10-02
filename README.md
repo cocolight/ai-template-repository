@@ -31,6 +31,7 @@
 
 - 分支：`main` 为保护分支，功能走 `feature/<名称>`。
 - 提交：Conventional Commits，详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+- 环境与配置：[docs/configuration.md](docs/configuration.md)（环境要求、行尾、CI、分支保护）。
 - 完成定义：[docs/definition-of-done.md](docs/definition-of-done.md)。
 - 架构与代码约定：[docs/architecture.md](docs/architecture.md)。
 
