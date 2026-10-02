@@ -5,7 +5,7 @@
 # 例:   ./scripts/template-init.sh ../my-new-app
 #
 # 行为:
-#   - 复制模板内容（排除 .git / example / TEMPLATE.md / 本脚本自身 / 模板仓库 CI）
+#   - 复制模板内容（排除 .git / .workbuddy / example / TEMPLATE.md / 本脚本自身 / 模板仓库 CI）
 #   - 把 {{PROJECT_NAME}} 与 {{YEAR}} 占位符替换为实际值
 #   - 在新目录初始化独立 git 仓库（默认分支 main）并做首次提交
 set -eu
@@ -100,12 +100,14 @@ if [ "$DRY_RUN" -eq 1 ]; then
   exit 0
 fi
 
-# ---- 复制（跳过模板自用内容：.git / example / TEMPLATE.md）----
+# ---- 复制（跳过模板自用内容：.git / .workbuddy / example / TEMPLATE.md）----
+# .workbuddy 是本地 AI 工具数据（通常未纳入版本控制），排除它以保证
+# "本地直接生成"与"克隆后生成"得到一致的结果。
 mkdir -p "$DST"
 for entry in "$SRC"/* "$SRC"/.[!.]* "$SRC"/..?*; do
   [ -e "$entry" ] || continue
   case "$(basename "$entry")" in
-    .git|example|TEMPLATE.md) continue ;;
+    .git|.workbuddy|example|TEMPLATE.md) continue ;;
   esac
   cp -a "$entry" "$DST"/
 done
