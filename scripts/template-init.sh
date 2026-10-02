@@ -6,6 +6,7 @@
 #
 # 行为:
 #   - 复制模板内容（排除 .git / .workbuddy / example / TEMPLATE.md / 本脚本自身 / 模板仓库 CI）
+#   - 不带 .gitkeep 占位文件；模板约定的空目录（src / tests / scripts）用 mkdir 显式创建
 #   - 把 {{PROJECT_NAME}} 与 {{YEAR}} 占位符替换为实际值
 #   - 在新目录初始化独立 git 仓库（默认分支 main）并做首次提交
 set -eu
@@ -113,6 +114,20 @@ for entry in "$SRC"/* "$SRC"/.[!.]* "$SRC"/..?*; do
 done
 # 去掉只属于模板仓库自身、不应进入新项目的文件
 rm -f "$DST/scripts/template-init.sh" "$DST/.github/workflows/ci.yml"
+
+# ---- 清掉占位文件，改为显式保留空目录 ----
+# .gitkeep 只是"让 Git 能跟踪空目录"的道具，服务的是模板仓库自身，新项目不需要它。
+# 但删掉之后，只含 .gitkeep 的目录会因"Git 不跟踪空目录"而整个消失，
+# 所以这里用 mkdir 把模板约定的目录显式建回来，三个目标同时达成：
+#   - 产物里不再有占位文件（原先要在新项目里手工删）
+#   - 目录约定依然存在（README / docs/architecture.md 都在引用 src/、tests/、scripts/）
+#   - "本地直接生成"与"克隆后生成"结果一致
+# 模板若新增"应当始终存在的空目录"，请一并加进 KEEP_DIRS。
+KEEP_DIRS="src tests scripts"
+find "$DST" -name '.gitkeep' -type f -exec rm -f {} +
+for d in $KEEP_DIRS; do
+  mkdir -p "$DST/$d"
+done
 
 # ---- 替换占位符（awk 字面替换：免转义、跨平台、无需 perl）----
 export NAME YEAR
