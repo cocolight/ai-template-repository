@@ -3,7 +3,7 @@ name = "py-task-cli"
 version = "0.1.0"
 description = "命令行任务管理工具"
 requires-python = ">=3.10"
-dependencies = ["rich>=13.0", "typer>=0.12"]
+dependencies = ["typer>=0.12"]
 
 [project.scripts]
 task = "py_task_cli.main:app"

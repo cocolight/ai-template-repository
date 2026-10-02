@@ -1,26 +1,33 @@
 """py-task-cli — 命令行任务管理工具。"""
+
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 import typer
 
-APP = typer.Typer(help="简单的命令行任务管理")
-STORE = Path.home() / ".py_task_cli.json"
+app = typer.Typer(help="简单的命令行任务管理")
+
+
+def _store() -> Path:
+    """任务数据文件路径；可用环境变量 PY_TASK_CLI_STORE 覆盖（便于测试隔离）。"""
+    return Path(os.environ.get("PY_TASK_CLI_STORE", Path.home() / ".py_task_cli.json"))
 
 
 def _load() -> list[dict]:
-    if STORE.exists():
-        return json.loads(STORE.read_text(encoding="utf-8"))
+    store = _store()
+    if store.exists():
+        return json.loads(store.read_text(encoding="utf-8"))
     return []
 
 
 def _save(tasks: list[dict]) -> None:
-    STORE.write_text(json.dumps(tasks, ensure_ascii=False, indent=2), encoding="utf-8")
+    _store().write_text(json.dumps(tasks, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-@APP.command()
+@app.command()
 def add(name: str) -> None:
     """新增一个任务。"""
     tasks = _load()
@@ -29,7 +36,7 @@ def add(name: str) -> None:
     typer.echo(f"added: {name}")
 
 
-@APP.command()
+@app.command()
 def ls() -> None:
     """列出所有任务。"""
     for task in _load():
@@ -38,4 +45,4 @@ def ls() -> None:
 
 
 if __name__ == "__main__":
-    APP()
+    app()
