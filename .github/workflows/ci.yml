@@ -16,14 +16,29 @@ permissions:
 # 在镜像切换当天突然改变行为。升级镜像前请先在分支上验证系统依赖。
 jobs:
   template:
+    # 注意：本 job 的 name 被 main 的分支保护（required status checks）引用，改名前先改保护设置
     name: Template (shellcheck + init dry-run)
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
       - name: ShellCheck
         run: shellcheck scripts/*.sh
-      - name: template-init dry-run smoke test
-        run: ./scripts/template-init.sh --dry-run "$RUNNER_TEMP/newproj"
+      - name: template-init smoke test
+        # dry-run 只验证参数解析；真实生成才能覆盖复制逻辑（占位文件跳过、空目录保留）。
+        # 每条断言都写成"失败即 exit 1"，不依赖 errexit 的生效范围。
+        run: |
+          set -eu
+          DST="$RUNNER_TEMP/newproj"
+          ./scripts/template-init.sh --dry-run "$DST"
+          ./scripts/template-init.sh "$DST"
+          test "$(find "$DST" -name .gitkeep | wc -l)" -eq 0 || { echo "产物里出现了 .gitkeep"; exit 1; }
+          for d in src tests scripts; do
+            [ -d "$DST/$d" ] || { echo "产物缺少目录：$d"; exit 1; }
+          done
+          [ ! -e "$DST/example" ] || { echo "产物泄露了 example/"; exit 1; }
+          [ ! -e "$DST/.workbuddy" ] || { echo "产物泄露了 .workbuddy/"; exit 1; }
+          ! grep -rq '{{' "$DST" --exclude-dir=.git || { echo "产物仍有未替换的占位符"; exit 1; }
+          [ "$(git -C "$DST" branch --show-current)" = main ] || { echo "默认分支不是 main"; exit 1; }
 
   python-example:
     name: Python example (ruff + pytest)

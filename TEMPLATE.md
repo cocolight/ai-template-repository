@@ -28,7 +28,7 @@ cd my-project
 
 `template-init.sh` 会：
 
-- 复制模板内容到新路径，**排除** `example/`、`TEMPLATE.md`、脚本自身、模板的 `.git`、本地工具数据 `.workbuddy/`，以及模板仓库自用的 CI（`.github/workflows/ci.yml`）；
+- 复制模板内容到新路径，**排除** `example/`、`TEMPLATE.md`、脚本自身、模板的 `.git`、本地工具数据 `.workbuddy/`、模板仓库自用的 CI（`.github/workflows/ci.yml`），以及所有 `.gitkeep` 占位文件（在复制阶段跳过，不是复制后再删）；
 - 把 `{{PROJECT_NAME}}` 与 `{{YEAR}}` 占位符替换为实际值；
 - 在新目录 `git init`（默认分支 `main`）并创建首次提交。
 
@@ -36,7 +36,7 @@ cd my-project
 
 ## 手动使用（不用脚本）
 
-1. 复制除 `example/`、`TEMPLATE.md`、`scripts/template-init.sh`、`.github/workflows/ci.yml`、`.workbuddy/` 外的全部文件；
+1. 复制除 `example/`、`TEMPLATE.md`、`scripts/template-init.sh`、`.github/workflows/ci.yml`、`.workbuddy/` 外的全部文件；`.gitkeep` 占位文件**不要复制**，但要把 `src/`、`tests/`、`scripts/` 三个目录用 `mkdir` 建出来（否则它们会随占位文件一起消失）；
 2. 全局替换 `{{PROJECT_NAME}}` 与 `{{YEAR}}`；
 3. 填好 `AGENTS.md` §2「常用命令」表与 `README.md` 的 TODO；
 4. `git init -b main && git add -A && git commit -m "chore: initialize project"`。
@@ -61,7 +61,9 @@ cd my-project
 
 按顺序做。第 1–7 步是「改文件」，第 8 步是「改外部设置」。每条写明 **改哪个文件 / 改什么 / 怎么算改对**。
 
-> `.gitkeep` 占位文件已由 `template-init.sh` 处理：产物里**不含任何 `.gitkeep`**，而模板约定的空目录（`src/`、`tests/`、`scripts/`）由脚本自动创建，所以新项目里不用再手工清理占位文件。
+> `.gitkeep` 占位文件只服务于模板仓库自身（让 Git 能跟踪空目录），`template-init.sh` **在复制阶段就跳过它们**，所以产物里**不含任何 `.gitkeep`**；而"只含占位文件的空目录"（`src/`、`tests/`、`scripts/`）仍然保留，只是里面没有占位文件。新项目里不用再手工清理占位文件。
+>
+> 唯一残留限制：Git 本身不跟踪空目录，所以这三个空目录不会进入新项目的**首次提交**。往 `src/`、`tests/` 里放进第一个真实文件（例如初始化骨架、写第一个测试）就会被自动纳入版本控制，无需额外操作。
 
 | # | 文件 | 改什么 | 怎么算改对 |
 |---|------|--------|-----------|
@@ -124,7 +126,7 @@ git ls-files -s scripts/
 
 ## 维护模板仓库自身
 
-**不会被复制进新项目的文件（排除清单）**：`.git`、`.workbuddy/`、`example/`、`TEMPLATE.md`、`scripts/template-init.sh`、`.github/workflows/ci.yml`。
+**不会被复制进新项目的文件（排除清单）**：`.git`、`.workbuddy/`、`example/`、`TEMPLATE.md`、`scripts/template-init.sh`、`.github/workflows/ci.yml`，以及 `.gitkeep`（模板仓库里保留，复制时跳过）。
 若新增"仅供模板自用"的文件，记得同步 `scripts/template-init.sh` 里的排除逻辑，并更新本节。
 
 **必须保持的仓库性质**：
@@ -157,6 +159,8 @@ sh -n scripts/template-init.sh                     # 语法
 T=$(mktemp -d)
 ./scripts/template-init.sh "$T/newproj"            # 真实生成
 grep -rn "{{" "$T/newproj" --exclude-dir=.git || echo "OK: 产物无残留占位符"
+find "$T/newproj" -name '.gitkeep' | wc -l         # 期望 0：占位文件未被复制
+ls -d "$T/newproj"/src "$T/newproj"/tests "$T/newproj"/scripts  # 期望三个目录都在
 git -C "$T/newproj" branch --show-current          # 期望 main
 # CI 会执行：shellcheck scripts/*.sh + 两个 example 的 lint/test
 ```
