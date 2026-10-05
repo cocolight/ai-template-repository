@@ -36,6 +36,7 @@ Python / Rust 示例的真实检查命令见 `ci.yml` 的 `python-example` / `ru
 
 - 保护分支 `main`，禁止直接推送。
 - 一个功能 = 一个 `feature/<名称>` 分支 = 一个 PR。
+- **推 commit 前先 `gh pr view <n> --json state` 确认 PR 仍 OPEN**；已 merge 就不要再往旧分支 push（commit 会成孤儿、不进 main）。
 - 提交：Conventional Commits，type 用英文前缀（`feat`/`fix`/`docs`/`test`/`chore`/`refactor`/`ci`）；描述可用中文；标题总长 ≤ 72 字符。
 - 本仓库的架构决策只记在 `CHANGELOG.md`；**不维护工具层 ADR**（`docs/adr/` 已在 `template/` 下，属生成物）。
 
