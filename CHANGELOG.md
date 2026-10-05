@@ -12,6 +12,7 @@
 
 - `ci.yml` 新增「产物内文档死链检查」step：解析产物里 Markdown 链接与反引号路径引用，验证目标存在，防止新增文档引入死链
 - `ci.yml` 新增「payload 索引模式」与「仓库结构自检」两个 step，守住「根目录是工具层、`template/` 是数据层」这个核心性质
+- `ci.yml` 新增「开工清单与 payload 一致性」step：双向校验 payload 权威清单与 `template/` 实际内容，把 `ROADMAP` 第 4 项的人工核对固化为门禁
 - 工具层补齐 `LICENSE` / `CONTRIBUTING` / `ROADMAP` / `CHANGELOG`，避免根文档出现死链
 
 ### Changed
@@ -32,6 +33,7 @@
 - 移除 `main` 分支保护里的 `test` 这一项 required status check。它是旧 `build.yml` 的 job id，该文件只是打印警告的空壳（恒绿），随重构移入 `template/` 后不再运行，导致 PR 长期 `BLOCKED`
 - 关闭仓库的 GitHub Template 标记。GitHub 打包整个仓库，走「Use this template」会把工具层文件一起带进新项目；白名单只对脚本生效
 - 删除冗余的 `docs/.gitkeep`（该目录已有真实文件）
+- 多技术栈模板变体（`--variant`）暂不实现。素材现成（`example/` 下已有 Python 与 Rust 两份填好的骨架），但需先定「变体怎么组织 / 支持哪几个技术栈 / `example/` 定位是否变」三个决策，与无争议的补缺口类改动分开
 
 ### 兼容性
 
