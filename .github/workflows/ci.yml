@@ -96,6 +96,47 @@ jobs:
           [ ! -e .github/workflows/build.yml ] || { echo "build.yml 仍在根 .github/workflows/，必须移入 template/"; exit 1; }
           [ -e .github/workflows/ci.yml ] || { echo "根 ci.yml 丢失"; exit 1; }
 
+      - name: 产物内文档死链检查
+        # 生成本身不校验文档引用：payload 里的文件被复制进新项目后，
+        # 任何指向「不随模板复制」的文件的引用都会变成死链（历史上 TEMPLATE.md
+        # 就因此在每个新项目里都是死链）。
+        #
+        # 校验两种写法：
+        #   1) Markdown 链接 ](path)
+        #   2) 反引号路径 `path.ext`（文档里更常见，例如 AGENTS.md 里的 docs/architecture.md）
+        # 路径按「相对当前目录」与「相对仓库根」两种方式解析——payload 里的文档
+        # 习惯写仓库根相对路径。
+        #
+        # 排除项（否则全是假阳性）：
+        #   NNNN-kebab-title.md  占位文件名，不是真引用
+        #   ./scripts/x.sh       行内示例文本
+        #   不含 / 的裸文件名     简称而非路径（如 `build.yml` 指 .github/workflows/build.yml）
+        run: |
+          set -eu
+          DST="$RUNNER_TEMP/linkcheck"
+          ./scripts/template-init.sh "$DST" >/dev/null
+          cd "$DST"
+          # 注意：管道左侧的 while 在子 shell 里，计数要用命令替换取出，
+          # 不能靠变量传递（set -e 也捕获不到管道左侧失败）
+          n=$(find . -name '*.md' -not -path './.git/*' | while IFS= read -r f; do
+                d=$(dirname "$f")
+                {
+                  # 1) Markdown 链接
+                  grep -o '](\([^)]*\))' "$f" 2>/dev/null | sed 's/^](//; s/)$//'
+                  # 2) 反引号里带斜杠的路径引用（只取含 / 的，裸文件名是简称）
+                  grep -o '`[A-Za-z0-9_.-]*/[A-Za-z0-9_./-]*`' "$f" 2>/dev/null | tr -d '`'
+                } | sort -u | while IFS= read -r l; do
+                  base="${l%%#*}"
+                  case "$base" in
+                    http*|mailto:*|"") continue ;;
+                    NNNN-*|*.example|./scripts/*) continue ;;
+                  esac
+                  [ -e "$d/$base" ] || [ -e "$base" ] || echo "${f#./} → ${l}"
+                done
+              done | tee "$RUNNER_TEMP/deadlinks" | wc -l)
+          [ "$n" -eq 0 ] || { echo "产物内存在 $n 处死链："; cat "$RUNNER_TEMP/deadlinks"; exit 1; }
+          echo "产物内文档引用全部可达"
+
   python-example:
     name: Python example (ruff + pytest)
     runs-on: ubuntu-24.04
