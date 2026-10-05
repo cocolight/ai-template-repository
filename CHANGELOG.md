@@ -14,6 +14,7 @@
 - `ci.yml` 新增「payload 索引模式」与「仓库结构自检」两个 step，守住「根目录是工具层、`template/` 是数据层」这个核心性质
 - `ci.yml` 新增「开工清单与 payload 一致性」step：双向校验 payload 权威清单与 `template/` 实际内容，把 `ROADMAP` 第 4 项的人工核对固化为门禁
 - 工具层补齐 `LICENSE` / `CONTRIBUTING` / `ROADMAP` / `CHANGELOG`，避免根文档出现死链
+- `template/AGENTS.md` 融入 FluxDown 式 AI 约束：§4 红线拆「阻断级/提醒级」两级、新增 §8 单一事实源坐标与 §9 同改矩阵、§1 补反漂移提醒
 
 ### Changed
 
