@@ -96,6 +96,52 @@ jobs:
           [ ! -e .github/workflows/build.yml ] || { echo "build.yml 仍在根 .github/workflows/，必须移入 template/"; exit 1; }
           [ -e .github/workflows/ci.yml ] || { echo "根 ci.yml 丢失"; exit 1; }
 
+      - name: 开工清单与 payload 一致性
+        # ROADMAP 第 4/6 项：TEMPLATE.md 的「新项目开工清单」与 template/ 实际内容
+        # 需保持一致。此前只靠人工核对，改名/删文件/加文件都不会被发现。
+        #
+        # 双向校验：
+        #   1) 下面这份权威清单里的每个文件都必须在 template/ 下真实存在
+        #   2) template/ 下的每个非 .gitkeep 文件都必须在这份清单里
+        # 两个方向都查 —— 只查 1) 漏了新文件，只查 2) 漏了删除。
+        #
+        # 改 payload 时：若新增文件，把对应路径加进 CHECKLIST；若删除，
+        # 从 CHECKLIST 移除。清单与 TEMPLATE.md 的开工清单应同步更新。
+        run: |
+          set -eu
+          CHECKLIST="AGENTS.md
+          CHANGELOG.md
+          CONTRIBUTING.md
+          LICENSE
+          README.md
+          ROADMAP.md
+          .gitattributes
+          .gitignore
+          .github/workflows/build.yml
+          docs/adr/0001-record-architecture-decisions.md
+          docs/adr/README.md
+          docs/adr/template.md
+          docs/architecture.md
+          docs/configuration.md
+          docs/definition-of-done.md"
+
+          # 1) 清单里的文件必须存在
+          echo "$CHECKLIST" | while IFS= read -r f; do
+            [ -n "$f" ] || continue
+            [ -f "template/$f" ] || { echo "清单里的文件不存在：template/$f"; exit 1; }
+          done
+
+          # 2) template/ 下的文件必须在清单里（.gitkeep 是占位文件，不算 payload）
+          miss=0
+          for f in $(cd template && find . -type f ! -name '.gitkeep' | sed 's|^\./||' | sort); do
+            if ! echo "$CHECKLIST" | grep -qxF "$f"; then
+              echo "template/$f 未列入 payload 清单"
+              miss=1
+            fi
+          done
+          [ "$miss" -eq 0 ] || exit 1
+          echo "payload 清单与 template/ 内容一致"
+
       - name: 产物内文档死链检查
         # 生成本身不校验文档引用：payload 里的文件被复制进新项目后，
         # 任何指向「不随模板复制」的文件的引用都会变成死链（历史上 TEMPLATE.md
