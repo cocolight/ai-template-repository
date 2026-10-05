@@ -5,7 +5,7 @@
 # 例:   ./scripts/template-init.sh ../my-new-app
 #
 # 行为:
-#   - 复制模板内容（排除 .git / .workbuddy / example / TEMPLATE.md / 本脚本自身 / 模板仓库 CI）
+#   - 复制 template/ 目录下的全部内容（白名单：只有 template/ 里的东西会进新项目）
 #   - 复制阶段即跳过 .gitkeep 占位文件（模板仓库自身保留它们）；
 #     只含占位文件的空目录（src / tests / scripts）仍会保留，只是里面没有占位文件
 #   - 把 {{PROJECT_NAME}} 与 {{YEAR}} 占位符替换为实际值
@@ -37,8 +37,27 @@ done
 
 [ "$#" -eq 1 ] || { echo "用法: $0 [--dry-run] [--force] <新项目路径>" >&2; exit 2; }
 
-SRC=$(cd "$(dirname "$0")/.." && pwd -P)
+# ---- 路径基准：两个变量职责不同，不可混用 ----
+# REPO_ROOT 安全检查的基准（整个模板仓库），用于拒绝「把新项目写进本仓库内」
+# TPL_DIR   复制源（本仓库的 template/ 子目录）
+# 混为一谈会导致 ./scripts/template-init.sh ./my-app 这类误操作被放过：
+# 目标 REPO_ROOT/my-app 既不在 TPL_DIR 内，TPL_DIR 也不在其中，两道检查都会通过，
+# 于是在模板仓库内部生成了一个嵌套 git 仓库，后续 git add -A 可能把它误提交进来。
+REPO_ROOT=$(cd "$(dirname "$0")/.." && pwd -P)
+TPL_DIR="$REPO_ROOT/template"
 DST_ARG=$1
+
+# ---- 模板源必须存在：缺失即报错，不回退到「复制仓库根目录」 ----
+# 不回退的理由：回退等于恢复黑名单语义，产物里会重新出现 TEMPLATE.md / example /
+# ci.yml 等工具层文件；而且回退分支会让 CI 察觉不到仓库布局已损坏。
+# 这条检查放在 DRY_RUN 判断之前，--dry-run 也必须能报出布局损坏。
+# 它同时是「cd 进可能不存在的目录」的唯一防线 —— 管道左侧的 cd 失败不会被
+# set -e 捕获（实测退出码仍为 0），若此处不拦，脚本会静默产出空项目。
+if [ ! -d "$TPL_DIR" ]; then
+  echo "错误：找不到模板目录：$TPL_DIR" >&2
+  echo "      仓库结构已损坏（重新克隆，或检查是否处于稀疏检出 / 迁移未完成状态）" >&2
+  exit 5
+fi
 
 # Windows 绝对路径（如 C:\foo\bar）先转成 POSIX 路径，兼容 Git Bash / Cygwin
 case "$DST_ARG" in
@@ -66,10 +85,10 @@ while [ "${DST_ABS%/}" != "$DST_ABS" ]; do DST_ABS=${DST_ABS%/}; done
 [ -n "$DST_ABS" ] || { echo "错误：无法解析目标路径：'$DST_ARG'" >&2; exit 2; }
 
 case "$DST_ABS" in
-  "$SRC"|"$SRC"/*) echo "错误：目标不能是模板仓库自身或其子目录：$DST_ABS" >&2; exit 3 ;;
+  "$REPO_ROOT"|"$REPO_ROOT"/*) echo "错误：目标不能是模板仓库自身或其子目录：$DST_ABS" >&2; exit 3 ;;
 esac
-case "$SRC" in
-  "$DST_ABS"/*) echo "错误：模板仓库位于目标目录之内，无法安全复制：$SRC" >&2; exit 3 ;;
+case "$REPO_ROOT" in
+  "$DST_ABS"/*) echo "错误：模板仓库位于目标目录之内，无法安全复制：$REPO_ROOT" >&2; exit 3 ;;
 esac
 
 # ---- 第二步：创建父目录并规范化，再校验一次（覆盖符号链接等）----
@@ -79,10 +98,10 @@ DST_PARENT=$(cd "$DST_PARENT" && pwd -P)
 DST="$DST_PARENT/$NAME"
 
 case "$DST" in
-  "$SRC"|"$SRC"/*) echo "错误：目标不能是模板仓库自身或其子目录：$DST" >&2; exit 3 ;;
+  "$REPO_ROOT"|"$REPO_ROOT"/*) echo "错误：目标不能是模板仓库自身或其子目录：$DST" >&2; exit 3 ;;
 esac
-case "$SRC" in
-  "$DST"/*) echo "错误：模板仓库位于目标目录之内，无法安全复制：$SRC" >&2; exit 3 ;;
+case "$REPO_ROOT" in
+  "$DST"/*) echo "错误：模板仓库位于目标目录之内，无法安全复制：$REPO_ROOT" >&2; exit 3 ;;
 esac
 
 if [ -e "$DST" ] && [ "$FORCE" -ne 1 ] \
@@ -92,7 +111,8 @@ if [ -e "$DST" ] && [ "$FORCE" -ne 1 ] \
 fi
 
 YEAR=$(date +%Y)
-echo "模板:   $SRC"
+echo "仓库:   $REPO_ROOT"
+echo "模板:   $TPL_DIR"
 echo "目标:   $DST"
 echo "项目名: $NAME"
 echo "年份:   $YEAR"
@@ -102,30 +122,29 @@ if [ "$DRY_RUN" -eq 1 ]; then
   exit 0
 fi
 
-# ---- 复制目录树（复制阶段即跳过模板自用内容与占位文件）----
-# 排除清单：
-#   .git / .workbuddy       模板仓库自身的版本库、本地 AI 工具数据
-#                           （.workbuddy 通常未纳入版本控制，排除它可保证
-#                            "本地直接生成"与"克隆后生成"得到一致结果）
-#   example / TEMPLATE.md   模板自用的示例与说明
-#   .gitkeep                占位文件只服务于模板仓库自身（让 Git 能跟踪空目录）；
-#                           这里在复制阶段就跳过，所以模板仓库里保留、产物里没有
-#   scripts/template-init.sh / .github/workflows/ci.yml   仅模板仓库自用
+# ---- 复制目录树 ----
+# 复制源是白名单：只有 template/ 下的内容会进新项目。
+# 工具层文件（TEMPLATE.md / example/ / 本脚本 / ci.yml / 根 README 等）物理上
+# 不在 template/ 里，因此「新增一个工具层文件」不需要改脚本，「新增一个 payload
+# 文件」也不需要改脚本 —— 这是本脚本最重要的性质。
+# 剪枝列表只剩 3 项：
+#   .gitkeep   占位文件只服务于模板仓库自身（让 Git 能跟踪空目录）；
+#              这里在复制阶段就跳过，所以模板仓库里保留、产物里没有
+#   .git / .workbuddy   纵深防御，不是主要机制（正常情况下它们不在 template/ 里）。
+#              保留是为了万一有人误放进 template/，代价不至于变成复制整个版本库。
+#              不要因为「排除了它们」就以为这还是黑名单。
 # 实现说明：按目录树逐项复制（find 先输出目录、后输出其中的文件），
 # 因此"只含占位文件的空目录"（src/、tests/、scripts/）依然会被 mkdir 出来 ——
 # 目录约定留在产物里，占位文件不留。
 mkdir -p "$DST"
 (
-  cd "$SRC" && find . \
-    \( -name .git -o -name .workbuddy -o -name example -o -name TEMPLATE.md \
-       -o -name .gitkeep \
-       -o -path ./scripts/template-init.sh \
-       -o -path ./.github/workflows/ci.yml \) -prune -o -print
+  cd "$TPL_DIR" && find . \
+    \( -name .git -o -name .workbuddy -o -name .gitkeep \) -prune -o -print
 ) | while IFS= read -r rel; do
-  if [ -d "$SRC/$rel" ]; then
+  if [ -d "$TPL_DIR/$rel" ]; then
     mkdir -p "$DST/$rel"
   else
-    cp -a "$SRC/$rel" "$DST/$rel"
+    cp -a "$TPL_DIR/$rel" "$DST/$rel"
   fi
 done
 

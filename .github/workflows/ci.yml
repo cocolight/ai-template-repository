@@ -31,14 +31,70 @@ jobs:
           DST="$RUNNER_TEMP/newproj"
           ./scripts/template-init.sh --dry-run "$DST"
           ./scripts/template-init.sh "$DST"
-          test "$(find "$DST" -name .gitkeep | wc -l)" -eq 0 || { echo "产物里出现了 .gitkeep"; exit 1; }
+
+          # --- 复制结果断言 ---
+          # find 排除 .git：git init 之后产物里已有 .git，不排除会白跑大量文件
+          test "$(find "$DST" -name .gitkeep -not -path '*/.git/*' | wc -l)" -eq 0 || { echo "产物里出现了 .gitkeep"; exit 1; }
           for d in src tests scripts; do
             [ -d "$DST/$d" ] || { echo "产物缺少目录：$d"; exit 1; }
           done
-          [ ! -e "$DST/example" ] || { echo "产物泄露了 example/"; exit 1; }
-          [ ! -e "$DST/.workbuddy" ] || { echo "产物泄露了 .workbuddy/"; exit 1; }
           ! grep -rq '{{' "$DST" --exclude-dir=.git || { echo "产物仍有未替换的占位符"; exit 1; }
           [ "$(git -C "$DST" branch --show-current)" = main ] || { echo "默认分支不是 main"; exit 1; }
+
+          # --- 白名单反向断言：工具层文件不得进入产物 ---
+          # 复制源是 template/，这些文件物理上就不在复制源里。
+          for f in template TEMPLATE.md example scripts/template-init.sh .github/workflows/ci.yml; do
+            [ ! -e "$DST/$f" ] || { echo "产物泄露了工具层文件：$f"; exit 1; }
+          done
+          # .workbuddy 是本地 AI 工具数据，在仓库根；白名单已天然排除，此处显式断言
+          [ ! -e "$DST/.workbuddy" ] || { echo "产物泄露了 .workbuddy/"; exit 1; }
+
+          # --- 正向断言：payload 必须真的复制到位 ---
+          # 仅有反向断言时，复制阶段整体失效会全绿通过（例如 .gitkeep 数=0、
+          # 无 example、无占位符、分支为 main），所以必须逐个确认关键文件存在。
+          for f in README.md AGENTS.md ROADMAP.md CONTRIBUTING.md CHANGELOG.md LICENSE \
+                   .gitignore .gitattributes \
+                   .github/workflows/build.yml \
+                   docs/architecture.md docs/configuration.md docs/definition-of-done.md \
+                   docs/adr/README.md docs/adr/0001-record-architecture-decisions.md; do
+            [ -f "$DST/$f" ] || { echo "产物缺少文件：$f"; exit 1; }
+          done
+          [ -d "$DST/.github/workflows" ] || { echo "产物缺少目录：.github/workflows"; exit 1; }
+          [ "$(ls "$DST/.github/workflows" | wc -l)" -eq 1 ] || { echo "产物里不止 build.yml 一个 workflow"; exit 1; }
+
+          # --- 行尾规则一致性：两份 .gitattributes 必须相同 ---
+          # 根那份递归覆盖 template/**（已实测），内容一致时无歧义。
+          diff .gitattributes template/.gitattributes >/dev/null \
+            || { echo "根 .gitattributes 与 template/.gitattributes 不一致"; exit 1; }
+          git check-attr eol -- scripts/template-init.sh | grep -q 'eol: lf' \
+            || { echo "scripts/template-init.sh 未被 eol=lf 覆盖"; exit 1; }
+
+      - name: payload 索引模式
+        # template/ 下的文件全部应是 100644；可执行位变化会影响新项目里的脚本
+        run: |
+          set -eu
+          test -z "$(git ls-files -s template/ | grep -v '^100644 ')" \
+            || { echo "template/ 下存在非 100644 的文件"; git ls-files -s template/ | grep -v '^100644 '; exit 1; }
+          git ls-files -s scripts/template-init.sh | grep -q '^100755 ' \
+            || { echo "scripts/template-init.sh 索引模式不是 100755"; exit 1; }
+
+      - name: 仓库结构自检
+        # 守住「两层结构」这个核心性质：根是工具层，template/ 是数据层
+        run: |
+          set -eu
+          for p in template/README.md template/AGENTS.md template/LICENSE \
+                   template/docs/architecture.md template/.github/workflows/build.yml; do
+            [ -e "$p" ] || { echo "仓库结构异常，缺少：$p"; exit 1; }
+          done
+          # 工具层文件不得出现在 template/ 里（放错位置会被复制进新项目）
+          for f in TEMPLATE.md example .gitkeep.bak; do
+            [ ! -e "template/$f" ] || { echo "template/ 里混入了工具层文件：$f"; exit 1; }
+          done
+          [ -e TEMPLATE.md ] || { echo "根 TEMPLATE.md 丢失"; exit 1; }
+          [ -e example/README.md ] || { echo "example/ 丢失"; exit 1; }
+          # build.yml 必须只在 template/ 下（留在根上会让本仓库跑一个空壳 job）
+          [ ! -e .github/workflows/build.yml ] || { echo "build.yml 仍在根 .github/workflows/，必须移入 template/"; exit 1; }
+          [ -e .github/workflows/ci.yml ] || { echo "根 ci.yml 丢失"; exit 1; }
 
   python-example:
     name: Python example (ruff + pytest)
