@@ -2,6 +2,8 @@
 
 本仓库是项目模板。新项目请用它生成一个**干净、独立、默认分支为 `main`** 的新仓库。
 
+> **仓库分两层**：根目录是「工具层」（本文件、生成脚本、活文档示例），[`template/`](template/) 是「数据层」（项目骨架，会被整目录复制进新项目）。**只有 `template/` 下的内容会进新项目。**
+
 ## 生成新项目（推荐）
 
 ```bash
@@ -20,7 +22,7 @@ cd my-project
 |------|------|
 | `git clone https://github.com/cocolight/ai-template-repository.git my-project` | 把模板仓库克隆到本地 `my-project/`（此目录只是"蓝本"，用完可删） |
 | `cd my-project` | 进入模板仓库；脚本按当前所在的仓库定位模板根，**必须在仓库内执行** |
-| `./scripts/template-init.sh ../my-app` | 以模板为蓝本，在 `../my-app` 生成新项目：复制文件（排除模板自用内容）、替换 `{{PROJECT_NAME}}`/`{{YEAR}}`、`git init -b main` 并创建首次提交 |
+| `./scripts/template-init.sh ../my-app` | 以模板为蓝本，在 `../my-app` 生成新项目：复制 `template/` 下的内容、替换 `{{PROJECT_NAME}}`/`{{YEAR}}`、`git init -b main` 并创建首次提交 |
 
 上面第 ③ 步里的路径就是新项目的位置，**不要**填在模板仓库内部——脚本会拒绝并报错（防止自我复制、误删模板的 `.git`）。
 
@@ -28,20 +30,24 @@ cd my-project
 
 `template-init.sh` 会：
 
-- 复制模板内容到新路径，**排除** `example/`、`TEMPLATE.md`、脚本自身、模板的 `.git`、本地工具数据 `.workbuddy/`、模板仓库自用的 CI（`.github/workflows/ci.yml`），以及所有 `.gitkeep` 占位文件（在复制阶段跳过，不是复制后再删）；
+- 复制 [`template/`](template/) 下的全部内容到新路径（**白名单**：工具层文件物理上不在 `template/` 里，因此无需维护排除清单）；复制阶段跳过所有 `.gitkeep` 占位文件（在复制阶段跳过，不是复制后再删）；
 - 把 `{{PROJECT_NAME}}` 与 `{{YEAR}}` 占位符替换为实际值；
 - 在新目录 `git init`（默认分支 `main`）并创建首次提交。
+
+若 `template/` 目录不存在（例如克隆不完整、稀疏检出），脚本以退出码 5 硬失败并提示仓库结构损坏 —— 它**不会**回退到「复制仓库根目录」，因为那会把工具层文件混进你的新项目。
 
 选项：`--dry-run`（只看将做什么，不写文件）、`--force`（允许写入非空目录）。
 
 ## 手动使用（不用脚本）
 
-1. 复制除 `example/`、`TEMPLATE.md`、`scripts/template-init.sh`、`.github/workflows/ci.yml`、`.workbuddy/` 外的全部文件；`.gitkeep` 占位文件**不要复制**，但要把 `src/`、`tests/`、`scripts/` 三个目录用 `mkdir` 建出来（否则它们会随占位文件一起消失）；
+1. 把 `template/` 目录下的**全部内容**复制为你新项目的内容（等价于 `cp -a template/. <新项目>/`）；`.gitkeep` 占位文件**不要复制**，但要把 `src/`、`tests/`、`scripts/` 三个目录用 `mkdir` 建出来（否则它们会随占位文件一起消失）；
 2. 全局替换 `{{PROJECT_NAME}}` 与 `{{YEAR}}`；
 3. 填好 `AGENTS.md` §2「常用命令」表与 `README.md` 的 TODO；
 4. `git init -b main && git add -A && git commit -m "chore: initialize project"`。
 
 ## 模板包含什么
+
+以下文件都在 [`template/`](template/) 目录下，生成新项目时会出现在新项目里。
 
 | 文件 | 作用 |
 |------|------|
@@ -49,13 +55,17 @@ cd my-project
 | `README.md` | 项目说明骨架（含 TODO 占位） |
 | `ROADMAP.md` | 功能清单 + **验收标准** 列 |
 | `CONTRIBUTING.md` | 分支 / 提交 / PR 规范 |
+| `CHANGELOG.md` | 变更记录骨架（Keep a Changelog） |
 | `docs/architecture.md` | 架构与代码约定 |
 | `docs/configuration.md` | 仓库与项目配置说明（环境 / Git / 行尾 / CI / 分支保护） |
 | `docs/definition-of-done.md` | 完成定义（DoD） |
 | `docs/adr/` | 架构决策记录（含模板与首条记录） |
-| `.gitattributes` | 强制库内 LF，防止脚本在 Windows 被检出为 CRLF |
+| `LICENSE` | MIT 许可证正文（年份与项目名已由脚本填好） |
+| `.gitignore` / `.gitattributes` | 依赖忽略规则；强制库内 LF，防止脚本在 Windows 被检出为 CRLF |
 | `.github/workflows/build.yml` | CI 门禁骨架（需按技术栈补全） |
-| `example/` | 两个填好的示例（Python / Rust），**不会**复制进新项目 |
+| `src/` `tests/` `scripts/` | 空目录（占位文件不复制，目录保留） |
+
+`example/` 下两个填好的示例（Python / Rust）在**仓库根**，仅供参照，**不会**复制进新项目。
 
 ## 新项目开工清单
 
@@ -64,6 +74,8 @@ cd my-project
 > `.gitkeep` 占位文件只服务于模板仓库自身（让 Git 能跟踪空目录），`template-init.sh` **在复制阶段就跳过它们**，所以产物里**不含任何 `.gitkeep`**；而"只含占位文件的空目录"（`src/`、`tests/`、`scripts/`）仍然保留，只是里面没有占位文件。新项目里不用再手工清理占位文件。
 >
 > 唯一残留限制：Git 本身不跟踪空目录，所以这三个空目录不会进入新项目的**首次提交**。往 `src/`、`tests/` 里放进第一个真实文件（例如初始化骨架、写第一个测试）就会被自动纳入版本控制，无需额外操作。
+>
+> 下表所有路径都是**新项目内**的路径（产物里已不含 `template/` 这一层）。
 
 | # | 文件 | 改什么 | 怎么算改对 |
 |---|------|--------|-----------|
@@ -82,6 +94,8 @@ cd my-project
 
 ```bash
 # 1) 占位符应已被脚本全部替换 —— 无输出即为干净
+#    注意：这条要在「新项目目录内」执行。在模板仓库里执行会命中 template/
+#    下的占位符，那是预期的。
 grep -rn "{{" . --exclude-dir=.git
 
 # 2) 脚本索引权限（Linux / macOS 克隆后 ./x.sh 才不会 Permission denied）
@@ -93,6 +107,8 @@ git ls-files -s scripts/
 ## 哪些文件不要改
 
 新项目里有几处内容是「判定基准」或「安全底线」，改了整套规范就失效。分四类。
+
+> 本节所有路径都是**新项目内**的路径。
 
 ### 一、完全不要动
 
@@ -122,21 +138,29 @@ git ls-files -s scripts/
 
 ### 四、不在你的项目里（别去找）
 
-`TEMPLATE.md`、`scripts/template-init.sh`、`.github/workflows/ci.yml`、`example/`、`.workbuddy/` 是模板仓库的自用文件，生成新项目时已被排除，新项目里**根本不存在**。
+`template/`、`TEMPLATE.md`、`scripts/template-init.sh`、`.github/workflows/ci.yml`、`example/`、`.workbuddy/` 是**工具层**文件，物理上就不在复制源 `template/` 里，生成新项目时被自然排除 —— 新项目里**根本不存在**。
 
 ## 维护模板仓库自身
 
-**不会被复制进新项目的文件（排除清单）**：`.git`、`.workbuddy/`、`example/`、`TEMPLATE.md`、`scripts/template-init.sh`、`.github/workflows/ci.yml`，以及 `.gitkeep`（模板仓库里保留，复制时跳过）。
-若新增"仅供模板自用"的文件，记得同步 `scripts/template-init.sh` 里的排除逻辑，并更新本节。
+**复制规则是白名单**：只有 `template/` 下的内容会被复制进新项目。根目录的 `README.md`、`AGENTS.md`、`CONTRIBUTING.md`、`ROADMAP.md`、`CHANGELOG.md`、`LICENSE`、`.gitignore`、`.gitattributes`、`TEMPLATE.md`、`scripts/`、`example/`、`.github/workflows/ci.yml` 全部是工具层，物理上不在 `template/` 里。
+
+因此：
+
+- 新增「仅供模板自用」的文件 → **直接放仓库根，不用改脚本**；
+- 新增「要进新项目」的文件 → **直接放 `template/` 下，不用改脚本**；
+- 维护成本为零：不存在需要同步的排除清单。
 
 **必须保持的仓库性质**：
 
 | 性质 | 原因 | 检查 |
 |------|------|------|
-| 通用文件不绑定具体技术栈 | 本模板对所有技术栈通用；语言 / 工具的具体示例**只放 `example/`**，不写进 README、AGENTS、ROADMAP、CONTRIBUTING、docs/、build.yml。通用文件里只写"该填什么"，不写"用什么填" | 见下方"通用文件技术栈中性自检" |
-| 库内一律 LF | Windows 检出脚本变 CRLF 会导致 `bad interpreter` | `git check-attr eol -- scripts/template-init.sh` → `eol: lf` |
+| 通用文件不绑定具体技术栈 | 本模板对所有技术栈通用；语言 / 工具的具体示例**只放 `example/`**，不写进 `template/` 下的任何文件。通用文件里只写"该填什么"，不写"用什么填" | 见下方"通用文件技术栈中性自检" |
+| 库内一律 LF | Windows 检出脚本变 CRLF 会导致 `bad interpreter` | `git check-attr eol -- scripts/template-init.sh` → `eol: lf`<br>`git check-attr eol -- template/README.md` → `eol: lf` |
+| 两份 `.gitattributes` 内容一致 | 根那份**递归覆盖** `template/**`（已实测），内容一致时属性无歧义 | `diff .gitattributes template/.gitattributes` |
 | `scripts/*.sh` 索引模式 `100755` | 否则 CI 的 `./scripts/template-init.sh` 报 `Permission denied`（Windows 上 `core.filemode=false`，本地测不出） | `git ls-files -s scripts/` |
-| 交付文件里不写占位符字面 | 生成新项目时，**所有被复制的文件**都会参与占位符替换，文档里写占位符字面会被改写 | 见下方"改完模板后的自检" |
+| `template/` 下索引模式全为 `100644` | 可执行位会跟着进新项目 | `git ls-files -s template/ \| grep -v '^100644 '` → 无输出 |
+| `build.yml` 只在 `template/` 下 | 留在根上会让本仓库跑一个「只打 warning」的空壳 job，门禁形同虚设 | `ls .github/workflows/` → 只有 `ci.yml` |
+| 交付文件里不写占位符字面 | 生成新项目时，**`template/` 下的所有文件**都会参与占位符替换，文档里写占位符字面会被改写 | 见下方"改完模板后的自检" |
 
 修复权限位丢失：
 
@@ -144,23 +168,50 @@ git ls-files -s scripts/
 git update-index --chmod=+x scripts/template-init.sh
 ```
 
-**通用文件技术栈中性自检**（下列交付文件用于指导任何技术栈的新项目，不得出现具体语言 / 工具名；示例一律放 `example/`）：
+**通用文件技术栈中性自检**（`template/` 下的文件用于指导任何技术栈的新项目，不得出现具体语言 / 工具名；示例一律放 `example/`）：
 
 ```bash
+# 先确认待扫路径存在 —— grep 对不存在的路径会返回退出码 2，
+# 但 `|| echo OK` 照样执行，路径写错时这个检查会「假绿」
+for p in template/README.md template/AGENTS.md template/ROADMAP.md \
+         template/CONTRIBUTING.md template/CHANGELOG.md template/docs \
+         template/.github/workflows/build.yml; do
+  [ -e "$p" ] || { echo "中性自检路径不存在：$p"; exit 1; }
+done
+
 grep -rn -i -e cargo -e pyproject -e pytest -e ruff -e "npm " -e "pip " \
-  README.md AGENTS.md ROADMAP.md CONTRIBUTING.md docs/ .github/workflows/build.yml \
+  template/README.md template/AGENTS.md template/ROADMAP.md template/CONTRIBUTING.md \
+  template/CHANGELOG.md template/docs template/.github/workflows/build.yml \
   || echo "OK: 通用文件保持技术栈中性"
 ```
 
-**改完模板后的自检**（在生成产物上检查，模板自用文件本身含占位符，直接 grep 仓库会误报）：
+> 扫描范围**只限 `template/`**。仓库根的 `AGENTS.md` §2 会列出本仓库 CI 的真实命令（`shellcheck` / `pytest` / `cargo` 等），那是正当的，不该被中性规则约束。
+
+**改完模板后的自检**（在生成产物上检查；模板自身的 `template/` 含占位符，直接 grep 仓库会误报）：
 
 ```bash
 sh -n scripts/template-init.sh                     # 语法
 T=$(mktemp -d)
 ./scripts/template-init.sh "$T/newproj"            # 真实生成
 grep -rn "{{" "$T/newproj" --exclude-dir=.git || echo "OK: 产物无残留占位符"
-find "$T/newproj" -name '.gitkeep' | wc -l         # 期望 0：占位文件未被复制
+find "$T/newproj" -name '.gitkeep' -not -path '*/.git/*' | wc -l  # 期望 0
 ls -d "$T/newproj"/src "$T/newproj"/tests "$T/newproj"/scripts  # 期望三个目录都在
 git -C "$T/newproj" branch --show-current          # 期望 main
-# CI 会执行：shellcheck scripts/*.sh + 两个 example 的 lint/test
+
+# 白名单反向断言：工具层文件不得进入产物
+for f in template TEMPLATE.md example scripts/template-init.sh .github/workflows/ci.yml; do
+  [ ! -e "$T/newproj/$f" ] || { echo "泄露：$f"; exit 1; }
+done
+
+# 正向断言：payload 必须真的复制到位
+#（只有反向断言时，复制阶段整体失效会全绿通过）
+for f in README.md AGENTS.md ROADMAP.md CONTRIBUTING.md CHANGELOG.md LICENSE \
+         .gitignore .gitattributes .github/workflows/build.yml \
+         docs/architecture.md docs/configuration.md docs/definition-of-done.md; do
+  [ -f "$T/newproj/$f" ] || { echo "缺少：$f"; exit 1; }
+done
+
+diff .gitattributes template/.gitattributes || echo "警告：两份 .gitattributes 不一致"
+
+# CI 会执行：shellcheck scripts/*.sh + 上面这套断言 + 两个 example 的 lint/test
 ```

@@ -1,3 +1,9 @@
+# 说明：本文件是「工具层」的 .gitignore，服务于本仓库自身的开发环境。
+#
+# 注意：这里的非锚定 pattern（如 build/、dist/、target/）会**递归作用到
+# template/** —— 将来若在 template/ 下新建 build/ 之类的目录，Git 会静默不跟踪它。
+# template/.gitignore 是给「生成的新项目」用的，两者允许有意分歧，不要强行保持一致。
+
 # 依赖 / 构建产物
 node_modules/
 __pycache__/
