@@ -35,6 +35,7 @@
 
 - 保护分支 `main`，禁止直接推送。
 - 一个功能 = 一个 `feature/<名称>` 分支 = 一个 PR。
+- 新功能开发前，先在 `ROADMAP.md` 加一行（状态 `planned`、写清验收标准），确认后才转 `in-progress` 开干；小改动 / bugfix 无需走计划。
 - 提交：Conventional Commits，type 用英文前缀（`feat`/`fix`/`docs`/`test`/`chore`/`refactor`/`ci`）；描述可用中文；标题总长 ≤ 72 字符。
 - 每完成一项，更新 `ROADMAP.md` 对应行状态。
 
