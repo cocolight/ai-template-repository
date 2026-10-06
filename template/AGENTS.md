@@ -37,7 +37,7 @@
 - 一个功能 = 一个 `feature/<名称>` 分支 = 一个 PR。
 - 新功能开发前，先在 `ROADMAP.md` 加一行（状态 `planned`、写清验收标准），确认后才转 `in-progress` 开干；小改动 / bugfix 无需走计划。
 - 提交：Conventional Commits，type 用英文前缀（`feat`/`fix`/`docs`/`test`/`chore`/`refactor`/`ci`）；描述可用中文；标题总长 ≤ 72 字符。
-- 每完成一项，更新 `ROADMAP.md` 对应行状态。
+- 每完成一项，更新 `ROADMAP.md` 对应行状态，并在 `CHANGELOG.md` 的 `[Unreleased]` 对应分类补一条。
 
 ## 4. 红线（违反即回滚）
 
@@ -64,7 +64,8 @@
 - [ ] `ROADMAP.md` 该行「验收标准」全部满足
 - [ ] 新增 / 更新对应测试，全量测试通过
 - [ ] Lint 与格式化检查通过
-- [ ] 相关文档（README / AGENTS / architecture / ADR）同步更新
+- [ ] 相关文档（README / AGENTS / architecture / ADR / CHANGELOG）同步更新
+- [ ] `CHANGELOG.md` 的 `[Unreleased]` 已记录本次改动
 - [ ] `ROADMAP.md` 状态更新为 `done`
 
 ## 6. 并发协作（多 AI / 多人）
@@ -103,3 +104,4 @@
 | 红线 / DoD | `docs/definition-of-done.md` 同步（不得放宽） |
 | 章节标题 | 全仓扫一遍按「§N」引用本文件的地方 |
 | 决策理由变更 | 新增一条 ADR，`docs/adr/` 旧记录原样保留 |
+| 发版（打 tag / 建 Release） | `CHANGELOG.md`：`[Unreleased]` 改名成 `[x.y.z] - 日期`，顶部补空的 `[Unreleased]` |
