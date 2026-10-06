@@ -57,7 +57,7 @@ Python / Rust 示例的真实检查命令见 `ci.yml` 的 `python-example` / `ru
 - [ ] `template-init.sh` 能真实生成新项目，产物结构与 `TEMPLATE.md` 描述一致
 - [ ] 产物**不含**任何工具层文件（`template/`、`TEMPLATE.md`、`example/`、`scripts/template-init.sh`、`.github/workflows/ci.yml`）
 - [ ] 产物**不含** `.gitkeep`，但 `src/` `tests/` `scripts/` 三个目录都在
-- [ ] 产物无残留 `{{` 占位符，默认分支为 `main`
+- [ ] 产物无残留 `{{PROJECT_NAME}}` / `{{YEAR}}` 占位符，默认分支为 `main`
 - [ ] 根 `.gitattributes` 与 `template/.gitattributes` 内容一致
 - [ ] `shellcheck scripts/*.sh` 通过
 - [ ] 改动了 `template/` 就已同步 `TEMPLATE.md` 中受影响的路径描述
