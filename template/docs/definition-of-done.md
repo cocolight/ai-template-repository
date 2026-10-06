@@ -8,7 +8,8 @@
 - [ ] 新增或更新了对应测试，且全量测试通过
 - [ ] Lint 与格式化检查通过
 - [ ] 未引入无关改动（无顺手重构 / 格式化噪声）
-- [ ] 相关文档（README / AGENTS / architecture / ADR）同步更新
+- [ ] 相关文档（README / AGENTS / architecture / ADR / CHANGELOG）同步更新
+- [ ] `CHANGELOG.md` 的 `[Unreleased]` 已记录本次改动
 - [ ] `ROADMAP.md` 状态更新为 `done`
 
 ## 按类型的差异
