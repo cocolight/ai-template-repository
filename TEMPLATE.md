@@ -96,7 +96,8 @@ cd my-project
 # 1) 占位符应已被脚本全部替换 —— 无输出即为干净
 #    注意：这条要在「新项目目录内」执行。在模板仓库里执行会命中 template/
 #    下的占位符，那是预期的。
-grep -rn "{{" . --exclude-dir=.git
+#    只检查两个真实占位符；`${{ }}` 是 GitHub Actions 表达式，不是占位符，不应被误报。
+grep -rnE '\{\{(PROJECT_NAME|YEAR)\}\}' . --exclude-dir=.git
 
 # 2) 脚本索引权限（Linux / macOS 克隆后 ./x.sh 才不会 Permission denied）
 git ls-files -s scripts/
@@ -193,7 +194,7 @@ grep -rn -i -e cargo -e pyproject -e pytest -e ruff -e "npm " -e "pip " \
 sh -n scripts/template-init.sh                     # 语法
 T=$(mktemp -d)
 ./scripts/template-init.sh "$T/newproj"            # 真实生成
-grep -rn "{{" "$T/newproj" --exclude-dir=.git || echo "OK: 产物无残留占位符"
+grep -rnE '\{\{(PROJECT_NAME|YEAR)\}\}' "$T/newproj" --exclude-dir=.git || echo "OK: 产物无残留占位符"
 find "$T/newproj" -name '.gitkeep' -not -path '*/.git/*' | wc -l  # 期望 0
 ls -d "$T/newproj"/src "$T/newproj"/tests "$T/newproj"/scripts  # 期望三个目录都在
 git -C "$T/newproj" branch --show-current          # 期望 main

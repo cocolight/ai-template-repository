@@ -38,7 +38,7 @@ jobs:
           for d in src tests scripts; do
             [ -d "$DST/$d" ] || { echo "产物缺少目录：$d"; exit 1; }
           done
-          ! grep -rq '{{' "$DST" --exclude-dir=.git || { echo "产物仍有未替换的占位符"; exit 1; }
+          ! grep -rqE '\{\{(PROJECT_NAME|YEAR)\}\}' "$DST" --exclude-dir=.git || { echo "产物仍有未替换的占位符"; exit 1; }
           [ "$(git -C "$DST" branch --show-current)" = main ] || { echo "默认分支不是 main"; exit 1; }
 
           # --- 白名单反向断言：工具层文件不得进入产物 ---
