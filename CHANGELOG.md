@@ -8,6 +8,16 @@
 
 ## [Unreleased]
 
+### Added
+
+- `template/.github/pull_request_template.md`：PR 描述骨架（做了什么 / 关联 ROADMAP 行 / 检查项，含 CHANGELOG）
+
+### Changed
+
+- `template/AGENTS.md` 把 CHANGELOG 接进工作流 / DoD / 同改矩阵，堵新项目 CHANGELOG 欠账
+- `template/AGENTS.md` §9 补齐发版命名三要素（tag 带 v、release title 跟 tag、CHANGELOG 不带 v）
+- `template/README.md` 去模板化：删「🤖 AI 编码助手」引导行、收敛「开发约定」，AI 入口移至 `template/CONTRIBUTING.md`
+
 ## [0.1.0] - 2026-10-05
 
 ### Added
