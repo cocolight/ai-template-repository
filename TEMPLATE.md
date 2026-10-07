@@ -63,6 +63,7 @@ cd my-project
 | `LICENSE` | MIT 许可证正文（年份与项目名已由脚本填好） |
 | `.gitignore` / `.gitattributes` | 依赖忽略规则；强制库内 LF，防止脚本在 Windows 被检出为 CRLF |
 | `.github/workflows/build.yml` | CI 门禁骨架（需按技术栈补全） |
+| `.github/pull_request_template.md` | PR 描述骨架：做了什么 / 关联 ROADMAP 行 / 检查项（含 CHANGELOG） |
 | `src/` `tests/` `scripts/` | 空目录（占位文件不复制，目录保留） |
 
 `example/` 下两个填好的示例（Python / Rust）在**仓库根**，仅供参照，**不会**复制进新项目。

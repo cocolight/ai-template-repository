@@ -118,6 +118,7 @@ jobs:
           .gitattributes
           .gitignore
           .github/workflows/build.yml
+          .github/pull_request_template.md
           docs/adr/0001-record-architecture-decisions.md
           docs/adr/README.md
           docs/adr/template.md
