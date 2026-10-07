@@ -104,4 +104,4 @@
 | 红线 / DoD | `docs/definition-of-done.md` 同步（不得放宽） |
 | 章节标题 | 全仓扫一遍按「§N」引用本文件的地方 |
 | 决策理由变更 | 新增一条 ADR，`docs/adr/` 旧记录原样保留 |
-| 发版（打 tag / 建 Release） | `CHANGELOG.md`：`[Unreleased]` 改名成 `[x.y.z] - 日期`，顶部补空的 `[Unreleased]` |
+| 发版（打 tag / 建 Release） | tag 用 `vX.Y.Z`；release title 与 tag 一致（`vX.Y.Z`）；`CHANGELOG.md` 的 `[Unreleased]` 改名 `[X.Y.Z] - 日期`（不带 v），顶部补空的 `[Unreleased]` |
