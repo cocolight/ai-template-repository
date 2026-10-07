@@ -225,3 +225,38 @@ jobs:
         run: cargo clippy --all-targets -- -D warnings
       - name: Test
         run: cargo test
+
+  # 门禁：改了 template/（payload）却没同步根 CHANGELOG，就拦下。
+  # 对齐根 AGENTS.md §5 DoD「改动了 template/ 就同步 CHANGELOG」——此前只靠自觉、已多次漏记。
+  # 要让它真正阻断合并，请把这个 job 一并设为分支保护的 required status check。
+  changelog:
+    name: Changelog gate (template/)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: 检查改动 template/ 是否同步了 CHANGELOG
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          SKIP_CHANGELOG: ${{ contains(github.event.pull_request.body, '[skip changelog]') }}
+        run: |
+          set -eu
+          if [ "$SKIP_CHANGELOG" = "true" ]; then
+            echo "PR 含 [skip changelog]，跳过"
+            exit 0
+          fi
+          CHANGED="$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")"
+          if ! printf '%s\n' "$CHANGED" | grep -q '^template/'; then
+            echo "未改动 template/，跳过"
+            exit 0
+          fi
+          if printf '%s\n' "$CHANGED" | grep -q '^CHANGELOG.md$'; then
+            echo "CHANGELOG.md 已同步"
+            exit 0
+          fi
+          echo "::error::改动了 template/ 必须在根 CHANGELOG.md 的 [Unreleased] 记录（或 PR 描述加 [skip changelog]）"
+          exit 1
