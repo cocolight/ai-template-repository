@@ -2,6 +2,8 @@
 
 > 项目：{{PROJECT_NAME}}
 
+> 🤖 使用 AI 编码助手开发时，请先阅读 [AGENTS.md](AGENTS.md)（规则与红线）。
+
 ## 分支策略
 
 - `main` 为保护分支，不要直接推送。
