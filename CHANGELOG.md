@@ -11,12 +11,23 @@
 ### Added
 
 - `template/.github/pull_request_template.md`：PR 描述骨架（做了什么 / 关联 ROADMAP 行 / 检查项，含 CHANGELOG）
+- `template/docs/releasing.md`：发版流程文档 —— 前置条件、命名三要素、步骤顺序、常见错误、预发布约定
+- 根 `AGENTS.md` §8「同改矩阵」：把核心约定「约束新建项目以 `template/` 为准；`template/` 更新后能力必须同步回根仓库」写成可查的矩阵，并注明同步是单向的、同步的是能力而非逐字复制
+- 根 `AGENTS.md` §3「发版」：本仓库自身的发版流程（工具层视角，与 `template/docs/releasing.md` 承载同一能力）
 
 ### Changed
 
 - `template/AGENTS.md` 把 CHANGELOG 接进工作流 / DoD / 同改矩阵，堵新项目 CHANGELOG 欠账
 - `template/AGENTS.md` §9 补齐发版命名三要素（tag 带 v、release title 跟 tag、CHANGELOG 不带 v）
+- `template/AGENTS.md` §3 新增「发版」小节（前置条件 / 命名 / 顺序）；§4 阻断级红线把 `tag`、`push --tags`、创建 Release 与 `commit` / `push` 并列禁止 —— 此前只禁 commit/push，AI 可辩称「规则没禁止打 tag」
+- `template/AGENTS.md` §8 的「版本号」坐标行由空白「（待填）」改为可填的中性指引（指向唯一版本号事实源，且不许另抄一份）
+- `template/AGENTS.md` §9 发版行改为指向 `docs/releasing.md`，并补「§8 坐标表指向的版本号事实源已同步」
 - `template/README.md` 去模板化：删「🤖 AI 编码助手」引导行、收敛「开发约定」，AI 入口移至 `template/CONTRIBUTING.md`
+- 同步该能力到工具层：根 `AGENTS.md` §4 红线（同禁 tag / Release）与 §5 DoD（新增「改了 `template/` 的规则能力已同步根 `AGENTS.md`」判据）、根 `CONTRIBUTING.md` 与 `template/CONTRIBUTING.md` 各增发版入口、`example/` 两份 `AGENTS.md` 各补发版条目
+
+### Fixed
+
+- 补齐 `docs/releasing.md` 引入后需要同步的三处枚举：`TEMPLATE.md` 的「模板包含什么」表与「哪些文件不要改」表、`TEMPLATE.md` 自检脚本的正向断言列表、`ci.yml` 的 payload 权威清单与 smoke 正向断言（漏同步会让「开工清单与 payload 一致性」step 直接失败）
 
 ## [0.1.0] - 2026-10-05
 

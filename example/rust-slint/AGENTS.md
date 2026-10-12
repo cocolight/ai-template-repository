@@ -15,11 +15,12 @@ rust-slint-counter — Rust + Slint 跨平台桌面计数器。
 - 保护分支 `main`。一个功能 = 一个 `feature/<名>` 分支 = 一个 PR。
 - 提交前必须通过 `cargo fmt --check`、`cargo clippy --all-targets -- -D warnings`、`cargo test`。
 - 每完成一项，更新 `ROADMAP.md` 对应行状态。
+- 发版**单独走一个 PR**：同步 `Cargo.toml` 的 `version` 与 `CHANGELOG.md` → 合入 `main` → 在 `main` 上打 tag → 建 Release。命名三要素：tag 用 `vX.Y.Z`、Release title 与 tag 相同、`CHANGELOG.md` 版本节写 `[X.Y.Z] - 日期`（不带 `v`）。
 
 ## 红线
 - 不得删除 / 跳过测试（含 `#[ignore]`）或改断言来骗过 CI；不得伪造「测试已通过」。
 - 大改动（>5 文件或 >200 行）先确认。
-- 不擅自 `git commit` / `push`；不提交密钥。
+- 不擅自 `git commit` / `push` / `tag` / 建 Release；不提交密钥。
 
 ## 安全
 - 绝不提交密钥 / token。

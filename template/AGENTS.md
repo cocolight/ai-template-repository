@@ -39,6 +39,15 @@
 - 提交：Conventional Commits，type 用英文前缀（`feat`/`fix`/`docs`/`test`/`chore`/`refactor`/`ci`）；描述可用中文；标题总长 ≤ 72 字符。
 - 每完成一项，更新 `ROADMAP.md` 对应行状态，并在 `CHANGELOG.md` 的 `[Unreleased]` 对应分类补一条。
 
+### 发版（打 tag / 建 Release）
+
+> 发版不是「功能做完」的自然结果，而是一次独立动作：单独走一个 PR，合并后再打 tag。完整清单见 `docs/releasing.md`。
+
+- **前置**：CI 全绿；`ROADMAP.md` 无 `in-progress` 行；`CHANGELOG.md` 的 `[Unreleased]` 已写全。
+- **命名**（三处必须一致）：tag 用 `vX.Y.Z`（带 `v`）；Release title 与 tag 完全相同；`CHANGELOG.md` 版本节写 `[X.Y.Z] - 日期`（**不带** `v`）。
+- **顺序**：先改版本号事实源（§8 坐标表指向的那一处）与 `CHANGELOG.md` → 提 PR 合入 `main` → **在 `main` 上**打 tag → 建 Release。
+- 未经明确要求，不得 `git tag` / 推送 tag / 建 Release —— 见 §4 红线第 3 条。
+
 ## 4. 红线（违反即回滚）
 
 红线分两级：**阻断级**是底线，触碰即回滚；**提醒级**是默认做法，偏离须在 PR 说明里写明理由。
@@ -47,7 +56,7 @@
 
 1. 不得删除 / 跳过 / 弱化测试（含 `skip`、`xfail`、`#[ignore]`、改断言），不得伪造「测试已通过」。
 2. 大改动先确认：单次改动 > 5 个文件 或 > 200 行，先给方案，等确认再动手。
-3. 不得擅自 `git commit` / `push` / `rebase` / `reset` / `--force`、切分支或改远程；仅在明确要求时执行。
+3. 不得擅自 `git commit` / `push` / `push --tags` / `tag` / `rebase` / `reset` / `--force`、创建 Release、切分支或改远程；仅在明确要求时执行。**发版尤其如此**：tag 与 Release 面向使用者、发布后撤不干净，规则见 §3「发版」。
 4. 不得为了让检查「变绿」而修改 CI、hook、lint 配置或测试门禁。
 5. 不得修改 `docs/adr/` 中「已接受」的记录；变更须新增 ADR。
 6. 绝不提交密钥 / token / 私钥 / `.env`（用环境变量或仓库外文件）。
@@ -90,7 +99,7 @@
 | 外部接口契约 | （待填） |
 | 数据结构与存储 | （待填） |
 | 关键算法或业务规则 | （待填） |
-| 版本号 | （待填） |
+| 版本号 | （待填：指向唯一维护版本号的那一处——包清单 / 版本文件 / 常量。发版时只改这一处，不要在 README 或文档里另抄一份） |
 
 ## 9. 同改矩阵
 
@@ -104,4 +113,4 @@
 | 红线 / DoD | `docs/definition-of-done.md` 同步（不得放宽） |
 | 章节标题 | 全仓扫一遍按「§N」引用本文件的地方 |
 | 决策理由变更 | 新增一条 ADR，`docs/adr/` 旧记录原样保留 |
-| 发版（打 tag / 建 Release） | tag 用 `vX.Y.Z`；release title 与 tag 一致（`vX.Y.Z`）；`CHANGELOG.md` 的 `[Unreleased]` 改名 `[X.Y.Z] - 日期`（不带 v），顶部补空的 `[Unreleased]` |
+| 发版（打 tag / 建 Release） | 按 §3「发版」与 `docs/releasing.md` 的清单执行；同一回合过一遍：tag 与 Release title 都是 `vX.Y.Z`、`CHANGELOG.md` 版本节是 `[X.Y.Z] - 日期`（不带 v）且顶部已补回空的 `[Unreleased]`、§8 坐标表指向的版本号事实源已同步 |

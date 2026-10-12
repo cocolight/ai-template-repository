@@ -14,6 +14,7 @@
 | 4 | 开工清单的路径与 `template/` 实际保持一致 | done | 由第 5 项的 CI step 持续保证（2026-10-05 首次人工核对：AGENTS / README / ROADMAP / CONTRIBUTING / build.yml / architecture / configuration 共 7 个文件均在 `template/` 下） |
 | 5 | 清单与仓库现状的自动一致性检查 | done | `ci.yml` 的「开工清单与 payload 一致性」step 双向校验：payload 权威清单里的文件都存在，且 `template/` 下每个非 `.gitkeep` 文件都在清单里 |
 | 6 | 多技术栈模板变体（`--variant`） | dropped | 2026-10-05 决定暂不做。素材现成（`example/` 下已有 Python 与 Rust 两份填好的骨架），但需先定「变体怎么组织 / 支持哪几个技术栈 / `example/` 定位是否变」三个决策。优先做无争议的补缺口类改动 |
+| 7 | 补齐发版（tag / Release）约束，并明确 `template/` → 根仓库的能力同步约定 | done | `template/AGENTS.md` §3「发版」/ §4 红线 / §8 坐标表 / §9 矩阵 + 新增 `template/docs/releasing.md`，覆盖前置条件、命名三要素、步骤顺序、常见错误；根 `AGENTS.md` §3「发版」与新增 §8「同改矩阵」承载同一能力（工具层视角）。由 `ci.yml` 的「开工清单与 payload 一致性」和「产物内文档死链检查」判定不引入回归 |
 
 ## 已知取舍
 
@@ -22,3 +23,4 @@
 | 不维护工具层 ADR | `docs/adr/` 已整体移入 `template/`，属生成物；本仓库的架构决策记在 `CHANGELOG.md` |
 | 关闭 GitHub Template 标记 | GitHub 打包整个仓库，「Use this template」会把工具层文件带进新项目；白名单只对 `template-init.sh` 生效。代价是失去「网页一键生成」 |
 | `example/` 与 `template/` 的内容同步靠人工 | 二者要展示「填空前后」的差异，不适合自动生成 |
+| `template/` → 根仓库的能力同步靠人工 | 两份 `AGENTS.md` 受众不同，同一能力需按各自视角表述，不适合逐字复制。机器只能兜住最低一层：`ci.yml` 的 changelog 门禁要求改 `template/` 必须记根 `CHANGELOG.md`；「是否已同步规则」由根 `AGENTS.md` §8 同改矩阵约束 |
