@@ -56,6 +56,7 @@ jobs:
                    .gitignore .gitattributes \
                    .github/workflows/build.yml \
                    docs/architecture.md docs/configuration.md docs/definition-of-done.md \
+                   docs/releasing.md \
                    docs/adr/README.md docs/adr/0001-record-architecture-decisions.md; do
             [ -f "$DST/$f" ] || { echo "产物缺少文件：$f"; exit 1; }
           done
@@ -124,7 +125,8 @@ jobs:
           docs/adr/template.md
           docs/architecture.md
           docs/configuration.md
-          docs/definition-of-done.md"
+          docs/definition-of-done.md
+          docs/releasing.md"
 
           # 1) 清单里的文件必须存在
           echo "$CHECKLIST" | while IFS= read -r f; do

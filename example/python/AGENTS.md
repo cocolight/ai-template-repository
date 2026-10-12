@@ -14,11 +14,12 @@ py-task-cli — Python + Typer 命令行任务管理工具。
 - 保护分支 `main`。一个功能 = 一个 `feature/<名>` 分支 = 一个 PR。
 - 提交前必须通过 `ruff check .`、`ruff format --check .`、`pytest`。
 - 每完成一项，更新 `ROADMAP.md` 对应行状态。
+- 发版**单独走一个 PR**：同步 `pyproject.toml` 的 `version` 与 `CHANGELOG.md` → 合入 `main` → 在 `main` 上打 tag → 建 Release。命名三要素：tag 用 `vX.Y.Z`、Release title 与 tag 相同、`CHANGELOG.md` 版本节写 `[X.Y.Z] - 日期`（不带 `v`）。
 
 ## 红线
 - 不得删除 / 跳过测试（含 `skip` / `xfail`）或改断言来骗过 CI；不得伪造「测试已通过」。
 - 大改动（>5 文件或 >200 行）先确认。
-- 不擅自 `git commit` / `push`；不提交密钥。
+- 不擅自 `git commit` / `push` / `tag` / 建 Release；不提交密钥。
 
 ## 测试隔离
 - 测试通过环境变量 `PY_TASK_CLI_STORE` 指向临时路径，**不要**依赖 `HOME`（Windows 上无效）。

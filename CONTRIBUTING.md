@@ -26,6 +26,8 @@
 
 复制是白名单：新增任何一层的文件都**不需要**改 `scripts/template-init.sh`。
 
+> **改了 `template/` 的规则，别忘了回同步根仓库。** 约束新建项目以 `template/` 下的文档为准；而 `template/` 里的红线 / DoD / 工作流一旦变动，**能力必须同步到根 `AGENTS.md`**（见其 §8 同改矩阵）。本仓库没有理由不遵守它教人遵守的规则。
+
 ## 本地检查
 
 提交前至少跑这两条，完整清单见 [TEMPLATE.md](TEMPLATE.md)「改完模板后的自检」：
@@ -41,6 +43,12 @@ find "$T/proj" -maxdepth 1 -mindepth 1 -not -name '.git' | sort
 ```
 
 期望：产物里**没有** `template/`、`TEMPLATE.md`、`example/`、`scripts/template-init.sh`、`.github/workflows/ci.yml`，但**有** `README.md`、`AGENTS.md`、`LICENSE`、`.github/workflows/build.yml`，且无 `.gitkeep`、保留 `src/` `tests/` `scripts/` 三个目录。
+
+## 发版
+
+本仓库自身也发版（已有 `v0.1.0`）。发版**单独走一个 PR**，不要混进功能 PR：改根 `CHANGELOG.md` 的 `[Unreleased]` → 合入 `main` → 在 `main` 上打 tag → 建 Release。
+
+命名三要素：tag 用 `vX.Y.Z`（带 `v`）、Release title 与 tag 相同、`CHANGELOG.md` 版本节写 `[X.Y.Z] - 日期`（不带 `v`）。完整规则见 [AGENTS.md](AGENTS.md) §3「发版」；生成项目的同项能力见 `template/docs/releasing.md`。
 
 ## 红线与完成定义
 

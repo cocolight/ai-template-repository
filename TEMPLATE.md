@@ -59,6 +59,7 @@ cd my-project
 | `docs/architecture.md` | 架构与代码约定 |
 | `docs/configuration.md` | 仓库与项目配置说明（环境 / Git / 行尾 / CI / 分支保护） |
 | `docs/definition-of-done.md` | 完成定义（DoD） |
+| `docs/releasing.md` | 发版流程：前置条件、命名规则（tag / Release title / CHANGELOG 版本节）、常见错误 |
 | `docs/adr/` | 架构决策记录（含模板与首条记录） |
 | `LICENSE` | MIT 许可证正文（年份与项目名已由脚本填好） |
 | `.gitignore` / `.gitattributes` | 依赖忽略规则；强制库内 LF，防止脚本在 Windows 被检出为 CRLF |
@@ -125,6 +126,7 @@ git ls-files -s scripts/
 |------------|-----------|
 | `AGENTS.md` §1 上下文入口、§3 工作流、§4 红线、§5 DoD、§7 安全、§8 坐标表、§9 同改矩阵 | 不得删条目、不得放宽（例如把"不得删除测试"删掉）。§0 与 §2 留给项目搭建者填；§8 坐标表保留表头结构、只填「待填」处 |
 | `docs/definition-of-done.md` | 不得为了让某个功能"达标"而放宽条件 —— 这正是模板定义的「伪完成」 |
+| `docs/releasing.md` | 命名三要素（tag `vX.Y.Z` / Release title 跟 tag / CHANGELOG 不带 `v`）是硬规则，不得改；只能按项目实际情况**追加**预发布等约定 |
 | `.github/workflows/build.yml` | 要填真实命令，但不得删掉 lint / test 步骤、不得改成 `|| true`、不得把失败降级成警告 |
 | `.gitignore` | 可以追加语言相关规则，但不得删除密钥段（`.env`、`*.key`、`*.pem`） |
 
@@ -208,7 +210,8 @@ done
 #（只有反向断言时，复制阶段整体失效会全绿通过）
 for f in README.md AGENTS.md ROADMAP.md CONTRIBUTING.md CHANGELOG.md LICENSE \
          .gitignore .gitattributes .github/workflows/build.yml \
-         docs/architecture.md docs/configuration.md docs/definition-of-done.md; do
+         docs/architecture.md docs/configuration.md docs/definition-of-done.md \
+         docs/releasing.md; do
   [ -f "$T/newproj/$f" ] || { echo "缺少：$f"; exit 1; }
 done
 

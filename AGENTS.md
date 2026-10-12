@@ -40,13 +40,23 @@ Python / Rust 示例的真实检查命令见 `ci.yml` 的 `python-example` / `ru
 - 提交：Conventional Commits，type 用英文前缀（`feat`/`fix`/`docs`/`test`/`chore`/`refactor`/`ci`）；描述可用中文；标题总长 ≤ 72 字符。
 - 本仓库的架构决策只记在 `CHANGELOG.md`；**不维护工具层 ADR**（`docs/adr/` 已在 `template/` 下，属生成物）。
 
+### 发版（打 tag / 建 Release）
+
+> 本仓库自身也发版（已有 `v0.1.0`）。这份能力与 `template/docs/releasing.md` 对齐 —— 但工具层不产生 payload、不复制 `releasing.md`，所以要点直接写在这里。
+
+- **前置**：`ci.yml` 全绿；`ROADMAP.md` 无 `in-progress` 行；根 `CHANGELOG.md` 的 `[Unreleased]` 已写全。
+- **命名**（三处必须一致）：tag 用 `vX.Y.Z`（带 `v`）；Release title 与 tag 完全相同；根 `CHANGELOG.md` 版本节写 `[X.Y.Z] - 日期`（**不带** `v`）。
+- **版本号事实源**：本仓库不维护独立版本号文件，版本只由根 `CHANGELOG.md` 的版本节定义 —— 这是 `template/AGENTS.md` §8 坐标表「版本号」一行在工具层的对应答法。
+- **顺序**：改根 `CHANGELOG.md` → 提 PR 合入 `main`（type 用 `chore`）→ **在 `main` 上**打 tag → 建 Release，说明正文取自根 `CHANGELOG.md` 的对应版本节，不另写一套。
+- 未经明确要求，不得 `git tag` / 推送 tag / 建 Release —— 见 §4 红线第 5 条。
+
 ## 4. 红线（违反即回滚）
 
 1. 不得删除 / 跳过 / 弱化 `ci.yml` 里的任何断言（含 `shellcheck`、smoke test、两个 example 的 lint/test），不得让检查变绿。
 2. **不得把 payload 文件放回仓库根目录。** 放错位置会让新项目静默混入工具层文件 —— 这正是本次重构要消除的缺陷。
 3. **不得修改 `template/` 内的占位符语义。** `{{PROJECT_NAME}}` 与 `{{YEAR}}` 是生成物的唯一替换源；把占位符字面写进 `template/` 以外的文件是安全的，写进 `template/` 内会在生成时被替换掉。
 4. **不得让 `template/` 缺失。** `template-init.sh` 在该目录缺失时以退出码 5 硬失败；新增工具层文件时请确认没误删 `template/`。
-5. 不得擅自 `git commit` / `push` / `rebase` / `reset` / `--force`、切分支或改远程；仅在明确要求时执行。
+5. 不得擅自 `git commit` / `push` / `push --tags` / `tag` / `rebase` / `reset` / `--force`、创建 Release、切分支或改远程；仅在明确要求时执行。**发版尤其如此**：tag 与 Release 对外可见、发布后撤不干净，规则见 §3「发版」。
 6. 不得为了让检查「变绿」而修改 CI、hook、lint 配置或断言阈值。
 7. 不得提交密钥 / token / 私钥 / `.env`。
 8. 只改与任务相关的文件，不做无关重构、不顺手改格式。
@@ -61,6 +71,7 @@ Python / Rust 示例的真实检查命令见 `ci.yml` 的 `python-example` / `ru
 - [ ] 根 `.gitattributes` 与 `template/.gitattributes` 内容一致
 - [ ] `shellcheck scripts/*.sh` 通过
 - [ ] 改动了 `template/` 就已同步 `TEMPLATE.md` 中受影响的路径描述
+- [ ] 改动了 `template/` 的**规则或能力**（红线 / DoD / 工作流 / 矩阵），已同步到根 `AGENTS.md` 的对应章节 —— 见 §8
 - [ ] `CHANGELOG.md` 的 `Unreleased` 已记录
 
 ## 6. 并发协作
@@ -72,3 +83,23 @@ Python / Rust 示例的真实检查命令见 `ci.yml` 的 `python-example` / `ru
 
 - 绝不提交密钥 / token / 私钥。
 - `template/` 下的文件会被复制到用户项目里，**写入其中的任何内容都会被用户看到**。不要在 payload 里写本仓库的内部信息、路径或凭据。
+
+## 8. 同改矩阵
+
+> 对应 `template/AGENTS.md` §9。适用本仓库的**核心约定**：约束新建项目以 `template/` 下的文档为准；`template/` 更新后，**能力必须同步回根仓库** —— 本仓库没有理由不遵守它教人遵守的规则。
+
+| 改了什么 | 同一回合必须过一遍 |
+|---|---|
+| `template/` 里新增 / 删除 payload 文件 | `TEMPLATE.md`「模板包含什么」表 + `ci.yml` 的 payload 清单与 smoke 正向断言（漏了 CI 会红） |
+| `template/` 里的**规则 / 能力**（红线 / DoD / 工作流 / 矩阵） | 根 `AGENTS.md` 的对应章节；根 `CHANGELOG.md` 记录 |
+| `template/` 里的路径描述 | `TEMPLATE.md`「新项目开工清单」与「哪些文件不要改」 |
+| 根工具层文件的增 / 删 / 改名 | `README.md` 目录结构、`TEMPLATE.md`「不在你的项目里」、`ci.yml` 的「仓库结构自检」 |
+| 脚本行为或选项 | `README.md` + `TEMPLATE.md` + `CONTRIBUTING.md` 三处描述一致 |
+| 本地检查命令或门禁 | `CONTRIBUTING.md`「本地检查」→ `.github/workflows/ci.yml`，两者必须一致 |
+| 发版（打 tag / 建 Release） | §3「发版」；根 `CHANGELOG.md` 的 `[Unreleased]` 改名为 `[X.Y.Z] - 日期`（不带 v）并补回空节点。`template/docs/releasing.md` 是同一能力的详细版，**两处不得打架** |
+| 章节标题 / 编号 | 全仓扫一遍按「§N」引用本文件的地方（根 `AGENTS.md`、`CONTRIBUTING.md`、`TEMPLATE.md`） |
+
+两条边界：
+
+- **同步是单向的**：只从 `template/` 流向根仓库。工具层专属红线（「不得把 payload 文件放回仓库根目录」「不得让 `template/` 缺失」「占位符语义不可改」等）只对本仓库有意义，**不写进 `template/`**。
+- **同步的是「能力」，不是逐字复制**：两份 `AGENTS.md` 受众不同（根 = 维护本仓库，`template/` = 开发新项目），同一能力在两边用各自视角表述。开头的「两者内容不同，不要互相覆盖」指的是**不要互相覆盖文件**，不排斥能力同步。
