@@ -32,6 +32,7 @@
 
 - 修 `template/docs/engineering/configuration.md` §1 表格里一处**从未生效过**的失效引用：「由 `.gitattributes` 强制，见 §3」—— 该引用自 PR #2（`45e1867`）引入时就指错了（行尾一直写在 §2，§3 始终是「目录约定」），改为「见 §2「行尾」」
 - 补齐 `docs/engineering/releasing.md` 引入后需要同步的三处枚举：`TEMPLATE.md` 的「模板包含什么」表与「哪些文件不要改」表、`TEMPLATE.md` 自检脚本的正向断言列表、`ci.yml` 的 payload 权威清单与 smoke 正向断言（漏同步会让「开工清单与 payload 一致性」step 直接失败）
+- `Changelog gate (template/)` 的 diff 基准由 `pull_request.base.sha` 改为 `git merge-base`：前者会随 `main` 前进而变化，于是 `main` 在分叉点之后改过的文件（含 `CHANGELOG.md`）会被算进「本次 PR 的改动」—— 门禁会在 PR 根本没补记录的情况下**假绿**。已用四个场景对比验证：改 `template/` 且未记 CHANGELOG 且 main 已前进时，旧逻辑 PASS（漏放）、新逻辑 FAIL（正确拦截）；记了 CHANGELOG、只改工具层、只改 `docs/` 三种情况新旧一致
 
 ## [0.1.0] - 2026-10-05
 

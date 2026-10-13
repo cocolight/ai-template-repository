@@ -251,7 +251,11 @@ jobs:
             echo "PR 含 [skip changelog]，跳过"
             exit 0
           fi
-          CHANGED="$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")"
+          # diff 基准必须取 merge-base，不能直接用 pull_request.base.sha ——
+          # 后者会随 main 前进而变化，于是 main 在分叉点之后改过的文件（含
+          # CHANGELOG.md）会被算进「本次 PR 的改动」，门禁在 PR 根本没补记录时假绿。
+          MERGE_BASE="$(git merge-base "$BASE_SHA" "$HEAD_SHA")"
+          CHANGED="$(git diff --name-only "$MERGE_BASE" "$HEAD_SHA")"
           if ! printf '%s\n' "$CHANGED" | grep -q '^template/'; then
             echo "未改动 template/，跳过"
             exit 0
