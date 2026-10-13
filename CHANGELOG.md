@@ -24,6 +24,7 @@
 - `template/AGENTS.md` §9 发版行改为指向 `docs/releasing.md`，并补「§8 坐标表指向的版本号事实源已同步」
 - `template/README.md` 去模板化：删「🤖 AI 编码助手」引导行、收敛「开发约定」，AI 入口移至 `template/CONTRIBUTING.md`
 - 同步该能力到工具层：根 `AGENTS.md` §4 红线（同禁 tag / Release）与 §5 DoD（新增「改了 `template/` 的规则能力已同步根 `AGENTS.md`」判据）、根 `CONTRIBUTING.md` 与 `template/CONTRIBUTING.md` 各增发版入口、`example/` 两份 `AGENTS.md` 各补发版条目
+- 说清「社区健康文件」的位置：`template/docs/configuration.md` §4 新增「仓库公开时再补的社区健康文件」小节、§5 补一条可选勾选项，`TEMPLATE.md` 第 8 步后加一句指针 —— 模板**有意不预置** `CODE_OF_CONDUCT` / `SECURITY` / `SUPPORT` / `ISSUE_TEMPLATE`（四者都需项目级信息，预置只会得到 TODO 存根），改为在仓库要公开时用 GitHub 的 Insights → Community Standards 一键套官方模板
 
 ### Fixed
 
