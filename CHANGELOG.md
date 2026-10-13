@@ -14,6 +14,7 @@
 - `template/docs/engineering/releasing.md`：发版流程文档 —— 前置条件、命名三要素、步骤顺序、常见错误、预发布约定
 - 根 `AGENTS.md` §8「同改矩阵」：把核心约定「约束新建项目以 `template/` 为准；`template/` 更新后能力必须同步回根仓库」写成可查的矩阵，并注明同步是单向的、同步的是能力而非逐字复制
 - 根 `AGENTS.md` §3「发版」：本仓库自身的发版流程（工具层视角，与 `template/docs/engineering/releasing.md` 承载同一能力）
+- `template/.github/workflows/build.yml` 新增 `Changelog gate` job：feat/fix 改了代码却没更新 CHANGELOG 就硬拦，非 feat/fix 仅 warning，PR 描述含 `[skip changelog]` 可豁免 —— 把「CHANGELOG 欠账」从事后检查变成合并前的门禁
 
 ### Changed
 
@@ -33,6 +34,7 @@
 - 修 `template/docs/engineering/configuration.md` §1 表格里一处**从未生效过**的失效引用：「由 `.gitattributes` 强制，见 §3」—— 该引用自 PR #2（`45e1867`）引入时就指错了（行尾一直写在 §2，§3 始终是「目录约定」），改为「见 §2「行尾」」
 - 补齐 `docs/engineering/releasing.md` 引入后需要同步的三处枚举：`TEMPLATE.md` 的「模板包含什么」表与「哪些文件不要改」表、`TEMPLATE.md` 自检脚本的正向断言列表、`ci.yml` 的 payload 权威清单与 smoke 正向断言（漏同步会让「开工清单与 payload 一致性」step 直接失败）
 - `Changelog gate (template/)` 的 diff 基准由 `pull_request.base.sha` 改为 `git merge-base`：前者会随 `main` 前进而变化，于是 `main` 在分叉点之后改过的文件（含 `CHANGELOG.md`）会被算进「本次 PR 的改动」—— 门禁会在 PR 根本没补记录的情况下**假绿**。已用四个场景对比验证：改 `template/` 且未记 CHANGELOG 且 main 已前进时，旧逻辑 PASS（漏放）、新逻辑 FAIL（正确拦截）；记了 CHANGELOG、只改工具层、只改 `docs/` 三种情况新旧一致
+- 占位符残留检查从笼统的 `{{` 精确到 `{{PROJECT_NAME}}` / `{{YEAR}}`：原写法会误伤 GitHub Actions 的 `${{ }}` 表达式。同步 `ci.yml`、`TEMPLATE.md` 两处自检命令与根 `AGENTS.md` 的 DoD 一行
 
 ## [0.1.0] - 2026-10-05
 
