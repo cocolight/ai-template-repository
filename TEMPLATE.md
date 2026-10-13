@@ -56,16 +56,18 @@ cd my-project
 | `ROADMAP.md` | 功能清单 + **验收标准** 列 |
 | `CONTRIBUTING.md` | 分支 / 提交 / PR 规范 |
 | `CHANGELOG.md` | 变更记录骨架（Keep a Changelog） |
-| `docs/architecture.md` | 架构与代码约定 |
-| `docs/configuration.md` | 仓库与项目配置说明（环境 / Git / 行尾 / CI / 分支保护） |
-| `docs/definition-of-done.md` | 完成定义（DoD） |
-| `docs/releasing.md` | 发版流程：前置条件、命名规则（tag / Release title / CHANGELOG 版本节）、常见错误 |
-| `docs/adr/` | 架构决策记录（含模板与首条记录） |
+| `docs/engineering/architecture.md` | 架构与代码约定 |
+| `docs/engineering/configuration.md` | 仓库与项目配置说明（环境 / Git / 行尾 / CI / 分支保护） |
+| `docs/engineering/definition-of-done.md` | 完成定义（DoD） |
+| `docs/engineering/releasing.md` | 发版流程：前置条件、命名规则（tag / Release title / CHANGELOG 版本节）、常见错误 |
+| `docs/engineering/adr/` | 架构决策记录（含模板与首条记录） |
 | `LICENSE` | MIT 许可证正文（年份与项目名已由脚本填好） |
 | `.gitignore` / `.gitattributes` | 依赖忽略规则；强制库内 LF，防止脚本在 Windows 被检出为 CRLF |
 | `.github/workflows/build.yml` | CI 门禁骨架（需按技术栈补全） |
 | `.github/pull_request_template.md` | PR 描述骨架：做了什么 / 关联 ROADMAP 行 / 检查项（含 CHANGELOG） |
 | `src/` `tests/` `scripts/` | 空目录（占位文件不复制，目录保留） |
+
+> `docs/` 下**只有 `docs/engineering/` 是模板预置的**（工程协作文档：架构 / 配置 / DoD / 发版 / ADR）。其余位置留给**项目自己的文档** —— 使用指南、API 参考、教程等按主题建子目录。分开的理由：前者是「判定基准」，受红线与同改矩阵约束、生命周期稳定；后者面向使用者、随版本频繁重写，两者的读者与可变性正好相反。这条分工同时写进了产物里的 `README.md` 与 `AGENTS.md`。
 
 `example/` 下两个填好的示例（Python / Rust）在**仓库根**，仅供参照，**不会**复制进新项目。
 
@@ -86,13 +88,13 @@ cd my-project
 | 3 | `README.md` | 开头的简介、`## 功能` 列表，以及 3 处 `<!-- TODO -->`（安装 / 运行 / 测试命令） | 文件里不再有 `TODO` |
 | 4 | `ROADMAP.md` | 写首批功能；每条「验收标准」必须**能被命令或明确检查验证** | 每条你都能说出"怎么验证它完成了" |
 | 5 | `.github/workflows/build.yml` | 把占位 step 换成真实命令（文件里的 TODO 注释已列出要填哪几步） | 本地跑一遍同样的命令，全绿 |
-| 6 | `docs/architecture.md` | §1 补目录分层；§3 补本项目技术栈的错误处理策略 | 与代码实际结构一致 |
+| 6 | `docs/engineering/architecture.md` | §1 补目录分层；§3 补本项目技术栈的错误处理策略 | 与代码实际结构一致 |
 | 7 | `CONTRIBUTING.md` | 「本地检查」那一行填成本项目的真实命令 | 与 `AGENTS.md` §2 完全一致 |
-| 8 | GitHub 仓库设置（不是文件） | 启用 Actions → 收紧 Workflow permissions → 为 `main` 开分支保护 + required status checks | 见 [docs/configuration.md](docs/configuration.md) §4 |
+| 8 | GitHub 仓库设置（不是文件） | 启用 Actions → 收紧 Workflow permissions → 为 `main` 开分支保护 + required status checks | 见 [docs/engineering/configuration.md](template/docs/engineering/configuration.md) §4 |
 
 第 8 步的坑：required status checks 的名字**必须等于 workflow 里的 job 名**。`build.yml` 的 job id 是 `test` 且未设 `name`，所以在列表里搜 `test`；一旦改了 job 名，这里要同步改。
 
-**若仓库要公开（可选，不属于上面 8 步）**：GitHub 还推荐一组社区健康文件（行为准则、安全策略、求助渠道、issue 表单），新项目里**没带** —— 这是有意不预置：它们全都要项目级信息（举报渠道、求助渠道、issue 字段），预置只会得到一份写着 TODO 的存根，对私有仓库也没有意义。真要公开时，GitHub 在 **Insights → Community Standards** 会列出缺哪几项，每项都有 **Add** 按钮可直接套官方模板新建。详见 [docs/configuration.md](docs/configuration.md) §4。
+**若仓库要公开（可选，不属于上面 8 步）**：GitHub 还推荐一组社区健康文件（行为准则、安全策略、求助渠道、issue 表单），新项目里**没带** —— 这是有意不预置：它们全都要项目级信息（举报渠道、求助渠道、issue 字段），预置只会得到一份写着 TODO 的存根，对私有仓库也没有意义。真要公开时，GitHub 在 **Insights → Community Standards** 会列出缺哪几项，每项都有 **Add** 按钮可直接套官方模板新建。详见 [docs/engineering/configuration.md](template/docs/engineering/configuration.md) §4。
 
 **开工前先跑这两条自检**：
 
@@ -106,7 +108,7 @@ grep -rn "{{" . --exclude-dir=.git
 git ls-files -s scripts/
 ```
 
-环境 / Git / 行尾 / CI / 分支保护的完整核对清单见 [docs/configuration.md](docs/configuration.md) §5。
+环境 / Git / 行尾 / CI / 分支保护的完整核对清单见 [docs/engineering/configuration.md](template/docs/engineering/configuration.md) §5。
 
 ## 哪些文件不要改
 
@@ -120,15 +122,15 @@ git ls-files -s scripts/
 |------|------------|-----------|
 | `LICENSE` | MIT 正文是法律文本，逐字固定；开头的年份与项目名已由脚本填好 | 换许可证 = 整体替换成另一份官方文本，不做局部编辑 |
 | `.gitattributes` | 它强制库内 LF；改了会让 Windows 检出脚本变成 CRLF（报 `bad interpreter`） | 只增不改，且必须保留 `*.sh text eol=lf` |
-| `docs/adr/` 中「已接受」的记录 | 决策记录的价值就在于不可篡改，改了就无从回溯当时为什么这样定 | 新增一条 ADR 说明变更，旧记录原样保留 |
+| `docs/engineering/adr/` 中「已接受」的记录 | 决策记录的价值就在于不可篡改，改了就无从回溯当时为什么这样定 | 新增一条 ADR 说明变更，旧记录原样保留 |
 
 ### 二、可以补，但不得削弱
 
 | 文件 / 位置 | 不许做的事 |
 |------------|-----------|
 | `AGENTS.md` §1 上下文入口、§3 工作流、§4 红线、§5 DoD、§7 安全、§8 坐标表、§9 同改矩阵 | 不得删条目、不得放宽（例如把"不得删除测试"删掉）。§0 与 §2 留给项目搭建者填；§8 坐标表保留表头结构、只填「待填」处 |
-| `docs/definition-of-done.md` | 不得为了让某个功能"达标"而放宽条件 —— 这正是模板定义的「伪完成」 |
-| `docs/releasing.md` | 命名三要素（tag `vX.Y.Z` / Release title 跟 tag / CHANGELOG 不带 `v`）是硬规则，不得改；只能按项目实际情况**追加**预发布等约定 |
+| `docs/engineering/definition-of-done.md` | 不得为了让某个功能"达标"而放宽条件 —— 这正是模板定义的「伪完成」 |
+| `docs/engineering/releasing.md` | 命名三要素（tag `vX.Y.Z` / Release title 跟 tag / CHANGELOG 不带 `v`）是硬规则，不得改；只能按项目实际情况**追加**预发布等约定 |
 | `.github/workflows/build.yml` | 要填真实命令，但不得删掉 lint / test 步骤、不得改成 `|| true`、不得把失败降级成警告 |
 | `.gitignore` | 可以追加语言相关规则，但不得删除密钥段（`.env`、`*.key`、`*.pem`） |
 
@@ -212,8 +214,8 @@ done
 #（只有反向断言时，复制阶段整体失效会全绿通过）
 for f in README.md AGENTS.md ROADMAP.md CONTRIBUTING.md CHANGELOG.md LICENSE \
          .gitignore .gitattributes .github/workflows/build.yml \
-         docs/architecture.md docs/configuration.md docs/definition-of-done.md \
-         docs/releasing.md; do
+         docs/engineering/architecture.md docs/engineering/configuration.md docs/engineering/definition-of-done.md \
+         docs/engineering/releasing.md; do
   [ -f "$T/newproj/$f" ] || { echo "缺少：$f"; exit 1; }
 done
 

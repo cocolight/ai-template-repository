@@ -13,7 +13,7 @@
 - Conventional Commits，type 用英文前缀：
   `feat:`（新功能）`fix:`（修复）`docs:`（文档）`test:`（测试）`chore:`（杂项）`refactor:`（重构）`ci:`（CI）。
 - 描述可用中文，简明；标题总长 ≤ 72 字符。
-- 本仓库的架构决策只记在 `CHANGELOG.md`，不维护工具层 ADR（`docs/adr/` 已移入 `template/`，属生成物）。
+- 本仓库的架构决策只记在 `CHANGELOG.md`，不维护工具层 ADR（`template/docs/engineering/adr/` 属生成物）。
 
 ## 改动该放哪
 
@@ -48,7 +48,7 @@ find "$T/proj" -maxdepth 1 -mindepth 1 -not -name '.git' | sort
 
 本仓库自身也发版（已有 `v0.1.0`）。发版**单独走一个 PR**，不要混进功能 PR：改根 `CHANGELOG.md` 的 `[Unreleased]` → 合入 `main` → 在 `main` 上打 tag → 建 Release。
 
-命名三要素：tag 用 `vX.Y.Z`（带 `v`）、Release title 与 tag 相同、`CHANGELOG.md` 版本节写 `[X.Y.Z] - 日期`（不带 `v`）。完整规则见 [AGENTS.md](AGENTS.md) §3「发版」；生成项目的同项能力见 `template/docs/releasing.md`。
+命名三要素：tag 用 `vX.Y.Z`（带 `v`）、Release title 与 tag 相同、`CHANGELOG.md` 版本节写 `[X.Y.Z] - 日期`（不带 `v`）。完整规则见 [AGENTS.md](AGENTS.md) §3「发版」；生成项目的同项能力见 `template/docs/engineering/releasing.md`。
 
 ## 红线与完成定义
 

@@ -1,7 +1,7 @@
 # 仓库与项目配置说明
 
 本文面向**由本模板生成的项目**，说明代码之外还需要配置什么：环境、Git、行尾与权限、CI、分支保护。
-AI 的行为规则见 [AGENTS.md](../AGENTS.md)。
+AI 的行为规则见 [AGENTS.md](../../AGENTS.md)。
 
 ## 1. 环境要求
 
@@ -64,11 +64,12 @@ git update-index --chmod=+x scripts/x.sh       # 修复
 |------|------|
 | `src/` | 源码 |
 | `tests/` | 测试 |
-| `docs/` | 文档；`docs/adr/` 为架构决策记录 |
+| `docs/` | 项目自己的文档（使用指南、参考、教程……） |
+| `docs/engineering/` | 工程协作文档：架构 / 配置 / 完成定义 / 发版 / ADR |
 | `scripts/` | 辅助脚本 |
 | `.github/workflows/` | CI 工作流 |
 
-详见 `docs/architecture.md`；完成标准见 `docs/definition-of-done.md`。
+详见 `docs/engineering/architecture.md`；完成标准见 `docs/engineering/definition-of-done.md`。
 
 ## 4. CI（GitHub Actions）
 

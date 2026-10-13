@@ -1,7 +1,7 @@
 # 发版（Releasing）
 
 > 本文是 `AGENTS.md` §3「发版」的详细版，也是 §9 同改矩阵「发版」行的落点。
-> 本文只展开步骤，**不得放宽** `AGENTS.md` 的红线与 `docs/definition-of-done.md` 的完成定义。
+> 本文只展开步骤，**不得放宽** `AGENTS.md` 的红线与 `docs/engineering/definition-of-done.md` 的完成定义。
 
 ## 1. 什么条件才可发版
 

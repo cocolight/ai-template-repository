@@ -55,9 +55,9 @@ jobs:
           for f in README.md AGENTS.md ROADMAP.md CONTRIBUTING.md CHANGELOG.md LICENSE \
                    .gitignore .gitattributes \
                    .github/workflows/build.yml \
-                   docs/architecture.md docs/configuration.md docs/definition-of-done.md \
-                   docs/releasing.md \
-                   docs/adr/README.md docs/adr/0001-record-architecture-decisions.md; do
+                   docs/engineering/architecture.md docs/engineering/configuration.md docs/engineering/definition-of-done.md \
+                   docs/engineering/releasing.md \
+                   docs/engineering/adr/README.md docs/engineering/adr/0001-record-architecture-decisions.md; do
             [ -f "$DST/$f" ] || { echo "产物缺少文件：$f"; exit 1; }
           done
           [ -d "$DST/.github/workflows" ] || { echo "产物缺少目录：.github/workflows"; exit 1; }
@@ -84,7 +84,7 @@ jobs:
         run: |
           set -eu
           for p in template/README.md template/AGENTS.md template/LICENSE \
-                   template/docs/architecture.md template/.github/workflows/build.yml; do
+                   template/docs/engineering/architecture.md template/.github/workflows/build.yml; do
             [ -e "$p" ] || { echo "仓库结构异常，缺少：$p"; exit 1; }
           done
           # 工具层文件不得出现在 template/ 里（放错位置会被复制进新项目）
@@ -120,13 +120,13 @@ jobs:
           .gitignore
           .github/workflows/build.yml
           .github/pull_request_template.md
-          docs/adr/0001-record-architecture-decisions.md
-          docs/adr/README.md
-          docs/adr/template.md
-          docs/architecture.md
-          docs/configuration.md
-          docs/definition-of-done.md
-          docs/releasing.md"
+          docs/engineering/adr/0001-record-architecture-decisions.md
+          docs/engineering/adr/README.md
+          docs/engineering/adr/template.md
+          docs/engineering/architecture.md
+          docs/engineering/configuration.md
+          docs/engineering/definition-of-done.md
+          docs/engineering/releasing.md"
 
           # 1) 清单里的文件必须存在
           echo "$CHECKLIST" | while IFS= read -r f; do
@@ -152,7 +152,7 @@ jobs:
         #
         # 校验两种写法：
         #   1) Markdown 链接 ](path)
-        #   2) 反引号路径 `path.ext`（文档里更常见，例如 AGENTS.md 里的 docs/architecture.md）
+        #   2) 反引号路径 `path.ext`（文档里更常见，例如 AGENTS.md 里的 docs/engineering/architecture.md）
         # 路径按「相对当前目录」与「相对仓库根」两种方式解析——payload 里的文档
         # 习惯写仓库根相对路径。
         #
