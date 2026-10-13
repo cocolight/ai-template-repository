@@ -1,7 +1,7 @@
 # 仓库与项目配置说明
 
-本文面向**由本模板生成的项目**，说明代码之外还需要配置什么：环境、Git、行尾与权限、CI、分支保护。
-AI 的行为规则见 [AGENTS.md](../AGENTS.md)。
+本文面向**由本模板生成的项目**，说明代码之外还需要配置什么：环境、Git、行尾与权限、CI、分支保护、文档站。
+AI 的行为规则见 [AGENTS.md](../../AGENTS.md)。
 
 ## 1. 环境要求
 
@@ -9,7 +9,7 @@ AI 的行为规则见 [AGENTS.md](../AGENTS.md)。
 |------|------|------|
 | Git | ≥ 2.28 | 需要 `git init -b`、`git branch -m` |
 | Shell | POSIX `sh` | 仓库内脚本用 `#!/bin/sh`；Windows 下请用 Git Bash |
-| 编码 / 行尾 | UTF-8 / LF | 由 `.gitattributes` 强制，见 §3 |
+| 编码 / 行尾 | UTF-8 / LF | 由 `.gitattributes` 强制，见 §2「行尾」 |
 
 Windows 说明：所有示例命令均可在 Git Bash 下执行；传入 `C:\...` 形式路径时脚本会调用 `cygpath` 转换（Git for Windows 自带）。
 
@@ -64,11 +64,12 @@ git update-index --chmod=+x scripts/x.sh       # 修复
 |------|------|
 | `src/` | 源码 |
 | `tests/` | 测试 |
-| `docs/` | 文档；`docs/adr/` 为架构决策记录 |
+| `docs/` | 项目自己的文档（使用指南、参考、教程……） |
+| `docs/engineering/` | 工程协作文档：架构 / 配置 / 完成定义 / 发版 / ADR |
 | `scripts/` | 辅助脚本 |
 | `.github/workflows/` | CI 工作流 |
 
-详见 `docs/architecture.md`；完成标准见 `docs/definition-of-done.md`。
+详见 `docs/engineering/architecture.md`；完成标准见 `docs/engineering/definition-of-done.md`。
 
 ## 4. CI（GitHub Actions）
 
@@ -107,7 +108,18 @@ git update-index --chmod=+x scripts/x.sh       # 修复
 
 **要补时不必手写**：GitHub 在 **Insights → Community Standards**（仓库主页 → Insights → 左栏 Community Standards）会列出还缺哪几项，每项都有 **Add** 按钮，可直接套官方模板新建。该清单只对公开仓库显示。
 
-## 5. 落地配置清单
+## 5. 文档站与静态发布
+
+新项目若要做文档站，有一处与**目录布局**直接相关的坑：把仓库的 `docs/` 直接当作发布源时，`docs/engineering/` 会被**一并发布** —— 它装的是工程协作文档（架构、配置、完成定义、发版、ADR），受众是协作者，不是对外读者。
+
+这尤其要注意：发布出去的内容**在公网可访问，即使仓库是私有的**。两种处理都行 ——
+
+- **首选：改用 Actions 发布，只上传构建产物。** 上传路径是显式指定的，`docs/engineering/` 天然不在其中（这也是 GitHub 现在推荐的方式）。
+- **或者在站点配置里排除 `engineering` 目录。** 多数静态站生成器都提供排除开关。
+
+两种都只是**构建层**的事，与文件放在哪无关 —— 不要为了避开发布而把这些文档挪进点目录：那会连它们的可见性一起丢掉。
+
+## 6. 落地配置清单
 
 - [ ] 填写 `AGENTS.md` §2「常用命令」表（AI 依赖它）
 - [ ] 填写 `README.md` 的安装 / 运行 / 测试命令
@@ -118,8 +130,9 @@ git update-index --chmod=+x scripts/x.sh       # 修复
 - [ ] GitHub：启用 Actions、收紧 Workflow permissions
 - [ ] GitHub：为 `main` 开启分支保护 + required status checks
 - [ ] （可选，仅仓库要公开时）补齐社区健康文件 —— 见 §4「仓库公开时再补的社区健康文件」
+- [ ] （可选，仅做文档站时）确认发布源不会带上 `docs/engineering/` —— 见 §5「文档站与静态发布」
 
-## 6. 常见问题
+## 7. 常见问题
 
 | 现象 | 原因 | 处理 |
 |------|------|------|

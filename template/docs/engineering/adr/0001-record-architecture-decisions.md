@@ -11,7 +11,7 @@
 
 ## 决策
 
-在 `docs/adr/` 下用 Markdown 记录架构决策，命名 `NNNN-kebab-title.md`；
+在 `docs/engineering/adr/` 下用 Markdown 记录架构决策，命名 `NNNN-kebab-title.md`；
 「已接受」的记录只增不改，变更通过新增 ADR 表达取代关系。
 
 ## 后果

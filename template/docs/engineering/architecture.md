@@ -7,7 +7,8 @@
 
 - `src/` — 源码（入口与业务逻辑）
 - `tests/` — 测试
-- `docs/` — 文档；`docs/adr/` 为架构决策记录
+- `docs/` — 项目文档（使用指南、参考等）
+- `docs/engineering/` — 工程协作文档：架构 / 配置 / 完成定义 / 发版 / ADR
 - `scripts/` — 辅助脚本
 
 （按技术栈补充更细的分层，例如 `src/<pkg>/` 或 `src/domain|infra|ui/`。）

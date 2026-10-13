@@ -26,12 +26,12 @@
 
 ## 发版
 
-发版**单独走一个 PR**，不要混进功能 PR 里顺手做。前置条件与步骤见 `AGENTS.md` §3「发版」，完整清单见 `docs/releasing.md`。
+发版**单独走一个 PR**，不要混进功能 PR 里顺手做。前置条件与步骤见 `AGENTS.md` §3「发版」，完整清单见 `docs/engineering/releasing.md`。
 
 ## 红线与完成定义
 
 - 提交前请阅读 `AGENTS.md` 的「红线」。
-- 功能是否算完成，以 `docs/definition-of-done.md` 为准。
+- 功能是否算完成，以 `docs/engineering/definition-of-done.md` 为准。
 
 ## 许可证
 

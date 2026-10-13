@@ -38,11 +38,11 @@ Python / Rust 示例的真实检查命令见 `ci.yml` 的 `python-example` / `ru
 - 一个功能 = 一个 `feature/<名称>` 分支 = 一个 PR。
 - **推 commit 前先 `gh pr view <n> --json state` 确认 PR 仍 OPEN**；已 merge 就不要再往旧分支 push（commit 会成孤儿、不进 main）。
 - 提交：Conventional Commits，type 用英文前缀（`feat`/`fix`/`docs`/`test`/`chore`/`refactor`/`ci`）；描述可用中文；标题总长 ≤ 72 字符。
-- 本仓库的架构决策只记在 `CHANGELOG.md`；**不维护工具层 ADR**（`docs/adr/` 已在 `template/` 下，属生成物）。
+- 本仓库的架构决策只记在 `CHANGELOG.md`；**不维护工具层 ADR**（`template/docs/engineering/adr/` 属生成物，不随工具层维护）。
 
 ### 发版（打 tag / 建 Release）
 
-> 本仓库自身也发版（已有 `v0.1.0`）。这份能力与 `template/docs/releasing.md` 对齐 —— 但工具层不产生 payload、不复制 `releasing.md`，所以要点直接写在这里。
+> 本仓库自身也发版（已有 `v0.1.0`）。这份能力与 `template/docs/engineering/releasing.md` 对齐 —— 但工具层不产生 payload、不复制 `releasing.md`，所以要点直接写在这里。
 
 - **前置**：`ci.yml` 全绿；`ROADMAP.md` 无 `in-progress` 行；根 `CHANGELOG.md` 的 `[Unreleased]` 已写全。
 - **命名**（三处必须一致）：tag 用 `vX.Y.Z`（带 `v`）；Release title 与 tag 完全相同；根 `CHANGELOG.md` 版本节写 `[X.Y.Z] - 日期`（**不带** `v`）。
@@ -91,12 +91,13 @@ Python / Rust 示例的真实检查命令见 `ci.yml` 的 `python-example` / `ru
 | 改了什么 | 同一回合必须过一遍 |
 |---|---|
 | `template/` 里新增 / 删除 payload 文件 | `TEMPLATE.md`「模板包含什么」表 + `ci.yml` 的 payload 清单与 smoke 正向断言（漏了 CI 会红） |
+| `template/` 里 payload 文件的**路径变化**（改名 / 移动） | 除上面一行外，还要过：`TEMPLATE.md`「新项目开工清单」与「哪些文件不要改」表、`TEMPLATE.md` 自检正向断言列表、`ci.yml` 的「仓库结构自检」；**payload 文档内的相对链接**（层级一变，`../x` 就会指空，由「产物内文档死链检查」判定）；以及根 `AGENTS.md` / `CONTRIBUTING.md` / `ROADMAP.md` / `CHANGELOG.md` 里的引用 |
 | `template/` 里的**规则 / 能力**（红线 / DoD / 工作流 / 矩阵） | 根 `AGENTS.md` 的对应章节；根 `CHANGELOG.md` 记录 |
 | `template/` 里的路径描述 | `TEMPLATE.md`「新项目开工清单」与「哪些文件不要改」 |
 | 根工具层文件的增 / 删 / 改名 | `README.md` 目录结构、`TEMPLATE.md`「不在你的项目里」、`ci.yml` 的「仓库结构自检」 |
 | 脚本行为或选项 | `README.md` + `TEMPLATE.md` + `CONTRIBUTING.md` 三处描述一致 |
 | 本地检查命令或门禁 | `CONTRIBUTING.md`「本地检查」→ `.github/workflows/ci.yml`，两者必须一致 |
-| 发版（打 tag / 建 Release） | §3「发版」；根 `CHANGELOG.md` 的 `[Unreleased]` 改名为 `[X.Y.Z] - 日期`（不带 v）并补回空节点。`template/docs/releasing.md` 是同一能力的详细版，**两处不得打架** |
+| 发版（打 tag / 建 Release） | §3「发版」；根 `CHANGELOG.md` 的 `[Unreleased]` 改名为 `[X.Y.Z] - 日期`（不带 v）并补回空节点。`template/docs/engineering/releasing.md` 是同一能力的详细版，**两处不得打架** |
 | 章节标题 / 编号 | 全仓扫一遍按「§N」引用本文件的地方（根 `AGENTS.md`、`CONTRIBUTING.md`、`TEMPLATE.md`） |
 
 两条边界：

@@ -10,17 +10,19 @@
 |---|------|------|----------|
 | 1 | 引入 `template/` 目录，复制改为白名单 | done | 产物不含任何工具层文件、含全部 payload 文件；由 `ci.yml` 的 smoke test 判定 |
 | 2 | 工具层文档去占位化 | done | `CHANGELOG.md` 的 `Unreleased` 为本仓库真实记录；其余文档无「待填 / TODO / 待补充」。**注**：`README.md` / `AGENTS.md` / `TEMPLATE.md` 里的 `{{PROJECT_NAME}}` 是描述占位符机制的说明文字，**不属占位符残留，不得删除** |
-| 3 | 修 `template/docs/configuration.md` 引用 `TEMPLATE.md` 的死链 | done | 产物内文档引用全部可达；由 `ci.yml` 的「产物内文档死链检查」判定 |
+| 3 | 修 `template/docs/engineering/configuration.md` 引用 `TEMPLATE.md` 的死链 | done | 产物内文档引用全部可达；由 `ci.yml` 的「产物内文档死链检查」判定 |
 | 4 | 开工清单的路径与 `template/` 实际保持一致 | done | 由第 5 项的 CI step 持续保证（2026-10-05 首次人工核对：AGENTS / README / ROADMAP / CONTRIBUTING / build.yml / architecture / configuration 共 7 个文件均在 `template/` 下） |
 | 5 | 清单与仓库现状的自动一致性检查 | done | `ci.yml` 的「开工清单与 payload 一致性」step 双向校验：payload 权威清单里的文件都存在，且 `template/` 下每个非 `.gitkeep` 文件都在清单里 |
 | 6 | 多技术栈模板变体（`--variant`） | dropped | 2026-10-05 决定暂不做。素材现成（`example/` 下已有 Python 与 Rust 两份填好的骨架），但需先定「变体怎么组织 / 支持哪几个技术栈 / `example/` 定位是否变」三个决策。优先做无争议的补缺口类改动 |
-| 7 | 补齐发版（tag / Release）约束，并明确 `template/` → 根仓库的能力同步约定 | done | `template/AGENTS.md` §3「发版」/ §4 红线 / §8 坐标表 / §9 矩阵 + 新增 `template/docs/releasing.md`，覆盖前置条件、命名三要素、步骤顺序、常见错误；根 `AGENTS.md` §3「发版」与新增 §8「同改矩阵」承载同一能力（工具层视角）。由 `ci.yml` 的「开工清单与 payload 一致性」和「产物内文档死链检查」判定不引入回归 |
+| 7 | 补齐发版（tag / Release）约束，并明确 `template/` → 根仓库的能力同步约定 | done | `template/AGENTS.md` §3「发版」/ §4 红线 / §8 坐标表 / §9 矩阵 + 新增 `template/docs/engineering/releasing.md`，覆盖前置条件、命名三要素、步骤顺序、常见错误；根 `AGENTS.md` §3「发版」与新增 §8「同改矩阵」承载同一能力（工具层视角）。由 `ci.yml` 的「开工清单与 payload 一致性」和「产物内文档死链检查」判定不引入回归 |
+| 8 | 产物文档分层：工程协作文档收进 `docs/engineering/`，`docs/` 根层让给项目文档 | done | `template/docs/` 下除 `engineering/` 外无模板预置文件；`docs/` 下任一位置的引用均可达（由「产物内文档死链检查」判定）；`ci.yml` 的 payload 权威清单与 `template/` 内容双向一致；`TEMPLATE.md` 的「模板包含什么」表与自检正向断言列表同步；产物 `README.md` 与 `AGENTS.md` §1 中含这条分工 |
 
 ## 已知取舍
 
 | 取舍 | 原因 |
 |------|------|
-| 不维护工具层 ADR | `docs/adr/` 已整体移入 `template/`，属生成物；本仓库的架构决策记在 `CHANGELOG.md` |
+| `docs/` 根层让给项目文档 | 模板的工程协作文档统一收进 `docs/engineering/`。代价是预置文件不再位于 `docs/` 根层（与 MkDocs / Docusaurus 等把 `docs/` 当文档根的默认略有出入），换来的是「模板在 `docs/` 下只占一个目录」这条**无例外的机械规则** —— 判定只需看路径，不必记保护名单 |
+| 不维护工具层 ADR | ADR 整体属 payload（`template/docs/engineering/adr/`）；本仓库的架构决策记在 `CHANGELOG.md` |
 | 关闭 GitHub Template 标记 | GitHub 打包整个仓库，「Use this template」会把工具层文件带进新项目；白名单只对 `template-init.sh` 生效。代价是失去「网页一键生成」 |
 | `example/` 与 `template/` 的内容同步靠人工 | 二者要展示「填空前后」的差异，不适合自动生成 |
 | `template/` → 根仓库的能力同步靠人工 | 两份 `AGENTS.md` 受众不同，同一能力需按各自视角表述，不适合逐字复制。机器只能兜住最低一层：`ci.yml` 的 changelog 门禁要求改 `template/` 必须记根 `CHANGELOG.md`；「是否已同步规则」由根 `AGENTS.md` §8 同改矩阵约束 |

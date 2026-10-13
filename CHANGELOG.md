@@ -11,24 +11,27 @@
 ### Added
 
 - `template/.github/pull_request_template.md`：PR 描述骨架（做了什么 / 关联 ROADMAP 行 / 检查项，含 CHANGELOG）
-- `template/docs/releasing.md`：发版流程文档 —— 前置条件、命名三要素、步骤顺序、常见错误、预发布约定
+- `template/docs/engineering/releasing.md`：发版流程文档 —— 前置条件、命名三要素、步骤顺序、常见错误、预发布约定
 - 根 `AGENTS.md` §8「同改矩阵」：把核心约定「约束新建项目以 `template/` 为准；`template/` 更新后能力必须同步回根仓库」写成可查的矩阵，并注明同步是单向的、同步的是能力而非逐字复制
-- 根 `AGENTS.md` §3「发版」：本仓库自身的发版流程（工具层视角，与 `template/docs/releasing.md` 承载同一能力）
+- 根 `AGENTS.md` §3「发版」：本仓库自身的发版流程（工具层视角，与 `template/docs/engineering/releasing.md` 承载同一能力）
 
 ### Changed
 
+- **产物文档重新分层**：`template/docs/` 下模板预置的 5 项（`architecture.md` / `configuration.md` / `definition-of-done.md` / `releasing.md` / `adr/`）整体移入 **`template/docs/engineering/`**，把 `docs/` 根层让给**项目自己的文档**。原因是原先两类文档压在同一个平面：一类是「判定基准」（受红线与同改矩阵约束、生命周期稳定），一类面向使用者（随版本频繁重写）——读者与可变性正好相反；且 `docs/configuration.md` 与产品文档里几乎必然出现的「配置参考」页会撞名。现规则为「**模板在 `docs/` 下只占 `docs/engineering/` 一个目录**」，机械可判定、无例外。同步改写全部引用（13 个文件）以及 `ci.yml` 的 payload 权威清单 / smoke 正向断言 / 仓库结构自检，并把这条分工写进 `template/README.md` 的目录结构、`template/AGENTS.md` §1 与 `TEMPLATE.md`。CHANGELOG 中指向这些文件的路径一并改为当前位置，避免留下已不存在的路径。
 - `template/AGENTS.md` 把 CHANGELOG 接进工作流 / DoD / 同改矩阵，堵新项目 CHANGELOG 欠账
 - `template/AGENTS.md` §9 补齐发版命名三要素（tag 带 v、release title 跟 tag、CHANGELOG 不带 v）
 - `template/AGENTS.md` §3 新增「发版」小节（前置条件 / 命名 / 顺序）；§4 阻断级红线把 `tag`、`push --tags`、创建 Release 与 `commit` / `push` 并列禁止 —— 此前只禁 commit/push，AI 可辩称「规则没禁止打 tag」
 - `template/AGENTS.md` §8 的「版本号」坐标行由空白「（待填）」改为可填的中性指引（指向唯一版本号事实源，且不许另抄一份）
-- `template/AGENTS.md` §9 发版行改为指向 `docs/releasing.md`，并补「§8 坐标表指向的版本号事实源已同步」
+- `template/AGENTS.md` §9 发版行改为指向 `docs/engineering/releasing.md`，并补「§8 坐标表指向的版本号事实源已同步」
 - `template/README.md` 去模板化：删「🤖 AI 编码助手」引导行、收敛「开发约定」，AI 入口移至 `template/CONTRIBUTING.md`
 - 同步该能力到工具层：根 `AGENTS.md` §4 红线（同禁 tag / Release）与 §5 DoD（新增「改了 `template/` 的规则能力已同步根 `AGENTS.md`」判据）、根 `CONTRIBUTING.md` 与 `template/CONTRIBUTING.md` 各增发版入口、`example/` 两份 `AGENTS.md` 各补发版条目
-- 说清「社区健康文件」的位置：`template/docs/configuration.md` §4 新增「仓库公开时再补的社区健康文件」小节、§5 补一条可选勾选项，`TEMPLATE.md` 第 8 步后加一句指针 —— 模板**有意不预置** `CODE_OF_CONDUCT` / `SECURITY` / `SUPPORT` / `ISSUE_TEMPLATE`（四者都需项目级信息，预置只会得到 TODO 存根），改为在仓库要公开时用 GitHub 的 Insights → Community Standards 一键套官方模板
+- 说清「社区健康文件」的位置：`template/docs/engineering/configuration.md` §4 新增「仓库公开时再补的社区健康文件」小节、§6 补一条可选勾选项，`TEMPLATE.md` 第 8 步后加一句指针 —— 模板**有意不预置** `CODE_OF_CONDUCT` / `SECURITY` / `SUPPORT` / `ISSUE_TEMPLATE`（四者都需项目级信息，预置只会得到 TODO 存根），改为在仓库要公开时用 GitHub 的 Insights → Community Standards 一键套官方模板
+- 记一处静态站发布风险：`template/docs/engineering/configuration.md` **新增独立一节 §5「文档站与静态发布」**（原拟并入 §4，§4 标题是「CI（GitHub Actions）」，内容会跑题；落地配置清单与常见问题顺延为 §6 / §7）、§6 补一条可选勾选项，`TEMPLATE.md` 第 8 步后加一句指针（与社区健康文件那句并列）、「模板包含什么」表补「文档站」、指向清单的引用由 §5 改为 §6 —— 把 `docs/` 直接当发布源会让 `docs/engineering/` 一并发布，而发布内容**公网可访问、即使仓库是私有的**；给出两条处理（改用 Actions 只上传构建产物 / 在站点配置里排除 `engineering`），并声明这属构建层、不必为躲发布而搬动文档
 
 ### Fixed
 
-- 补齐 `docs/releasing.md` 引入后需要同步的三处枚举：`TEMPLATE.md` 的「模板包含什么」表与「哪些文件不要改」表、`TEMPLATE.md` 自检脚本的正向断言列表、`ci.yml` 的 payload 权威清单与 smoke 正向断言（漏同步会让「开工清单与 payload 一致性」step 直接失败）
+- 修 `template/docs/engineering/configuration.md` §1 表格里一处**从未生效过**的失效引用：「由 `.gitattributes` 强制，见 §3」—— 该引用自 PR #2（`45e1867`）引入时就指错了（行尾一直写在 §2，§3 始终是「目录约定」），改为「见 §2「行尾」」
+- 补齐 `docs/engineering/releasing.md` 引入后需要同步的三处枚举：`TEMPLATE.md` 的「模板包含什么」表与「哪些文件不要改」表、`TEMPLATE.md` 自检脚本的正向断言列表、`ci.yml` 的 payload 权威清单与 smoke 正向断言（漏同步会让「开工清单与 payload 一致性」step 直接失败）
 
 ## [0.1.0] - 2026-10-05
 
@@ -50,7 +53,7 @@
 
 ### Fixed
 
-- `template/docs/configuration.md` 删掉对 `TEMPLATE.md` 的引用 —— 该文件属工具层、不随模板复制，此前在每个生成出来的项目里都是死链
+- `template/docs/engineering/configuration.md` 删掉对 `TEMPLATE.md` 的引用 —— 该文件属工具层、不随模板复制，此前在每个生成出来的项目里都是死链
 - `ci.yml` 的 smoke test 补上**正向断言**：原断言全是否定式，复制阶段整体失效、产物为空时四条全过
 
 ### Removed
