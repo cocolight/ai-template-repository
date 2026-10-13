@@ -92,6 +92,8 @@ cd my-project
 
 第 8 步的坑：required status checks 的名字**必须等于 workflow 里的 job 名**。`build.yml` 的 job id 是 `test` 且未设 `name`，所以在列表里搜 `test`；一旦改了 job 名，这里要同步改。
 
+**若仓库要公开（可选，不属于上面 8 步）**：GitHub 还推荐一组社区健康文件（行为准则、安全策略、求助渠道、issue 表单），新项目里**没带** —— 这是有意不预置：它们全都要项目级信息（举报渠道、求助渠道、issue 字段），预置只会得到一份写着 TODO 的存根，对私有仓库也没有意义。真要公开时，GitHub 在 **Insights → Community Standards** 会列出缺哪几项，每项都有 **Add** 按钮可直接套官方模板新建。详见 [docs/configuration.md](docs/configuration.md) §4。
+
 **开工前先跑这两条自检**：
 
 ```bash

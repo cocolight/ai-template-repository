@@ -92,6 +92,21 @@ git update-index --chmod=+x scripts/x.sh       # 修复
 切换镜像时（例如迁移到 Ubuntu 26）让 CI 行为突变——系统依赖的包名可能变化，CI 会在你毫无改动的一天突然变红。
 钉住版本后，升级时机由你决定，且升级前可以先在分支上验证。
 
+### 仓库公开时再补的社区健康文件
+
+上面三步**私有仓库也该做**。此外 GitHub 还推荐一组社区健康文件，用于公开项目接待外部使用者 —— 新项目里**没有**这些，是有意不预置，不是漏了。
+
+| 文件 | 作用 |
+|------|------|
+| `CODE_OF_CONDUCT.md` | 行为准则（可套官方 Contributor Covenant 正文） |
+| `SECURITY.md` | 漏洞报告渠道（同时在 Security 设置里开启私密漏洞报告） |
+| `SUPPORT.md` | 求助渠道 |
+| `ISSUE_TEMPLATE` | issue 表单 |
+
+**为什么模板不预置**：这几份全都要**项目级信息** —— 举报渠道、求助渠道、赞助账号、issue 字段。预置只会得到一份写着 TODO 的存根，之后还得跟着维护；而对私有仓库它们也没有意义。
+
+**要补时不必手写**：GitHub 在 **Insights → Community Standards**（仓库主页 → Insights → 左栏 Community Standards）会列出还缺哪几项，每项都有 **Add** 按钮，可直接套官方模板新建。该清单只对公开仓库显示。
+
 ## 5. 落地配置清单
 
 - [ ] 填写 `AGENTS.md` §2「常用命令」表（AI 依赖它）
@@ -102,6 +117,7 @@ git update-index --chmod=+x scripts/x.sh       # 修复
 - [ ] 确认 shell 脚本索引模式为 `100755`
 - [ ] GitHub：启用 Actions、收紧 Workflow permissions
 - [ ] GitHub：为 `main` 开启分支保护 + required status checks
+- [ ] （可选，仅仓库要公开时）补齐社区健康文件 —— 见 §4「仓库公开时再补的社区健康文件」
 
 ## 6. 常见问题
 
