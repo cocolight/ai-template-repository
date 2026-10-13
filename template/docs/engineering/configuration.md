@@ -108,6 +108,17 @@ git update-index --chmod=+x scripts/x.sh       # 修复
 
 **要补时不必手写**：GitHub 在 **Insights → Community Standards**（仓库主页 → Insights → 左栏 Community Standards）会列出还缺哪几项，每项都有 **Add** 按钮，可直接套官方模板新建。该清单只对公开仓库显示。
 
+### 把 `docs/` 直接当静态站源时
+
+上面两项都是 GitHub 平台侧的设置。还有一处与**本文档的目录布局**有关的坑：新项目若要做文档站，并把仓库的 `docs/` 直接当作发布源，那么 `docs/engineering/` 会被**一并发布** —— 它装的是工程协作文档（架构、配置、完成定义、发版、ADR），受众是协作者，不是对外读者。
+
+这尤其要注意：发布出去的内容**在公网可访问，即使仓库是私有的**。两种处理都行 ——
+
+- **首选：改用 Actions 发布，只上传构建产物。** 上传路径是显式指定的，`docs/engineering/` 天然不在其中（这也是 GitHub 现在推荐的方式）。
+- **或者在站点配置里排除 `engineering` 目录。** 多数静态站生成器都提供排除开关。
+
+两种都只是**构建层**的事，与文件放在哪无关 —— 不要为了避开发布而把这些文档挪进点目录：那会连它们的可见性一起丢掉。
+
 ## 5. 落地配置清单
 
 - [ ] 填写 `AGENTS.md` §2「常用命令」表（AI 依赖它）
@@ -119,6 +130,7 @@ git update-index --chmod=+x scripts/x.sh       # 修复
 - [ ] GitHub：启用 Actions、收紧 Workflow permissions
 - [ ] GitHub：为 `main` 开启分支保护 + required status checks
 - [ ] （可选，仅仓库要公开时）补齐社区健康文件 —— 见 §4「仓库公开时再补的社区健康文件」
+- [ ] （可选，仅做文档站时）确认发布源不会带上 `docs/engineering/` —— 见 §4「把 `docs/` 直接当静态站源时」
 
 ## 6. 常见问题
 
