@@ -35,6 +35,7 @@
 - 补齐 `docs/engineering/releasing.md` 引入后需要同步的三处枚举：`TEMPLATE.md` 的「模板包含什么」表与「哪些文件不要改」表、`TEMPLATE.md` 自检脚本的正向断言列表、`ci.yml` 的 payload 权威清单与 smoke 正向断言（漏同步会让「开工清单与 payload 一致性」step 直接失败）
 - `Changelog gate (template/)` 的 diff 基准由 `pull_request.base.sha` 改为 `git merge-base`：前者会随 `main` 前进而变化，于是 `main` 在分叉点之后改过的文件（含 `CHANGELOG.md`）会被算进「本次 PR 的改动」—— 门禁会在 PR 根本没补记录的情况下**假绿**。已用四个场景对比验证：改 `template/` 且未记 CHANGELOG 且 main 已前进时，旧逻辑 PASS（漏放）、新逻辑 FAIL（正确拦截）；记了 CHANGELOG、只改工具层、只改 `docs/` 三种情况新旧一致
 - 占位符残留检查从笼统的 `{{` 精确到 `{{PROJECT_NAME}}` / `{{YEAR}}`：原写法会误伤 GitHub Actions 的 `${{ }}` 表达式。同步 `ci.yml`、`TEMPLATE.md` 两处自检命令与根 `AGENTS.md` 的 DoD 一行
+- `template/.github/workflows/build.yml` 的 `Changelog gate` job 做与工具层同样的修正：diff 与 `git log` 的基准由 `pull_request.base.sha` 改为 `git merge-base`。否则**每一个由本模板生成的项目都会继承这道会假绿的门禁**。用该 job 的真实脚本跑五场景对比验证：feat 改代码未记 CHANGELOG 且主分支已前进时，旧逻辑 PASS（漏放）、新逻辑 FAIL（拦截）；chore 改代码未记时，旧逻辑误报「CHANGELOG 已更新」、新逻辑给出正确的 warning；记了 CHANGELOG、只改文档、fix 未记且主分支未动三种情况新旧一致
 
 ## [0.1.0] - 2026-10-05
 
