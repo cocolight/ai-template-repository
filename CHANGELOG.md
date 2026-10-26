@@ -15,6 +15,7 @@
 - 根 `AGENTS.md` §8「同改矩阵」：把核心约定「约束新建项目以 `template/` 为准；`template/` 更新后能力必须同步回根仓库」写成可查的矩阵，并注明同步是单向的、同步的是能力而非逐字复制
 - 根 `AGENTS.md` §3「发版」：本仓库自身的发版流程（工具层视角，与 `template/docs/engineering/releasing.md` 承载同一能力）
 - `template/.github/workflows/build.yml` 新增 `Changelog gate` job：feat/fix 改了代码却没更新 CHANGELOG 就硬拦，非 feat/fix 仅 warning，PR 描述含 `[skip changelog]` 可豁免 —— 把「CHANGELOG 欠账」从事后检查变成合并前的门禁
+- `template/THIRD-PARTY.md`：第三方依赖许可证记录文档 —— 每引入一个直接依赖须登记许可证（SPDX 标识）、用途与是否随分发；接入 `template/AGENTS.md` §8 坐标表（新增「第三方依赖许可证 → THIRD-PARTY.md」一行）与 `template/docs/engineering/architecture.md` §5（依赖引入规则新增登记要求），并在 `template/README.md` 许可证节加指针。补齐「引入开源工具无许可证记录文档」的缺口
 
 ### Changed
 
