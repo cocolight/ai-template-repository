@@ -34,3 +34,4 @@
 ## 许可证
 
 本项目采用 MIT 许可证，详见 [LICENSE](LICENSE)。
+第三方依赖的许可证另行登记在 [THIRD-PARTY.md](THIRD-PARTY.md)，供合规审查。

@@ -62,6 +62,7 @@ cd my-project
 | `docs/engineering/releasing.md` | 发版流程：前置条件、命名规则（tag / Release title / CHANGELOG 版本节）、常见错误 |
 | `docs/engineering/adr/` | 架构决策记录（含模板与首条记录） |
 | `LICENSE` | MIT 许可证正文（年份与项目名已由脚本填好） |
+| `THIRD-PARTY.md` | 第三方依赖许可证记录（每引入一个直接依赖须登记：许可证 / 用途 / 是否随分发） |
 | `.gitignore` / `.gitattributes` | 依赖忽略规则；强制库内 LF，防止脚本在 Windows 被检出为 CRLF |
 | `.github/workflows/build.yml` | CI 门禁骨架（需按技术栈补全） |
 | `.github/pull_request_template.md` | PR 描述骨架：做了什么 / 关联 ROADMAP 行 / 检查项（含 CHANGELOG） |
@@ -145,6 +146,7 @@ git ls-files -s scripts/
 |------|------|
 | `CHANGELOG.md` | 已发布版本的条目不再修改；新改动追加到 `Unreleased` |
 | `ROADMAP.md` 中已标 `done` 的行 | 状态可回溯，但不要删行，也不要改写已完成功能的验收标准 |
+| `THIRD-PARTY.md` | 第三方依赖许可证记录；已登记的依赖不得删除或篡改其许可证信息（移除依赖时保留该行并标注状态） |
 
 ### 四、不在你的项目里（别去找）
 
@@ -216,6 +218,7 @@ done
 # 正向断言：payload 必须真的复制到位
 #（只有反向断言时，复制阶段整体失效会全绿通过）
 for f in README.md AGENTS.md ROADMAP.md CONTRIBUTING.md CHANGELOG.md LICENSE \
+         THIRD-PARTY.md \
          .gitignore .gitattributes .github/workflows/build.yml \
          docs/engineering/architecture.md docs/engineering/configuration.md docs/engineering/definition-of-done.md \
          docs/engineering/releasing.md; do

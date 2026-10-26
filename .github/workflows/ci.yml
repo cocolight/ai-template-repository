@@ -53,6 +53,7 @@ jobs:
           # 仅有反向断言时，复制阶段整体失效会全绿通过（例如 .gitkeep 数=0、
           # 无 example、无占位符、分支为 main），所以必须逐个确认关键文件存在。
           for f in README.md AGENTS.md ROADMAP.md CONTRIBUTING.md CHANGELOG.md LICENSE \
+                   THIRD-PARTY.md \
                    .gitignore .gitattributes \
                    .github/workflows/build.yml \
                    docs/engineering/architecture.md docs/engineering/configuration.md docs/engineering/definition-of-done.md \
@@ -114,6 +115,7 @@ jobs:
           CHANGELOG.md
           CONTRIBUTING.md
           LICENSE
+          THIRD-PARTY.md
           README.md
           ROADMAP.md
           .gitattributes
