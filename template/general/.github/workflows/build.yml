@@ -1,0 +1,87 @@
+name: build
+
+# 新项目的 CI 门禁骨架。生成后请把下面的占位步骤换成真实命令。
+# 未填写前，required status checks 是空转的（永远成功）。
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+# runner 镜像显式钉版本，不跟随 ubuntu-latest：隐式跟随会在 GitHub 切换镜像时
+# 让 CI 行为突变（例如系统依赖的包名变化）。升级镜像前请先在分支上验证依赖。
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+
+      # TODO: 按本项目技术栈补全以下三步（缺任一步，门禁即形同虚设）：
+      #   1) 安装依赖
+      #   2) lint / 格式检查
+      #   3) 测试（不得改成 `|| true`，不得把失败降级为警告）
+
+      - name: Test
+        run: |
+          echo "::warning::CI 尚未配置：请在 .github/workflows/build.yml 填写真实的安装 / lint / 测试命令"
+
+  # 门禁：feat/fix 改了代码却没更新 CHANGELOG，就拦下（防「CHANGELOG 欠账」）。
+  # 只在 pull_request 时跑——push 到 main 时代码已合并，再检查无意义。
+  # 三级响应：
+  #   - PR 描述含 `[skip changelog]` → 跳过（豁免口，用于纯测试/CI/无行为变化的重构）
+  #   - feat/fix 的代码改动、未更新 CHANGELOG → 失败（硬拦）
+  #   - 非 feat/fix 的代码改动、未更新 CHANGELOG → 仅 warning（不阻断）
+  # 要让它真正阻断合并，请在分支保护里把这个 job 一并设为 required status check。
+  changelog:
+    name: Changelog gate
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0   # 需要 base..head 的完整历史才能 diff
+
+      - name: 检查 feat/fix 是否更新了 CHANGELOG
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          SKIP_CHANGELOG: ${{ contains(github.event.pull_request.body, '[skip changelog]') }}
+        run: |
+          set -eu
+          # 1) 豁免口：PR 描述显式声明 [skip changelog]
+          if [ "$SKIP_CHANGELOG" = "true" ]; then
+            echo "PR 含 [skip changelog]，跳过检查"
+            exit 0
+          fi
+          # 2) 本次 PR 改动的文件
+          # diff 基准必须取 merge-base，不能直接用 pull_request.base.sha ——
+          # 后者会随主分支前进而变化，于是主分支在分叉点之后改过的文件（含
+          # CHANGELOG.md）会被算进「本次 PR 的改动」，门禁在 PR 根本没补记录时假绿。
+          MERGE_BASE="$(git merge-base "$BASE_SHA" "$HEAD_SHA")"
+          CHANGED="$(git diff --name-only "$MERGE_BASE" "$HEAD_SHA")"
+          # 3) 是否改了「代码」：排除纯文档（.md）与仓库级配置文件
+          CODE_CHANGED="$(printf '%s\n' "$CHANGED" \
+            | grep -vE '\.md$' \
+            | grep -vE '^(LICENSE|\.gitignore|\.gitattributes|\.editorconfig)$' \
+            | grep -v '^docs/' \
+            | head -n 1)"
+          if [ -z "$CODE_CHANGED" ]; then
+            echo "纯文档改动，无需 CHANGELOG"
+            exit 0
+          fi
+          # 4) commit 是否含 feat/fix（用户可见变更）
+          HAS_FEATFIX="$(git log "$MERGE_BASE".."$HEAD_SHA" --pretty=format:%s | grep -E '^(feat|fix)' || true)"
+          # 5) CHANGELOG 是否已更新
+          if printf '%s\n' "$CHANGED" | grep -q '^CHANGELOG.md$'; then
+            echo "CHANGELOG.md 已更新"
+            exit 0
+          fi
+          # 6) feat/fix 硬拦，其余仅提醒
+          if [ -n "$HAS_FEATFIX" ]; then
+            echo "::error::本 PR 含 feat/fix 的代码改动，须在 CHANGELOG.md 的 [Unreleased] 记录（或 PR 描述加 [skip changelog]）"
+            exit 1
+          fi
+          echo "::warning::本 PR 改了代码但未更新 CHANGELOG（非 feat/fix，仅提醒）"

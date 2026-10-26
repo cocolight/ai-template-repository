@@ -1,0 +1,118 @@
+# AGENTS.md — 给 AI 编码助手的行为规则
+
+> 本文件供 AI 编码助手（WorkBuddy / Claude Code / Cursor 等）自动读取。
+> **开始任务前先读完本文件；需求含糊时先提问，不要臆造。**
+
+## 0. 项目
+
+{{PROJECT_NAME}} — （一句话说明本项目做什么）。
+
+## 1. 上下文入口（按此顺序阅读）
+
+1. `AGENTS.md`（本文件）— 规则与红线
+2. `ROADMAP.md` — 当前任务与「验收标准」
+3. `README.md` — 定位、安装、常用命令
+4. `docs/engineering/architecture.md` — 目录 / 分层 / 错误处理 / 日志 / 依赖规则
+5. `docs/engineering/definition-of-done.md` — 完成定义（DoD）
+6. `docs/engineering/adr/` — 已接受的架构决策（改动相关模块前先读）
+7. 与任务相关的源码与测试
+
+> 事实以源码为准：用 `read` 看结构、`grep` 查事实，文档只给坐标。
+
+> **文档落点**：`docs/engineering/` 是模板预置的工程协作文档（上面第 4–6 项，以及配置与发版），已由模板定稿，改动须走 §9 同改矩阵；**项目自己的文档放 `docs/` 下的其他位置** —— 按主题建子目录（使用指南、API 参考、教程等），不要写进 `docs/engineering/`。
+
+## 2. 常用命令（可直接复制执行）
+
+> 由项目搭建者首次补全。**未填写前，不得声称「已跑过测试 / 检查」。**
+
+| 目的 | 命令 |
+|------|------|
+| 安装依赖 | （待填） |
+| 运行 | （待填） |
+| 测试 | （待填） |
+| Lint | （待填） |
+| 格式化检查 | （待填） |
+
+## 3. 工作流
+
+- 保护分支 `main`，禁止直接推送。
+- 一个功能 = 一个 `feature/<名称>` 分支 = 一个 PR。
+- 新功能开发前，先在 `ROADMAP.md` 加一行（状态 `planned`、写清验收标准），确认后才转 `in-progress` 开干；小改动 / bugfix 无需走计划。
+- 提交：Conventional Commits，type 用英文前缀（`feat`/`fix`/`docs`/`test`/`chore`/`refactor`/`ci`）；描述可用中文；标题总长 ≤ 72 字符。
+- 每完成一项，更新 `ROADMAP.md` 对应行状态，并在 `CHANGELOG.md` 的 `[Unreleased]` 对应分类补一条。
+
+### 发版（打 tag / 建 Release）
+
+> 发版不是「功能做完」的自然结果，而是一次独立动作：单独走一个 PR，合并后再打 tag。完整清单见 `docs/engineering/releasing.md`。
+
+- **前置**：CI 全绿；`ROADMAP.md` 无 `in-progress` 行；`CHANGELOG.md` 的 `[Unreleased]` 已写全。
+- **命名**（三处必须一致）：tag 用 `vX.Y.Z`（带 `v`）；Release title 与 tag 完全相同；`CHANGELOG.md` 版本节写 `[X.Y.Z] - 日期`（**不带** `v`）。
+- **顺序**：先改版本号事实源（§8 坐标表指向的那一处）与 `CHANGELOG.md` → 提 PR 合入 `main` → **在 `main` 上**打 tag → 建 Release。
+- 未经明确要求，不得 `git tag` / 推送 tag / 建 Release —— 见 §4 红线第 3 条。
+
+## 4. 红线（违反即回滚）
+
+红线分两级：**阻断级**是底线，触碰即回滚；**提醒级**是默认做法，偏离须在 PR 说明里写明理由。
+
+**阻断级（不可触碰）**
+
+1. 不得删除 / 跳过 / 弱化测试（含 `skip`、`xfail`、`#[ignore]`、改断言），不得伪造「测试已通过」。
+2. 大改动先确认：单次改动 > 5 个文件 或 > 200 行，先给方案，等确认再动手。
+3. 不得擅自 `git commit` / `push` / `push --tags` / `tag` / `rebase` / `reset` / `--force`、创建 Release、切分支或改远程；仅在明确要求时执行。**发版尤其如此**：tag 与 Release 面向使用者、发布后撤不干净，规则见 §3「发版」。
+4. 不得为了让检查「变绿」而修改 CI、hook、lint 配置或测试门禁。
+5. 不得修改 `docs/engineering/adr/` 中「已接受」的记录；变更须新增 ADR。
+6. 绝不提交密钥 / token / 私钥 / `.env`（用环境变量或仓库外文件）。
+
+**提醒级（须写明理由）**
+
+7. 含糊需求先提问；同一问题连续 2 次修复失败，停下说明现状并求助。
+8. 只改与任务相关的文件，不做无关重构、不顺手改格式。
+
+## 5. 完成定义（DoD）
+
+详见 `docs/engineering/definition-of-done.md`。任一功能完成须同时满足：
+
+- [ ] `ROADMAP.md` 该行「验收标准」全部满足
+- [ ] 新增 / 更新对应测试，全量测试通过
+- [ ] Lint 与格式化检查通过
+- [ ] 相关文档（README / AGENTS / architecture / ADR / CHANGELOG）同步更新
+- [ ] `CHANGELOG.md` 的 `[Unreleased]` 已记录本次改动
+- [ ] `ROADMAP.md` 状态更新为 `done`
+
+## 6. 并发协作（多 AI / 多人）
+
+- 一个分支只由一个执行者写入；动手前先 `git fetch`，避免同文件并发编辑。
+- 遇到冲突立即停止并说明，不要擅自 `--force`。
+
+## 7. 安全
+
+- 绝不提交密钥 / token / 私钥。
+- `tests/` 必须保持可运行。
+
+## 8. 单一事实源坐标
+
+> 本表只给「去哪查」，不给「查到什么」。事实层（版本号、协议、配置项、数据结构）一律以代码为准。
+> 搭建新项目时把下表补全——这是 AI 最高频的查阅入口，留空等于让 AI 每次全仓搜索。
+> 任何文档都**不得**维护「完整文件清单 / 完整设置项清单」这类每次提交都漂移的枚举；源码是唯一事实源。
+
+| 契约 / 事实 | 唯一事实源在哪 |
+|---|---|
+| 配置项 / 设置键 | （待填） |
+| 外部接口契约 | （待填） |
+| 数据结构与存储 | （待填） |
+| 关键算法或业务规则 | （待填） |
+| 版本号 | （待填：指向唯一维护版本号的那一处——包清单 / 版本文件 / 常量。发版时只改这一处，不要在 README 或文档里另抄一份） |
+
+## 9. 同改矩阵
+
+> 改了什么，同一回合必须过一遍哪些地方；只改一处导致两份文档打架是禁止的。
+
+| 改了什么 | 同回合必须过一遍 |
+|---|---|
+| 架构 / 分层 / 不变式 | `docs/engineering/architecture.md`；需要留痕的追加 `docs/engineering/adr/` |
+| 配置项 / 设置键 / 命令行参数 | `docs/engineering/configuration.md` + §8 坐标表对应行 |
+| 命令或门禁 | §2 常用命令 → `CONTRIBUTING.md` → `.github/workflows/build.yml`，三者必须一致 |
+| 红线 / DoD | `docs/engineering/definition-of-done.md` 同步（不得放宽） |
+| 章节标题 | 全仓扫一遍按「§N」引用本文件的地方 |
+| 决策理由变更 | 新增一条 ADR，`docs/engineering/adr/` 旧记录原样保留 |
+| 发版（打 tag / 建 Release） | 按 §3「发版」与 `docs/engineering/releasing.md` 的清单执行；同一回合过一遍：tag 与 Release title 都是 `vX.Y.Z`、`CHANGELOG.md` 版本节是 `[X.Y.Z] - 日期`（不带 v）且顶部已补回空的 `[Unreleased]`、§8 坐标表指向的版本号事实源已同步 |

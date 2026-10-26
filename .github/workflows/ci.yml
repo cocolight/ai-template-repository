@@ -26,11 +26,12 @@ jobs:
       - name: template-init smoke test
         # dry-run 只验证参数解析；真实生成才能覆盖复制逻辑（占位文件跳过、空目录保留）。
         # 每条断言都写成"失败即 exit 1"，不依赖 errexit 的生效范围。
+        # 生成使用 --template blank（CI 非交互，必须显式指定变体）；general 由「仓库结构自检」保证存在。
         run: |
           set -eu
           DST="$RUNNER_TEMP/newproj"
-          ./scripts/template-init.sh --dry-run "$DST"
-          ./scripts/template-init.sh "$DST"
+          ./scripts/template-init.sh --template blank --dry-run "$DST"
+          ./scripts/template-init.sh --template blank "$DST"
 
           # --- 复制结果断言 ---
           # find 排除 .git：git init 之后产物里已有 .git，不排除会白跑大量文件
@@ -42,7 +43,7 @@ jobs:
           [ "$(git -C "$DST" branch --show-current)" = main ] || { echo "默认分支不是 main"; exit 1; }
 
           # --- 白名单反向断言：工具层文件不得进入产物 ---
-          # 复制源是 template/，这些文件物理上就不在复制源里。
+          # 复制源是 template/<变体>/，这些文件物理上就不在复制源里。
           for f in template TEMPLATE.md example scripts/template-init.sh .github/workflows/ci.yml; do
             [ ! -e "$DST/$f" ] || { echo "产物泄露了工具层文件：$f"; exit 1; }
           done
@@ -63,10 +64,14 @@ jobs:
           [ -d "$DST/.github/workflows" ] || { echo "产物缺少目录：.github/workflows"; exit 1; }
           [ "$(ls "$DST/.github/workflows" | wc -l)" -eq 1 ] || { echo "产物里不止 build.yml 一个 workflow"; exit 1; }
 
-          # --- 行尾规则一致性：两份 .gitattributes 必须相同 ---
+          # --- 行尾规则一致性：根 .gitattributes 与各变体的 .gitattributes 必须相同 ---
           # 根那份递归覆盖 template/**（已实测），内容一致时无歧义。
-          diff .gitattributes template/.gitattributes >/dev/null \
-            || { echo "根 .gitattributes 与 template/.gitattributes 不一致"; exit 1; }
+          for d in template/*/; do
+            [ -d "$d" ] || continue
+            v=$(basename "$d")
+            diff .gitattributes "template/$v/.gitattributes" >/dev/null \
+              || { echo "根 .gitattributes 与 template/$v/.gitattributes 不一致"; exit 1; }
+          done
           git check-attr eol -- scripts/template-init.sh | grep -q 'eol: lf' \
             || { echo "scripts/template-init.sh 未被 eol=lf 覆盖"; exit 1; }
 
@@ -80,13 +85,22 @@ jobs:
             || { echo "scripts/template-init.sh 索引模式不是 100755"; exit 1; }
 
       - name: 仓库结构自检
-        # 守住「两层结构」这个核心性质：根是工具层，template/ 是数据层
+        # 守住「两层结构 + 多变体」这个核心性质：根是工具层，template/ 下每个子目录是一个变体。
+        # 这里只校验「每个变体都含最小骨架」+「至少 blank/general 两个变体」+「工具层不在 template/ 内」。
         run: |
           set -eu
-          for p in template/README.md template/AGENTS.md template/LICENSE \
-                   template/docs/engineering/architecture.md template/.github/workflows/build.yml; do
-            [ -e "$p" ] || { echo "仓库结构异常，缺少：$p"; exit 1; }
+          for d in template/*/; do
+            [ -d "$d" ] || continue
+            v=$(basename "$d")
+            for p in README.md AGENTS.md LICENSE \
+                     docs/engineering/architecture.md docs/engineering/configuration.md \
+                     .github/workflows/build.yml; do
+              [ -e "template/$v/$p" ] || { echo "模板变体 $v 缺少：$p"; exit 1; }
+            done
           done
+          # 至少存在 blank 与 general 两个变体
+          [ -d template/blank ] || { echo "缺少 template/blank 变体"; exit 1; }
+          [ -d template/general ] || { echo "缺少 template/general 变体"; exit 1; }
           # 工具层文件不得出现在 template/ 里（放错位置会被复制进新项目）
           for f in TEMPLATE.md example .gitkeep.bak; do
             [ ! -e "template/$f" ] || { echo "template/ 里混入了工具层文件：$f"; exit 1; }
@@ -101,9 +115,9 @@ jobs:
         # ROADMAP 第 4/6 项：TEMPLATE.md 的「新项目开工清单」与 template/ 实际内容
         # 需保持一致。此前只靠人工核对，改名/删文件/加文件都不会被发现。
         #
-        # 双向校验：
-        #   1) 下面这份权威清单里的每个文件都必须在 template/ 下真实存在
-        #   2) template/ 下的每个非 .gitkeep 文件都必须在这份清单里
+        # 双向校验（对每个变体各做一次）：
+        #   1) 下面这份权威清单里的每个文件都必须在变体目录下真实存在
+        #   2) 变体目录下的每个非 .gitkeep 文件都必须在这份清单里
         # 两个方向都查 —— 只查 1) 漏了新文件，只查 2) 漏了删除。
         #
         # 改 payload 时：若新增文件，把对应路径加进 CHECKLIST；若删除，
@@ -128,22 +142,25 @@ jobs:
           docs/engineering/definition-of-done.md
           docs/engineering/releasing.md"
 
-          # 1) 清单里的文件必须存在
-          echo "$CHECKLIST" | while IFS= read -r f; do
-            [ -n "$f" ] || continue
-            [ -f "template/$f" ] || { echo "清单里的文件不存在：template/$f"; exit 1; }
+          for d in template/*/; do
+            [ -d "$d" ] || continue
+            v=$(basename "$d")
+            # 1) 清单里的文件必须存在
+            echo "$CHECKLIST" | while IFS= read -r f; do
+              [ -n "$f" ] || continue
+              [ -f "template/$v/$f" ] || { echo "变体 $v 清单里的文件不存在：template/$v/$f"; exit 1; }
+            done
+            # 2) 变体目录下的文件必须在清单里（.gitkeep 是占位文件，不算 payload）
+            miss=0
+            for f in $(cd "template/$v" && find . -type f ! -name '.gitkeep' | sed 's|^\./||' | sort); do
+              if ! echo "$CHECKLIST" | grep -qxF "$f"; then
+                echo "template/$v/$f 未列入 payload 清单"
+                miss=1
+              fi
+            done
+            [ "$miss" -eq 0 ] || exit 1
+            echo "变体 $v：payload 清单一致"
           done
-
-          # 2) template/ 下的文件必须在清单里（.gitkeep 是占位文件，不算 payload）
-          miss=0
-          for f in $(cd template && find . -type f ! -name '.gitkeep' | sed 's|^\./||' | sort); do
-            if ! echo "$CHECKLIST" | grep -qxF "$f"; then
-              echo "template/$f 未列入 payload 清单"
-              miss=1
-            fi
-          done
-          [ "$miss" -eq 0 ] || exit 1
-          echo "payload 清单与 template/ 内容一致"
 
       - name: 产物内文档死链检查
         # 生成本身不校验文档引用：payload 里的文件被复制进新项目后，
@@ -160,10 +177,12 @@ jobs:
         #   NNNN-kebab-title.md  占位文件名，不是真引用
         #   ./scripts/x.sh       行内示例文本
         #   不含 / 的裸文件名     简称而非路径（如 `build.yml` 指 .github/workflows/build.yml）
+        #
+        # 用 --template blank 生成（与 smoke test 一致；general 当前为 blank 种子，链接等价）。
         run: |
           set -eu
           DST="$RUNNER_TEMP/linkcheck"
-          ./scripts/template-init.sh "$DST" >/dev/null
+          ./scripts/template-init.sh --template blank "$DST" >/dev/null
           cd "$DST"
           # 注意：管道左侧的 while 在子 shell 里，计数要用命令替换取出，
           # 不能靠变量传递（set -e 也捕获不到管道左侧失败）

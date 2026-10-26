@@ -1,7 +1,7 @@
 # Changelog
 
 本文件记录 **本仓库自身**（`ai-template-repository`）的变更。
-生成的新项目另有一份 `CHANGELOG.md`（位于 `template/CHANGELOG.md`），那份用于记录该项目自己的变更。
+生成的新项目另有一份 `CHANGELOG.md`（位于 `template/blank/CHANGELOG.md`），那份用于记录该项目自己的变更。
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 与
 [语义化版本](https://semver.org/lang/zh-CN/)。
@@ -10,20 +10,24 @@
 
 ### Added
 
-- `template/.github/pull_request_template.md`：PR 描述骨架（做了什么 / 关联 ROADMAP 行 / 检查项，含 CHANGELOG）
-- `template/docs/engineering/releasing.md`：发版流程文档 —— 前置条件、命名三要素、步骤顺序、常见错误、预发布约定
+- `template/blank/`（原 `template/` 内容，最小骨架变体）与 `template/general/`（更详细的通用变体，当前以 blank 为种子）两个模板变体；`template-init.sh` 现支持多变体：非交互用 `--template <名称>` 指定，交互模式自动发现 `template/*/` 并菜单选择
+- `template/blank/.github/pull_request_template.md`：PR 描述骨架（做了什么 / 关联 ROADMAP 行 / 检查项，含 CHANGELOG）
+- `template/blank/docs/engineering/releasing.md`：发版流程文档 —— 前置条件、命名三要素、步骤顺序、常见错误、预发布约定
 - 根 `AGENTS.md` §8「同改矩阵」：把核心约定「约束新建项目以 `template/` 为准；`template/` 更新后能力必须同步回根仓库」写成可查的矩阵，并注明同步是单向的、同步的是能力而非逐字复制
-- 根 `AGENTS.md` §3「发版」：本仓库自身的发版流程（工具层视角，与 `template/docs/engineering/releasing.md` 承载同一能力）
-- `template/.github/workflows/build.yml` 新增 `Changelog gate` job：feat/fix 改了代码却没更新 CHANGELOG 就硬拦，非 feat/fix 仅 warning，PR 描述含 `[skip changelog]` 可豁免 —— 把「CHANGELOG 欠账」从事后检查变成合并前的门禁
+- 根 `AGENTS.md` §3「发版」：本仓库自身的发版流程（工具层视角，与 `template/blank/docs/engineering/releasing.md` 承载同一能力）
+- `template/blank/.github/workflows/build.yml` 新增 `Changelog gate` job：feat/fix 改了代码却没更新 CHANGELOG 就硬拦，非 feat/fix 仅 warning，PR 描述含 `[skip changelog]` 可豁免 —— 把「CHANGELOG 欠账」从事后检查变成合并前的门禁
 
 ### Changed
 
-- **产物文档重新分层**：`template/docs/` 下模板预置的 5 项（`architecture.md` / `configuration.md` / `definition-of-done.md` / `releasing.md` / `adr/`）整体移入 **`template/docs/engineering/`**，把 `docs/` 根层让给**项目自己的文档**。原因是原先两类文档压在同一个平面：一类是「判定基准」（受红线与同改矩阵约束、生命周期稳定），一类面向使用者（随版本频繁重写）——读者与可变性正好相反；且 `docs/configuration.md` 与产品文档里几乎必然出现的「配置参考」页会撞名。现规则为「**模板在 `docs/` 下只占 `docs/engineering/` 一个目录**」，机械可判定、无例外。同步改写全部引用（13 个文件）以及 `ci.yml` 的 payload 权威清单 / smoke 正向断言 / 仓库结构自检，并把这条分工写进 `template/README.md` 的目录结构、`template/AGENTS.md` §1 与 `TEMPLATE.md`。CHANGELOG 中指向这些文件的路径一并改为当前位置，避免留下已不存在的路径。
-- `template/AGENTS.md` 把 CHANGELOG 接进工作流 / DoD / 同改矩阵，堵新项目 CHANGELOG 欠账
-- `template/AGENTS.md` §9 补齐发版命名三要素（tag 带 v、release title 跟 tag、CHANGELOG 不带 v）
-- `template/AGENTS.md` §3 新增「发版」小节（前置条件 / 命名 / 顺序）；§4 阻断级红线把 `tag`、`push --tags`、创建 Release 与 `commit` / `push` 并列禁止 —— 此前只禁 commit/push，AI 可辩称「规则没禁止打 tag」
-- `template/AGENTS.md` §8 的「版本号」坐标行由空白「（待填）」改为可填的中性指引（指向唯一版本号事实源，且不许另抄一份）
-- `template/AGENTS.md` §9 发版行改为指向 `docs/engineering/releasing.md`，并补「§8 坐标表指向的版本号事实源已同步」
+- **模板支持多内容变体**：`template/` 下每个子目录是一个变体（`blank` / `general`）；`template-init.sh` 复制源由「整个 `template/`」改为「所选变体目录 `template/<变体>/`」，交互顺序为先问路径再选变体，非交互必须显式 `--template` 与路径（CI 用 `--template blank`）；占位符替换、`.gitkeep` 剪枝、空目录保留、`git init -b main` 行为不变
+- `ci.yml`：结构自检、payload 正向/反向断言、`.gitattributes` 一致性改为对**每个变体**循环校验；死链检查与 smoke 生成改用 `--template blank`；新增「至少存在 blank/general 两个变体」断言
+- 根 `README.md` / `AGENTS.md` / `TEMPLATE.md` / `CONTRIBUTING.md` / `ROADMAP.md` 同步 `template/` → `template/<变体>/` 路径描述与多变体说明
+- **产物文档重新分层**：`template/blank/docs/` 下模板预置的 5 项（`architecture.md` / `configuration.md` / `definition-of-done.md` / `releasing.md` / `adr/`）整体移入 **`template/docs/engineering/`**，把 `docs/` 根层让给**项目自己的文档**。原因是原先两类文档压在同一个平面：一类是「判定基准」（受红线与同改矩阵约束、生命周期稳定），一类面向使用者（随版本频繁重写）——读者与可变性正好相反；且 `docs/configuration.md` 与产品文档里几乎必然出现的「配置参考」页会撞名。现规则为「**模板在 `docs/` 下只占 `docs/engineering/` 一个目录**」，机械可判定、无例外。同步改写全部引用（13 个文件）以及 `ci.yml` 的 payload 权威清单 / smoke 正向断言 / 仓库结构自检，并把这条分工写进 `template/blank/README.md` 的目录结构、`template/blank/AGENTS.md` §1 与 `TEMPLATE.md`。CHANGELOG 中指向这些文件的路径一并改为当前位置，避免留下已不存在的路径。
+- `template/blank/AGENTS.md` 把 CHANGELOG 接进工作流 / DoD / 同改矩阵，堵新项目 CHANGELOG 欠账
+- `template/blank/AGENTS.md` §9 补齐发版命名三要素（tag 带 v、release title 跟 tag、CHANGELOG 不带 v）
+- `template/blank/AGENTS.md` §3 新增「发版」小节（前置条件 / 命名 / 顺序）；§4 阻断级红线把 `tag`、`push --tags`、创建 Release 与 `commit` / `push` 并列禁止 —— 此前只禁 commit/push，AI 可辩称「规则没禁止打 tag」
+- `template/blank/AGENTS.md` §8 的「版本号」坐标行由空白「（待填）」改为可填的中性指引（指向唯一版本号事实源，且不许另抄一份）
+- `template/blank/AGENTS.md` §9 发版行改为指向 `docs/engineering/releasing.md`，并补「§8 坐标表指向的版本号事实源已同步」
 - `template/README.md` 去模板化：删「🤖 AI 编码助手」引导行、收敛「开发约定」，AI 入口移至 `template/CONTRIBUTING.md`
 - 同步该能力到工具层：根 `AGENTS.md` §4 红线（同禁 tag / Release）与 §5 DoD（新增「改了 `template/` 的规则能力已同步根 `AGENTS.md`」判据）、根 `CONTRIBUTING.md` 与 `template/CONTRIBUTING.md` 各增发版入口、`example/` 两份 `AGENTS.md` 各补发版条目
 - 说清「社区健康文件」的位置：`template/docs/engineering/configuration.md` §4 新增「仓库公开时再补的社区健康文件」小节、§6 补一条可选勾选项，`TEMPLATE.md` 第 8 步后加一句指针 —— 模板**有意不预置** `CODE_OF_CONDUCT` / `SECURITY` / `SUPPORT` / `ISSUE_TEMPLATE`（四者都需项目级信息，预置只会得到 TODO 存根），改为在仓库要公开时用 GitHub 的 Insights → Community Standards 一键套官方模板

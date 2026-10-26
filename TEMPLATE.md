@@ -2,7 +2,7 @@
 
 本仓库是项目模板。新项目请用它生成一个**干净、独立、默认分支为 `main`** 的新仓库。
 
-> **仓库分两层**：根目录是「工具层」（本文件、生成脚本、活文档示例），[`template/`](template/) 是「数据层」（项目骨架，会被整目录复制进新项目）。**只有 `template/` 下的内容会进新项目。**
+> **仓库分两层**：根目录是「工具层」（本文件、生成脚本、活文档示例），[`template/`](template/) 是「数据层」（项目骨架，按变体组织，会被整目录复制进新项目）。**只有所选变体（`template/<变体>/`）下的内容会进新项目。**
 
 ## 生成新项目（推荐）
 
@@ -22,7 +22,7 @@ cd my-project
 |------|------|
 | `git clone https://github.com/cocolight/ai-template-repository.git my-project` | 把模板仓库克隆到本地 `my-project/`（此目录只是"蓝本"，用完可删） |
 | `cd my-project` | 进入模板仓库；脚本按当前所在的仓库定位模板根，**必须在仓库内执行** |
-| `./scripts/template-init.sh ../my-app` | 以模板为蓝本，在 `../my-app` 生成新项目：复制 `template/` 下的内容、替换 `{{PROJECT_NAME}}`/`{{YEAR}}`、`git init -b main` 并创建首次提交 |
+| `./scripts/template-init.sh --template blank ../my-app` | 以 `blank` 变体为蓝本，在 `../my-app` 生成新项目：复制 `template/blank/` 下的内容、替换 `{{PROJECT_NAME}}`/`{{YEAR}}`、`git init -b main` 并创建首次提交 |
 
 上面第 ③ 步里的路径就是新项目的位置，**不要**填在模板仓库内部——脚本会拒绝并报错（防止自我复制、误删模板的 `.git`）。
 
@@ -30,7 +30,7 @@ cd my-project
 
 `template-init.sh` 会：
 
-- 复制 [`template/`](template/) 下的全部内容到新路径（**白名单**：工具层文件物理上不在 `template/` 里，因此无需维护排除清单）；复制阶段跳过所有 `.gitkeep` 占位文件（在复制阶段跳过，不是复制后再删）；
+- 复制所选变体目录（如 [`template/blank/`](template/blank/)）下的全部内容到新路径（**白名单**：工具层文件物理上不在任何变体目录里，因此无需维护排除清单）；复制阶段跳过所有 `.gitkeep` 占位文件（在复制阶段跳过，不是复制后再删）；
 - 把 `{{PROJECT_NAME}}` 与 `{{YEAR}}` 占位符替换为实际值；
 - 在新目录 `git init`（默认分支 `main`）并创建首次提交。
 
@@ -40,14 +40,14 @@ cd my-project
 
 ## 手动使用（不用脚本）
 
-1. 把 `template/` 目录下的**全部内容**复制为你新项目的内容（等价于 `cp -a template/. <新项目>/`）；`.gitkeep` 占位文件**不要复制**，但要把 `src/`、`tests/`、`scripts/` 三个目录用 `mkdir` 建出来（否则它们会随占位文件一起消失）；
+1. 把所选变体目录（如 `template/blank/`）下的**全部内容**复制为你新项目的内容（等价于 `cp -a template/blank/. <新项目>/`）；`.gitkeep` 占位文件**不要复制**，但要把 `src/`、`tests/`、`scripts/` 三个目录用 `mkdir` 建出来（否则它们会随占位文件一起消失）；
 2. 全局替换 `{{PROJECT_NAME}}` 与 `{{YEAR}}`；
 3. 填好 `AGENTS.md` §2「常用命令」表与 `README.md` 的 TODO；
 4. `git init -b main && git add -A && git commit -m "chore: initialize project"`。
 
 ## 模板包含什么
 
-以下文件都在 [`template/`](template/) 目录下，生成新项目时会出现在新项目里。
+本仓库提供多个模板变体，位于 `template/` 下各子目录（当前有 `blank` 与 `general`，文件集一致、差异在内容详略；`template-init.sh` 运行时会让你选择变体）。以下文件在每个变体目录（如 [`template/blank/`](template/blank/)）下，生成新项目时会出现在新项目里。
 
 | 文件 | 作用 |
 |------|------|
@@ -90,13 +90,13 @@ cd my-project
 | 5 | `.github/workflows/build.yml` | 把占位 step 换成真实命令（文件里的 TODO 注释已列出要填哪几步） | 本地跑一遍同样的命令，全绿 |
 | 6 | `docs/engineering/architecture.md` | §1 补目录分层；§3 补本项目技术栈的错误处理策略 | 与代码实际结构一致 |
 | 7 | `CONTRIBUTING.md` | 「本地检查」那一行填成本项目的真实命令 | 与 `AGENTS.md` §2 完全一致 |
-| 8 | GitHub 仓库设置（不是文件） | 启用 Actions → 收紧 Workflow permissions → 为 `main` 开分支保护 + required status checks | 见 [docs/engineering/configuration.md](template/docs/engineering/configuration.md) §4 |
+| 8 | GitHub 仓库设置（不是文件） | 启用 Actions → 收紧 Workflow permissions → 为 `main` 开分支保护 + required status checks | 见 [docs/engineering/configuration.md](template/blank/docs/engineering/configuration.md) §4 |
 
 第 8 步的坑：required status checks 的名字**必须等于 workflow 里的 job 名**。`build.yml` 的 job id 是 `test` 且未设 `name`，所以在列表里搜 `test`；一旦改了 job 名，这里要同步改。
 
-**若仓库要公开（可选，不属于上面 8 步）**：GitHub 还推荐一组社区健康文件（行为准则、安全策略、求助渠道、issue 表单），新项目里**没带** —— 这是有意不预置：它们全都要项目级信息（举报渠道、求助渠道、issue 字段），预置只会得到一份写着 TODO 的存根，对私有仓库也没有意义。真要公开时，GitHub 在 **Insights → Community Standards** 会列出缺哪几项，每项都有 **Add** 按钮可直接套官方模板新建。详见 [docs/engineering/configuration.md](template/docs/engineering/configuration.md) §4。
+**若仓库要公开（可选，不属于上面 8 步）**：GitHub 还推荐一组社区健康文件（行为准则、安全策略、求助渠道、issue 表单），新项目里**没带** —— 这是有意不预置：它们全都要项目级信息（举报渠道、求助渠道、issue 字段），预置只会得到一份写着 TODO 的存根，对私有仓库也没有意义。真要公开时，GitHub 在 **Insights → Community Standards** 会列出缺哪几项，每项都有 **Add** 按钮可直接套官方模板新建。详见 [docs/engineering/configuration.md](template/blank/docs/engineering/configuration.md) §4。
 
-**若要做文档站（可选，不属于上面 8 步）**：把仓库的 `docs/` 直接当作静态站发布源时，`docs/engineering/` 会被一并发布 —— 它装的是工程协作文档，不是对外内容；而且发布出去的内容**在公网可访问，即使仓库是私有的**。这只跟构建有关、与文件放哪无关：首选改用 Actions 发布、只上传构建产物，或在站点配置里排除该目录。详见 [docs/engineering/configuration.md](template/docs/engineering/configuration.md) §5。
+**若要做文档站（可选，不属于上面 8 步）**：把仓库的 `docs/` 直接当作静态站发布源时，`docs/engineering/` 会被一并发布 —— 它装的是工程协作文档，不是对外内容；而且发布出去的内容**在公网可访问，即使仓库是私有的**。这只跟构建有关、与文件放哪无关：首选改用 Actions 发布、只上传构建产物，或在站点配置里排除该目录。详见 [docs/engineering/configuration.md](template/blank/docs/engineering/configuration.md) §5。
 
 **开工前先跑这两条自检**：
 
@@ -111,7 +111,7 @@ grep -rnE '\{\{(PROJECT_NAME|YEAR)\}\}' . --exclude-dir=.git
 git ls-files -s scripts/
 ```
 
-环境 / Git / 行尾 / CI / 分支保护 / 文档站的完整核对清单见 [docs/engineering/configuration.md](template/docs/engineering/configuration.md) §6。
+环境 / Git / 行尾 / CI / 分支保护 / 文档站的完整核对清单见 [docs/engineering/configuration.md](template/blank/docs/engineering/configuration.md) §6。
 
 ## 哪些文件不要改
 
@@ -148,29 +148,29 @@ git ls-files -s scripts/
 
 ### 四、不在你的项目里（别去找）
 
-`template/`、`TEMPLATE.md`、`scripts/template-init.sh`、`.github/workflows/ci.yml`、`example/`、`.workbuddy/` 是**工具层**文件，物理上就不在复制源 `template/` 里，生成新项目时被自然排除 —— 新项目里**根本不存在**。
+`template/`、`TEMPLATE.md`、`scripts/template-init.sh`、`.github/workflows/ci.yml`、`example/`、`.workbuddy/` 是**工具层**文件，物理上就不在复制源 `template/<变体>/` 里，生成新项目时被自然排除 —— 新项目里**根本不存在**。
 
 ## 维护模板仓库自身
 
-**复制规则是白名单**：只有 `template/` 下的内容会被复制进新项目。根目录的 `README.md`、`AGENTS.md`、`CONTRIBUTING.md`、`ROADMAP.md`、`CHANGELOG.md`、`LICENSE`、`.gitignore`、`.gitattributes`、`TEMPLATE.md`、`scripts/`、`example/`、`.github/workflows/ci.yml` 全部是工具层，物理上不在 `template/` 里。
+**复制规则是白名单**：只有所选变体（如 `template/blank/`）下的内容会被复制进新项目。根目录的 `README.md`、`AGENTS.md`、`CONTRIBUTING.md`、`ROADMAP.md`、`CHANGELOG.md`、`LICENSE`、`.gitignore`、`.gitattributes`、`TEMPLATE.md`、`scripts/`、`example/`、`.github/workflows/ci.yml` 全部是工具层，物理上不在任何变体目录里。
 
 因此：
 
 - 新增「仅供模板自用」的文件 → **直接放仓库根，不用改脚本**；
-- 新增「要进新项目」的文件 → **直接放 `template/` 下，不用改脚本**；
+- 新增「要进新项目」的文件 → **直接放对应变体目录（如 `template/blank/`）下，不用改脚本**；
 - 维护成本为零：不存在需要同步的排除清单。
 
 **必须保持的仓库性质**：
 
 | 性质 | 原因 | 检查 |
 |------|------|------|
-| 通用文件不绑定具体技术栈 | 本模板对所有技术栈通用；语言 / 工具的具体示例**只放 `example/`**，不写进 `template/` 下的任何文件。通用文件里只写"该填什么"，不写"用什么填" | 见下方"通用文件技术栈中性自检" |
-| 库内一律 LF | Windows 检出脚本变 CRLF 会导致 `bad interpreter` | `git check-attr eol -- scripts/template-init.sh` → `eol: lf`<br>`git check-attr eol -- template/README.md` → `eol: lf` |
-| 两份 `.gitattributes` 内容一致 | 根那份**递归覆盖** `template/**`（已实测），内容一致时属性无歧义 | `diff .gitattributes template/.gitattributes` |
+| 通用文件不绑定具体技术栈 | 本模板对所有技术栈通用；语言 / 工具的具体示例**只放 `example/`**，不写进任一变体目录（如 `template/blank/`）下的任何文件。通用文件里只写"该填什么"，不写"用什么填" | 见下方"通用文件技术栈中性自检" |
+| 库内一律 LF | Windows 检出脚本变 CRLF 会导致 `bad interpreter` | `git check-attr eol -- scripts/template-init.sh` → `eol: lf`<br>`git check-attr eol -- template/blank/README.md` → `eol: lf` |
+| 两份 `.gitattributes` 内容一致 | 根那份**递归覆盖** `template/**`（已实测），内容一致时属性无歧义 | `diff .gitattributes template/blank/.gitattributes` |
 | `scripts/*.sh` 索引模式 `100755` | 否则 CI 的 `./scripts/template-init.sh` 报 `Permission denied`（Windows 上 `core.filemode=false`，本地测不出） | `git ls-files -s scripts/` |
-| `template/` 下索引模式全为 `100644` | 可执行位会跟着进新项目 | `git ls-files -s template/ \| grep -v '^100644 '` → 无输出 |
-| `build.yml` 只在 `template/` 下 | 留在根上会让本仓库跑一个「只打 warning」的空壳 job，门禁形同虚设 | `ls .github/workflows/` → 只有 `ci.yml` |
-| 交付文件里不写占位符字面 | 生成新项目时，**`template/` 下的所有文件**都会参与占位符替换，文档里写占位符字面会被改写 | 见下方"改完模板后的自检" |
+| `template/**` 下索引模式全为 `100644` | 可执行位会跟着进新项目 | `git ls-files -s template/ \| grep -v '^100644 '` → 无输出 |
+| `build.yml` 只在 `template/<变体>/` 下 | 留在根上会让本仓库跑一个「只打 warning」的空壳 job，门禁形同虚设 | `ls .github/workflows/` → 只有 `ci.yml` |
+| 交付文件里不写占位符字面 | 生成新项目时，**任一变体目录（如 `template/blank/`）下的所有文件**都会参与占位符替换，文档里写占位符字面会被改写 | 见下方"改完模板后的自检" |
 
 修复权限位丢失：
 
@@ -178,21 +178,23 @@ git ls-files -s scripts/
 git update-index --chmod=+x scripts/template-init.sh
 ```
 
-**通用文件技术栈中性自检**（`template/` 下的文件用于指导任何技术栈的新项目，不得出现具体语言 / 工具名；示例一律放 `example/`）：
+**通用文件技术栈中性自检**（`template/<变体>/` 下的文件用于指导任何技术栈的新项目，不得出现具体语言 / 工具名；示例一律放 `example/`）：
 
 ```bash
 # 先确认待扫路径存在 —— grep 对不存在的路径会返回退出码 2，
 # 但 `|| echo OK` 照样执行，路径写错时这个检查会「假绿」
-for p in template/README.md template/AGENTS.md template/ROADMAP.md \
-         template/CONTRIBUTING.md template/CHANGELOG.md template/docs \
-         template/.github/workflows/build.yml; do
-  [ -e "$p" ] || { echo "中性自检路径不存在：$p"; exit 1; }
-done
+for v in blank general; do
+  for p in template/$v/README.md template/$v/AGENTS.md template/$v/ROADMAP.md \
+           template/$v/CONTRIBUTING.md template/$v/CHANGELOG.md template/$v/docs \
+           template/$v/.github/workflows/build.yml; do
+    [ -e "$p" ] || { echo "中性自检路径不存在：$p"; exit 1; }
+  done
 
-grep -rn -i -e cargo -e pyproject -e pytest -e ruff -e "npm " -e "pip " \
-  template/README.md template/AGENTS.md template/ROADMAP.md template/CONTRIBUTING.md \
-  template/CHANGELOG.md template/docs template/.github/workflows/build.yml \
-  || echo "OK: 通用文件保持技术栈中性"
+  grep -rn -i -e cargo -e pyproject -e pytest -e ruff -e "npm " -e "pip " \
+    template/$v/README.md template/$v/AGENTS.md template/$v/ROADMAP.md template/$v/CONTRIBUTING.md \
+    template/$v/CHANGELOG.md template/$v/docs template/$v/.github/workflows/build.yml \
+    || echo "OK: 通用文件（变体 $v）保持技术栈中性"
+done
 ```
 
 > 扫描范围**只限 `template/`**。仓库根的 `AGENTS.md` §2 会列出本仓库 CI 的真实命令（`shellcheck` / `pytest` / `cargo` 等），那是正当的，不该被中性规则约束。
@@ -202,7 +204,7 @@ grep -rn -i -e cargo -e pyproject -e pytest -e ruff -e "npm " -e "pip " \
 ```bash
 sh -n scripts/template-init.sh                     # 语法
 T=$(mktemp -d)
-./scripts/template-init.sh "$T/newproj"            # 真实生成
+./scripts/template-init.sh --template blank "$T/newproj"            # 真实生成
 grep -rnE '\{\{(PROJECT_NAME|YEAR)\}\}' "$T/newproj" --exclude-dir=.git || echo "OK: 产物无残留占位符"
 find "$T/newproj" -name '.gitkeep' -not -path '*/.git/*' | wc -l  # 期望 0
 ls -d "$T/newproj"/src "$T/newproj"/tests "$T/newproj"/scripts  # 期望三个目录都在
