@@ -11,6 +11,8 @@
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-28
+
 ### Added
 
 - `template/.github/pull_request_template.md`：PR 描述骨架（做了什么 / 关联 ROADMAP 行 / 检查项，含 CHANGELOG）
