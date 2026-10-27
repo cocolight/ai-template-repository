@@ -43,6 +43,8 @@ jobs:
 
           # --- 白名单反向断言：工具层文件不得进入产物 ---
           # 复制源是 template/，这些文件物理上就不在复制源里。
+          # 注意：不要把 .github/pull_request_template.md 加进本清单 ——
+          # 产物里有 payload 自带的同名文件，加了必假阳。
           for f in template TEMPLATE.md example scripts/template-init.sh .github/workflows/ci.yml; do
             [ ! -e "$DST/$f" ] || { echo "产物泄露了工具层文件：$f"; exit 1; }
           done
@@ -93,6 +95,7 @@ jobs:
             [ ! -e "template/$f" ] || { echo "template/ 里混入了工具层文件：$f"; exit 1; }
           done
           [ -e TEMPLATE.md ] || { echo "根 TEMPLATE.md 丢失"; exit 1; }
+          [ -e .github/pull_request_template.md ] || { echo "根 .github/pull_request_template.md 丢失"; exit 1; }
           [ -e example/README.md ] || { echo "example/ 丢失"; exit 1; }
           # build.yml 必须只在 template/ 下（留在根上会让本仓库跑一个空壳 job）
           [ ! -e .github/workflows/build.yml ] || { echo "build.yml 仍在根 .github/workflows/，必须移入 template/"; exit 1; }

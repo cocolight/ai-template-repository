@@ -49,8 +49,10 @@ ai-template-repository/
 ├── LICENSE              # 本仓库许可证
 ├── scripts/
 │   └── template-init.sh # 项目生成器
-├── .github/workflows/
-│   └── ci.yml           # 校验脚本 + 跑 example/ 的 lint 与测试
+├── .github/
+│   ├── workflows/
+│   │   └── ci.yml       # 校验脚本 + 跑 example/ 的 lint 与测试
+│   └── pull_request_template.md  # PR 描述骨架（工具层版）
 ├── example/             # 填好的示例项目（Python / Rust），仅供参照，不会进新项目
 └── template/            # ★ 项目骨架，整目录复制进新项目
     ├── README.md / AGENTS.md / ROADMAP.md / CONTRIBUTING.md / CHANGELOG.md
