@@ -16,6 +16,7 @@
 - 根 `AGENTS.md` §3「发版」：本仓库自身的发版流程（工具层视角，与 `template/docs/engineering/releasing.md` 承载同一能力）
 - `template/.github/workflows/build.yml` 新增 `Changelog gate` job：feat/fix 改了代码却没更新 CHANGELOG 就硬拦，非 feat/fix 仅 warning，PR 描述含 `[skip changelog]` 可豁免 —— 把「CHANGELOG 欠账」从事后检查变成合并前的门禁
 - `template/THIRD-PARTY.md`：第三方依赖许可证记录文档 —— 每引入一个直接依赖须登记许可证（SPDX 标识）、用途与是否随分发；接入 `template/AGENTS.md` §8 坐标表（新增「第三方依赖许可证 → THIRD-PARTY.md」一行）与 `template/docs/engineering/architecture.md` §5（依赖引入规则新增登记要求），并在 `template/README.md` 许可证节加指针。补齐「引入开源工具无许可证记录文档」的缺口
+- 新增「交付物内容边界」纪律：根 `AGENTS.md` §4 红线第 10 条、生成物 `template/AGENTS.md` §4 提醒级第 9 条，以及 `template/.github/pull_request_template.md` 提示框，约束 AI 不得在 PR 描述 / CHANGELOG / 文档 / 代码注释等面向读者的交付物中夹带与项目无关的本地环境 / 工具链 / 沙箱 / 认证等 Agent 运行问题或 AI 执行过程等元信息
 
 ### Changed
 
