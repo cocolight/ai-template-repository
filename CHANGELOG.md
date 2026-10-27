@@ -6,6 +6,9 @@
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 与
 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+> 条目一行说清「改了什么」；涉及取舍或非显而易见的决定，条目末尾用「（理由：…）」附一句 ——
+> 本仓库不维护工具层 ADR，重大决策写进条目或 `ROADMAP.md` 的「已知取舍」。
+
 ## [Unreleased]
 
 ### Added
@@ -17,6 +20,7 @@
 - `template/.github/workflows/build.yml` 新增 `Changelog gate` job：feat/fix 改了代码却没更新 CHANGELOG 就硬拦，非 feat/fix 仅 warning，PR 描述含 `[skip changelog]` 可豁免 —— 把「CHANGELOG 欠账」从事后检查变成合并前的门禁
 - `template/THIRD-PARTY.md`：第三方依赖许可证记录文档 —— 每引入一个直接依赖须登记许可证（SPDX 标识）、用途与是否随分发；接入 `template/AGENTS.md` §8 坐标表（新增「第三方依赖许可证 → THIRD-PARTY.md」一行）与 `template/docs/engineering/architecture.md` §5（依赖引入规则新增登记要求），并在 `template/README.md` 许可证节加指针。补齐「引入开源工具无许可证记录文档」的缺口
 - 新增「交付物内容边界」纪律：根 `AGENTS.md` §4 红线第 10 条、生成物 `template/AGENTS.md` §4 提醒级第 9 条，以及 `template/.github/pull_request_template.md` 提示框，约束 AI 不得在 PR 描述 / CHANGELOG / 文档 / 代码注释等面向读者的交付物中夹带与项目无关的本地环境 / 工具链 / 沙箱 / 认证等 Agent 运行问题或 AI 执行过程等元信息
+- 工具层对齐 template 能力：① 根 `ROADMAP.md` 头部同步归档规则（done/dropped 约 20 条移入 docs/archive/）；② 根 `CHANGELOG.md` 头部「条目附理由」小决策留痕约定；③ 根 `AGENTS.md` §4 红线分阻断级 / 提醒级两级（条文与编号不变）、§1 补「事实以源码为准」；④ 新增根 `.github/pull_request_template.md`（工具层 PR 骨架，含交付物内容边界提醒），同步 README 目录结构、TEMPLATE.md「维护模板仓库自身」与「不在你的项目里」、ci.yml 仓库结构自检（有意不把根 PR 模板加入产物反向断言清单——产物里 payload 自带同名文件，加了必假阳）（理由：「template/ 更新后能力必须同步回根仓库」是本仓库核心约定，此前加固只部分同步；有意不同步项——坐标表：根 §1 入口 + §8 矩阵 + §3 发版注已承担坐标职能，再立表反而违反单一事实源；腐化信号：工具层腐化形态是文档漂移与清单失配，已由同改矩阵 + ci.yml 五道断言机械兜住；就绪门槛：工具层无「搭建」概念；根 THIRD-PARTY.md：工具层无随分发依赖，CI Actions 由平台执行，且同名文件易与 payload 混淆）
 - template 加固四项：① `template/ROADMAP.md` 头部新增归档规则（`done` / `dropped` 累计约 20 条时把最旧的移入 `docs/archive/`，防必读链随时间膨胀）；② `TEMPLATE.md` 开工清单补 `AGENTS.md` §8 坐标表为硬前置并加「就绪门槛」（§2/§8/build.yml 未填实前 AI 不得声称已验证）；③ `template/docs/engineering/architecture.md` §2 新增分层 / 依赖方向门禁要求、新增 §7「腐化信号与重构触发」（跨层调用 / 三处重复 / 职责边界模糊 / 测试与实现脱节即触发重构评估）；④ 写作纪律与小决策留痕：`template/AGENTS.md` §4 提醒级第 10 条与根 `AGENTS.md` §4 第 11 条（文档写给人看），`template/CHANGELOG.md` 头部「条目附理由」约定，`template/docs/engineering/definition-of-done.md` 同步
 
 ### Changed

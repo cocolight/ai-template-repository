@@ -152,11 +152,11 @@ git ls-files -s scripts/
 
 ### 四、不在你的项目里（别去找）
 
-`template/`、`TEMPLATE.md`、`scripts/template-init.sh`、`.github/workflows/ci.yml`、`example/`、`.workbuddy/` 是**工具层**文件，物理上就不在复制源 `template/` 里，生成新项目时被自然排除 —— 新项目里**根本不存在**。
+`template/`、`TEMPLATE.md`、`scripts/template-init.sh`、`.github/workflows/ci.yml`、`example/`、`.workbuddy/` 是**工具层**文件，物理上就不在复制源 `template/` 里，生成新项目时被自然排除 —— 新项目里**根本不存在**。根 `.github/pull_request_template.md` 也是工具层（本仓库自己的 PR 骨架）；注意产物里的 `.github/pull_request_template.md` 是 `template/` 下那份 payload，**不是**它。
 
 ## 维护模板仓库自身
 
-**复制规则是白名单**：只有 `template/` 下的内容会被复制进新项目。根目录的 `README.md`、`AGENTS.md`、`CONTRIBUTING.md`、`ROADMAP.md`、`CHANGELOG.md`、`LICENSE`、`.gitignore`、`.gitattributes`、`TEMPLATE.md`、`scripts/`、`example/`、`.github/workflows/ci.yml` 全部是工具层，物理上不在 `template/` 里。
+**复制规则是白名单**：只有 `template/` 下的内容会被复制进新项目。根目录的 `README.md`、`AGENTS.md`、`CONTRIBUTING.md`、`ROADMAP.md`、`CHANGELOG.md`、`LICENSE`、`.gitignore`、`.gitattributes`、`TEMPLATE.md`、`scripts/`、`example/`、`.github/workflows/ci.yml`、`.github/pull_request_template.md` 全部是工具层，物理上不在 `template/` 里。
 
 因此：
 
