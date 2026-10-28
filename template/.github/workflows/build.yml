@@ -19,6 +19,15 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # 上下文预算：AGENTS.md 是每次 AI 会话开工必读的常驻文档，体积失控即上下文预算失控。
+      # 阈值 200 行，与 AGENTS.md §4「常驻上下文文档控体积」条目一致。
+      - name: AGENTS.md 行数断言（≤200）
+        run: |
+          set -eu
+          n=$(wc -l < AGENTS.md)
+          echo "AGENTS.md: $n 行"
+          [ "$n" -le 200 ] || { echo "::error::AGENTS.md 超过 200 行（当前 $n 行）。超限先拆：详细内容下沉 docs/engineering/ 详细版，AGENTS.md 只留入口指针与红线"; exit 1; }
+
       # TODO: 按本项目技术栈补全以下三步（缺任一步，门禁即形同虚设）：
       #   1) 安装依赖
       #   2) lint / 格式检查

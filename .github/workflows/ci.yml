@@ -101,6 +101,18 @@ jobs:
           [ ! -e .github/workflows/build.yml ] || { echo "build.yml 仍在根 .github/workflows/，必须移入 template/"; exit 1; }
           [ -e .github/workflows/ci.yml ] || { echo "根 ci.yml 丢失"; exit 1; }
 
+      - name: 常驻上下文档体积断言
+        # AGENTS.md 是每次 AI 会话开工必读的常驻文档，体积即上下文预算。
+        # 阈值 200 行，与两份 AGENTS.md §4「常驻上下文文档控体积」条目一致；
+        # 超限先拆：细节下沉详细文档，AGENTS.md 只留入口指针与红线。
+        run: |
+          set -eu
+          for f in AGENTS.md template/AGENTS.md; do
+            n=$(wc -l < "$f")
+            echo "$f: $n 行"
+            [ "$n" -le 200 ] || { echo "$f 超过 200 行（当前 $n 行）：拆详细版下沉详细文档，AGENTS.md 只留入口与红线"; exit 1; }
+          done
+
       - name: 开工清单与 payload 一致性
         # ROADMAP 第 4/6 项：TEMPLATE.md 的「新项目开工清单」与 template/ 实际内容
         # 需保持一致。此前只靠人工核对，改名/删文件/加文件都不会被发现。
