@@ -267,6 +267,9 @@ jobs:
         run: |
           ruff check .
           ruff format --check .
+      - name: 依赖方向门禁 (import-linter)
+        # 分层合同见 pyproject.toml [tool.importlinter]，是 architecture.md §2 的可抄样板
+        run: lint-imports
       - name: Pytest
         run: pytest
 
