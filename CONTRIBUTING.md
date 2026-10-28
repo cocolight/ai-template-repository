@@ -44,6 +44,8 @@ find "$T/proj" -maxdepth 1 -mindepth 1 -not -name '.git' | sort
 
 期望：产物里**没有** `template/`、`TEMPLATE.md`、`example/`、`scripts/template-init.sh`、`.github/workflows/ci.yml`，但**有** `README.md`、`AGENTS.md`、`LICENSE`、`.github/workflows/build.yml`，且无 `.gitkeep`、保留 `src/` `tests/` `scripts/` 三个目录。
 
+CI 对 `example/` 的 lint/test 按改动范围触发：PR 只跑改动涉及的示例（改 `ci.yml` 本身则两个都跑），push 到 `main` 全量。
+
 ## 发版
 
 本仓库自身也发版（已有 `v0.1.0`）。发版**单独走一个 PR**，不要混进功能 PR：改根 `CHANGELOG.md` 的 `[Unreleased]` → 合入 `main` → 在 `main` 上打 tag → 建 Release。

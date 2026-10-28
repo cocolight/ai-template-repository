@@ -191,8 +191,55 @@ jobs:
           [ "$n" -eq 0 ] || { echo "产物内存在 $n 处死链："; cat "$RUNNER_TEMP/deadlinks"; exit 1; }
           echo "产物内文档引用全部可达"
 
+  # 变更检测：按改动范围收窄 example 检查的调用时机（断言与检查命令一字未动）。
+  # 规则（fail-safe，拿不准就跑）：
+  #   push（仅 main）→ 两个示例全量（合并后兜底，防「没改但本来就坏」漏检）
+  #   PR → 只跑改动涉及的示例；ci.yml 自身有改动 → 两个都跑（验证新检查逻辑）
+  # 下游用 != 'false' 守卫：只有显式判定「没改」才跳过；本 job 失败 / 无输出 → 照跑。
+  # 跳过的 job 报 Success（GitHub 官方语义），不阻塞分支保护的 required check。
+  changes:
+    name: Change detection
+    runs-on: ubuntu-24.04
+    outputs:
+      python: ${{ steps.detect.outputs.python }}
+      rust: ${{ steps.detect.outputs.rust }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: 判定示例检查范围
+        id: detect
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -eu
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            echo "python=true" >> "$GITHUB_OUTPUT"
+            echo "rust=true" >> "$GITHUB_OUTPUT"
+            echo "push 事件（main），示例全量检查"
+            exit 0
+          fi
+          # 与 Changelog gate 同基准：merge-base，不用 base.sha 直接 diff
+          # （base.sha 随 main 前进，会把 main 上的改动误算进 PR）
+          MERGE_BASE="$(git merge-base "$BASE_SHA" "$HEAD_SHA")"
+          CHANGED="$(git diff --name-only "$MERGE_BASE" "$HEAD_SHA")"
+          python=false
+          rust=false
+          if printf '%s\n' "$CHANGED" | grep -q '^example/python/'; then python=true; fi
+          if printf '%s\n' "$CHANGED" | grep -q '^example/rust-slint/'; then rust=true; fi
+          # 检查逻辑自身变了 → 两个示例都跑
+          if printf '%s\n' "$CHANGED" | grep -q '^\.github/workflows/ci\.yml$'; then python=true; rust=true; fi
+          echo "python=$python" >> "$GITHUB_OUTPUT"
+          echo "rust=$rust" >> "$GITHUB_OUTPUT"
+          echo "改动文件："; printf '%s\n' "$CHANGED"
+          echo "→ python=$python rust=$rust"
+
   python-example:
     name: Python example (ruff + pytest)
+    needs: changes
+    # 只有显式 false 才跳过（见 changes job 的 fail-safe 说明）；拿不准 → 照跑。
+    if: needs.changes.outputs.python != 'false'
     runs-on: ubuntu-24.04
     defaults:
       run:
@@ -213,6 +260,9 @@ jobs:
 
   rust-example:
     name: Rust example (fmt + clippy + test)
+    needs: changes
+    # 只有显式 false 才跳过（见 changes job 的 fail-safe 说明）；拿不准 → 照跑。
+    if: needs.changes.outputs.rust != 'false'
     runs-on: ubuntu-24.04
     defaults:
       run:
