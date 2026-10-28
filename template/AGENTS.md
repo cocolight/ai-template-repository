@@ -82,7 +82,7 @@
 详见 `docs/engineering/definition-of-done.md`。任一功能完成须同时满足：
 
 - [ ] `ROADMAP.md` 该行「验收标准」全部满足
-- [ ] 新增 / 更新对应测试，全量测试通过
+- [ ] 新增 / 更新对应测试符合测试质量基线（断言行为而非实现、测试名说清场景、拒绝空转断言），全量测试通过
 - [ ] Lint 与格式化检查通过
 - [ ] 相关文档（README / AGENTS / architecture / ADR / CHANGELOG）同步更新
 - [ ] `CHANGELOG.md` 的 `[Unreleased]` 已记录本次改动
