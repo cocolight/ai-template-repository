@@ -28,6 +28,20 @@ jobs:
           echo "AGENTS.md: $n 行"
           [ "$n" -le 200 ] || { echo "::error::AGENTS.md 超过 200 行（当前 $n 行）。超限先拆：详细内容下沉 docs/engineering/ 详细版，AGENTS.md 只留入口指针与红线"; exit 1; }
 
+      # 发布说明取自 CHANGELOG 版本节，条目即 Release 正文。
+      # 单条 ≤ 150 字符，防多事项巨型长条目；写法约定见 CHANGELOG.md 头部注记。
+      - name: CHANGELOG 条目体积断言（单条 ≤150 字符）
+        run: |
+          set -eu
+          grep '^[[:space:]]*- ' CHANGELOG.md | {
+            bad=0
+            while IFS= read -r line; do
+              n=$(printf '%s' "$line" | LC_ALL=C.UTF-8 wc -m)
+              [ "$n" -le 150 ] || { echo "::error::条目超 150 字符（当前 $n 字符）：$line"; bad=1; }
+            done
+            [ "$bad" -eq 0 ]
+          }
+
       # TODO: 按本项目技术栈补全以下三步（缺任一步，门禁即形同虚设）：
       #   1) 安装依赖
       #   2) lint / 格式检查
