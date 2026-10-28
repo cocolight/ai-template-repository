@@ -57,7 +57,7 @@ cd my-project
 | `CONTRIBUTING.md` | 分支 / 提交 / PR 规范 |
 | `CHANGELOG.md` | 变更记录骨架（Keep a Changelog） |
 | `docs/engineering/architecture.md` | 架构与代码约定 |
-| `docs/engineering/configuration.md` | 仓库与项目配置说明（环境 / Git / 行尾 / CI / 分支保护 / 文档站） |
+| `docs/engineering/configuration.md` | 仓库与项目配置说明（环境 / Git / 行尾 / CI / 分支保护 / 依赖安全 / 文档站） |
 | `docs/engineering/definition-of-done.md` | 完成定义（DoD） |
 | `docs/engineering/releasing.md` | 发版流程：前置条件、命名规则（tag / Release title / CHANGELOG 版本节）、常见错误 |
 | `docs/engineering/adr/` | 架构决策记录（含模板与首条记录） |
@@ -99,7 +99,7 @@ cd my-project
 
 **若仓库要公开（可选，不属于上面 8 步）**：GitHub 还推荐一组社区健康文件（行为准则、安全策略、求助渠道、issue 表单），新项目里**没带** —— 这是有意不预置：它们全都要项目级信息（举报渠道、求助渠道、issue 字段），预置只会得到一份写着 TODO 的存根，对私有仓库也没有意义。真要公开时，GitHub 在 **Insights → Community Standards** 会列出缺哪几项，每项都有 **Add** 按钮可直接套官方模板新建。详见 [docs/engineering/configuration.md](template/docs/engineering/configuration.md) §4。
 
-**若要做文档站（可选，不属于上面 8 步）**：把仓库的 `docs/` 直接当作静态站发布源时，`docs/engineering/` 会被一并发布 —— 它装的是工程协作文档，不是对外内容；而且发布出去的内容**在公网可访问，即使仓库是私有的**。这只跟构建有关、与文件放哪无关：首选改用 Actions 发布、只上传构建产物，或在站点配置里排除该目录。详见 [docs/engineering/configuration.md](template/docs/engineering/configuration.md) §5。
+**若要做文档站（可选，不属于上面 8 步）**：把仓库的 `docs/` 直接当作静态站发布源时，`docs/engineering/` 会被一并发布 —— 它装的是工程协作文档，不是对外内容；而且发布出去的内容**在公网可访问，即使仓库是私有的**。这只跟构建有关、与文件放哪无关：首选改用 Actions 发布、只上传构建产物，或在站点配置里排除该目录。详见 [docs/engineering/configuration.md](template/docs/engineering/configuration.md) §6。
 
 **开工前先跑这两条自检**：
 
@@ -114,7 +114,7 @@ grep -rnE '\{\{(PROJECT_NAME|YEAR)\}\}' . --exclude-dir=.git
 git ls-files -s scripts/
 ```
 
-环境 / Git / 行尾 / CI / 分支保护 / 文档站的完整核对清单见 [docs/engineering/configuration.md](template/docs/engineering/configuration.md) §6。
+环境 / Git / 行尾 / CI / 分支保护 / 依赖安全 / 文档站的完整核对清单见 [docs/engineering/configuration.md](template/docs/engineering/configuration.md) §7。
 
 ## 哪些文件不要改
 

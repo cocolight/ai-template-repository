@@ -1,6 +1,6 @@
 # 仓库与项目配置说明
 
-本文面向**由本模板生成的项目**，说明代码之外还需要配置什么：环境、Git、行尾与权限、CI、分支保护、文档站。
+本文面向**由本模板生成的项目**，说明代码之外还需要配置什么：环境、Git、行尾与权限、CI、分支保护、依赖安全、文档站。
 AI 的行为规则见 [AGENTS.md](../../AGENTS.md)。
 
 ## 1. 环境要求
@@ -108,7 +108,32 @@ git update-index --chmod=+x scripts/x.sh       # 修复
 
 **要补时不必手写**：GitHub 在 **Insights → Community Standards**（仓库主页 → Insights → 左栏 Community Standards）会列出还缺哪几项，每项都有 **Add** 按钮，可直接套官方模板新建。该清单只对公开仓库显示。
 
-## 5. 文档站与静态发布
+## 5. 依赖更新与漏洞防护
+
+许可证登记（`../../THIRD-PARTY.md`）解决「能不能用」，本节解决「用得安不安全」：要开的开关，以及漏洞出现后怎么响应。
+
+### 平台侧开关
+
+路径：Settings → Code security and analysis。
+
+| 开关 | 作用 | 公开仓库 | 私有仓库 |
+|------|------|---------|---------|
+| Dependabot alerts | 依赖有已知漏洞时告警 | 免费 | 免费 |
+| Dependabot security updates | 自动开 PR 把漏洞依赖升到安全版本 | 免费 | 免费 |
+| Dependabot version updates | 定期开 PR 升级过期依赖（需 `dependabot.yml`） | 免费 | 免费 |
+| Secret scanning + push protection | 检出并拦截提交 / 推送里的密钥 | 免费 | 需付费方案 |
+| Code scanning | 静态安全扫描（默认设置用 CodeQL） | 免费 | 需付费方案 |
+
+Dependabot 三项在所有仓库免费：漏洞告警与自动修复建议无条件开启，版本更新按需。
+Secret scanning 与代码扫描在私有仓库要付费方案，按需取舍。版本更新也可用第三方 bot（如 Renovate）替代，与 Dependabot 二选一，同时开会产生重复 PR。
+
+### 漏洞响应约定
+
+- 收到漏洞告警先查 `../../THIRD-PARTY.md` 的「是否随分发」列：随分发的优先处理。
+- 升级依赖后同步更新该表的「版本」列，登记与实际不符等于没登记。
+- 修复记入 `CHANGELOG.md`；已发版的库按 [`releasing.md`](releasing.md) 评估是否发补丁版本。
+
+## 6. 文档站与静态发布
 
 新项目若要做文档站，有一处与**目录布局**直接相关的坑：把仓库的 `docs/` 直接当作发布源时，`docs/engineering/` 会被**一并发布** —— 它装的是工程协作文档（架构、配置、完成定义、发版、ADR），受众是协作者，不是对外读者。
 
@@ -119,7 +144,7 @@ git update-index --chmod=+x scripts/x.sh       # 修复
 
 两种都只是**构建层**的事，与文件放在哪无关 —— 不要为了避开发布而把这些文档挪进点目录：那会连它们的可见性一起丢掉。
 
-## 6. 落地配置清单
+## 7. 落地配置清单
 
 - [ ] 填写 `AGENTS.md` §2「常用命令」表（AI 依赖它）
 - [ ] 填写 `README.md` 的安装 / 运行 / 测试命令
@@ -129,10 +154,11 @@ git update-index --chmod=+x scripts/x.sh       # 修复
 - [ ] 确认 shell 脚本索引模式为 `100755`
 - [ ] GitHub：启用 Actions、收紧 Workflow permissions
 - [ ] GitHub：为 `main` 开启分支保护 + required status checks
+- [ ] GitHub：开启 Dependabot 漏洞告警与自动修复 —— 见 §5「依赖更新与漏洞防护」
 - [ ] （可选，仅仓库要公开时）补齐社区健康文件 —— 见 §4「仓库公开时再补的社区健康文件」
-- [ ] （可选，仅做文档站时）确认发布源不会带上 `docs/engineering/` —— 见 §5「文档站与静态发布」
+- [ ] （可选，仅做文档站时）确认发布源不会带上 `docs/engineering/` —— 见 §6「文档站与静态发布」
 
-## 7. 常见问题
+## 8. 常见问题
 
 | 现象 | 原因 | 处理 |
 |------|------|------|
