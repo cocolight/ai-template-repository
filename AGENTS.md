@@ -89,6 +89,7 @@ Python / Rust 示例的真实检查命令见 `ci.yml` 的 `python-example` / `ru
 - [ ] 产物无残留 `{{PROJECT_NAME}}` / `{{YEAR}}` 占位符，默认分支为 `main`
 - [ ] 根 `.gitattributes` 与 `template/.gitattributes` 内容一致
 - [ ] `shellcheck scripts/*.sh` 通过
+- [ ] 改动了 `example/` 的测试符合测试质量基线：断言行为而非实现、测试名说清场景、拒绝空转断言（详见 `template/docs/engineering/definition-of-done.md`）
 - [ ] 改动了 `template/` 就已同步 `TEMPLATE.md` 中受影响的路径描述
 - [ ] 改动了 `template/` 的**规则或能力**（红线 / DoD / 工作流 / 矩阵），已同步到根 `AGENTS.md` 的对应章节 —— 见 §8
 - [ ] `CHANGELOG.md` 的 `Unreleased` 已记录
