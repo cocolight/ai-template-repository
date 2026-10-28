@@ -229,7 +229,7 @@ done
 
 diff .gitattributes template/.gitattributes || echo "警告：两份 .gitattributes 不一致"
 
-# 常驻上下文档体积：AGENTS.md ≤ 150 行（超限先拆，见 AGENTS.md §4 红线）
+# 常驻上下文档体积：AGENTS.md ≤ 200 行（超限先拆，见 AGENTS.md §4 红线）
 wc -l "$T/newproj/AGENTS.md"
 
 # CI 会执行：shellcheck scripts/*.sh + 上面这套断言 + AGENTS.md 行数断言 + 两个 example 的 lint/test

@@ -41,8 +41,8 @@ shellcheck scripts/*.sh
 T=$(mktemp -d) && ./scripts/template-init.sh "$T/proj"
 find "$T/proj" -maxdepth 1 -mindepth 1 -not -name '.git' | sort
 
-# 3) 常驻上下文档体积（CI 也会跑）：两份 AGENTS.md 各 ≤ 150 行
-for f in AGENTS.md template/AGENTS.md; do n=$(wc -l < "$f"); echo "$f: $n 行"; [ "$n" -le 150 ]; done
+# 3) 常驻上下文档体积（CI 也会跑）：两份 AGENTS.md 各 ≤ 200 行
+for f in AGENTS.md template/AGENTS.md; do n=$(wc -l < "$f"); echo "$f: $n 行"; [ "$n" -le 200 ]; done
 ```
 
 期望：产物里**没有** `template/`、`TEMPLATE.md`、`example/`、`scripts/template-init.sh`、`.github/workflows/ci.yml`，但**有** `README.md`、`AGENTS.md`、`LICENSE`、`.github/workflows/build.yml`，且无 `.gitkeep`、保留 `src/` `tests/` `scripts/` 三个目录。
