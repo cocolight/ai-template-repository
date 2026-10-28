@@ -17,6 +17,7 @@
 ```bash
 ruff check .
 ruff format --check .
+lint-imports
 pytest
 ```
 

@@ -13,6 +13,8 @@
 
 ### 新增
 
+- example/python 示范依赖方向门禁：拆成入口 / 业务逻辑 / 基础设施三层（main / domain / storage），import-linter 分层合同与纯净合同接入 CI，`architecture.md` §2 加坐标指向（理由：§2 只写了「做成门禁」没有可抄样板，落地全靠读者自行选型）
+
 - 常驻上下文体积阈值进 CI：`AGENTS.md` 各不超过 200 行（根 `ci.yml` 断言工具层与 `template/` 两份，`build.yml` 断言生成物那份），超限先拆详细版下沉详细文档；规则写入两份 `AGENTS.md` §4 提醒级红线（理由：`AGENTS.md` 是每次 AI 会话开工必读的常驻文档，体积失控即上下文预算失控，此前无机械约束；阈值取 200 行——模板骨架 125 行，实际项目填实约需再加 20 行，150 会在填实阶段误伤，200 仍拦得住手册化膨胀）
 
 - `template/docs/engineering/configuration.md` 新增 §5「依赖更新与漏洞防护」（原 §5–§7 顺延为 §6–§8，`TEMPLATE.md` 引用同步）：平台侧开关清单与漏洞响应约定；`THIRD-PARTY.md` 补版本同步与漏洞响应两条登记规则，`architecture.md` §5 挂接（理由：许可证登记只覆盖合规，依赖的漏洞与版本维护此前无任何机制）

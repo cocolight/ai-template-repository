@@ -21,6 +21,7 @@ task ls
 pip install -e ".[dev]"
 ruff check .
 ruff format --check .
+lint-imports
 pytest
 ```
 

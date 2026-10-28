@@ -9,7 +9,7 @@ dependencies = ["typer>=0.12"]
 task = "py_task_cli.main:app"
 
 [project.optional-dependencies]
-dev = ["ruff>=0.5", "pytest>=8.0"]
+dev = ["ruff>=0.5", "pytest>=8.0", "import-linter>=1.13"]
 
 [build-system]
 requires = ["hatchling"]
@@ -23,3 +23,21 @@ line-length = 100
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+# 依赖方向门禁：lint-imports 按下面的合同检查分层，违规即非零退出。
+[tool.importlinter]
+root_package = "py_task_cli"
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+# 对应 architecture.md §2 第一条：入口 → 业务逻辑 → 基础设施，底层不得反向依赖上层
+name = "依赖方向：入口 → 业务逻辑 → 基础设施"
+type = "layers"
+layers = ["py_task_cli.main", "py_task_cli.domain", "py_task_cli.storage"]
+
+[[tool.importlinter.contracts]]
+# 对应 architecture.md §2 第二条：纯逻辑与 I/O 分离
+name = "业务逻辑纯净：domain 不做 I/O、不接 CLI"
+type = "forbidden"
+source_modules = ["py_task_cli.domain"]
+forbidden_modules = ["py_task_cli.storage", "py_task_cli.main", "typer"]
