@@ -13,38 +13,38 @@
 
 ## [0.2.0] - 2026-10-28
 
-### Added
+### 新增
 
-- `template/.github/pull_request_template.md`：PR 描述骨架（做了什么 / 关联 ROADMAP 行 / 检查项，含 CHANGELOG）
-- `template/docs/engineering/releasing.md`：发版流程文档 —— 前置条件、命名三要素、步骤顺序、常见错误、预发布约定
-- 根 `AGENTS.md` §8「同改矩阵」：把核心约定「约束新建项目以 `template/` 为准；`template/` 更新后能力必须同步回根仓库」写成可查的矩阵，并注明同步是单向的、同步的是能力而非逐字复制
-- 根 `AGENTS.md` §3「发版」：本仓库自身的发版流程（工具层视角，与 `template/docs/engineering/releasing.md` 承载同一能力）
-- `template/.github/workflows/build.yml` 新增 `Changelog gate` job：feat/fix 改了代码却没更新 CHANGELOG 就硬拦，非 feat/fix 仅 warning，PR 描述含 `[skip changelog]` 可豁免 —— 把「CHANGELOG 欠账」从事后检查变成合并前的门禁
-- `template/THIRD-PARTY.md`：第三方依赖许可证记录文档 —— 每引入一个直接依赖须登记许可证（SPDX 标识）、用途与是否随分发；接入 `template/AGENTS.md` §8 坐标表（新增「第三方依赖许可证 → THIRD-PARTY.md」一行）与 `template/docs/engineering/architecture.md` §5（依赖引入规则新增登记要求），并在 `template/README.md` 许可证节加指针。补齐「引入开源工具无许可证记录文档」的缺口
-- 新增「交付物内容边界」纪律：根 `AGENTS.md` §4 红线第 10 条、生成物 `template/AGENTS.md` §4 提醒级第 9 条，以及 `template/.github/pull_request_template.md` 提示框，约束 AI 不得在 PR 描述 / CHANGELOG / 文档 / 代码注释等面向读者的交付物中夹带与项目无关的本地环境 / 工具链 / 沙箱 / 认证等 Agent 运行问题或 AI 执行过程等元信息
-- 工具层对齐 template 能力：① 根 `ROADMAP.md` 头部同步归档规则（done/dropped 约 20 条移入 docs/archive/）；② 根 `CHANGELOG.md` 头部「条目附理由」小决策留痕约定；③ 根 `AGENTS.md` §4 红线分阻断级 / 提醒级两级（条文与编号不变）、§1 补「事实以源码为准」；④ 新增根 `.github/pull_request_template.md`（工具层 PR 骨架，含交付物内容边界提醒），同步 README 目录结构、TEMPLATE.md「维护模板仓库自身」与「不在你的项目里」、ci.yml 仓库结构自检（有意不把根 PR 模板加入产物反向断言清单——产物里 payload 自带同名文件，加了必假阳）（理由：「template/ 更新后能力必须同步回根仓库」是本仓库核心约定，此前加固只部分同步；有意不同步项——坐标表：根 §1 入口 + §8 矩阵 + §3 发版注已承担坐标职能，再立表反而违反单一事实源；腐化信号：工具层腐化形态是文档漂移与清单失配，已由同改矩阵 + ci.yml 五道断言机械兜住；就绪门槛：工具层无「搭建」概念；根 THIRD-PARTY.md：工具层无随分发依赖，CI Actions 由平台执行，且同名文件易与 payload 混淆）
-- template 加固四项：① `template/ROADMAP.md` 头部新增归档规则（`done` / `dropped` 累计约 20 条时把最旧的移入 `docs/archive/`，防必读链随时间膨胀）；② `TEMPLATE.md` 开工清单补 `AGENTS.md` §8 坐标表为硬前置并加「就绪门槛」（§2/§8/build.yml 未填实前 AI 不得声称已验证）；③ `template/docs/engineering/architecture.md` §2 新增分层 / 依赖方向门禁要求、新增 §7「腐化信号与重构触发」（跨层调用 / 三处重复 / 职责边界模糊 / 测试与实现脱节即触发重构评估）；④ 写作纪律与小决策留痕：`template/AGENTS.md` §4 提醒级第 10 条与根 `AGENTS.md` §4 第 11 条（文档写给人看），`template/CHANGELOG.md` 头部「条目附理由」约定，`template/docs/engineering/definition-of-done.md` 同步
+- `template/THIRD-PARTY.md`：第三方依赖许可证登记，引入直接依赖时登记许可证（SPDX）、用途与是否随分发
+- `template/.github/pull_request_template.md`：PR 描述骨架，含 CHANGELOG 检查项
+- `template/docs/engineering/releasing.md`：发版流程文档，覆盖前置条件、命名、步骤与常见错误
+- `template/.github/workflows/build.yml` 新增 `Changelog gate`：feat/fix 改了代码没更新 CHANGELOG 就拦在合并前
+- 交付物内容边界纪律：PR、CHANGELOG、文档、注释只写项目内容，不写 AI 运行环境与执行过程
+- 写作纪律与小决策留痕：文档写给人看，小决策的理由记在 CHANGELOG 条目末尾
+- `template/ROADMAP.md` 归档规则：done/dropped 行累计约 20 条移入 docs/archive/
+- `TEMPLATE.md` 开工清单把 `AGENTS.md` §8 坐标表列为硬前置，并加就绪门槛
+- `architecture.md` §2 加依赖方向门禁要求，新增 §7 腐化信号与重构触发
+- 根 `AGENTS.md` §3 发版流程、§8 同改矩阵：`template/` 的能力改动须同步回根仓库
+- 工具层对齐 template 能力：根 ROADMAP 归档规则、CHANGELOG 附理由约定、红线分阻断级/提醒级、根 PR 模板（理由：核心约定要求 template/ 能力同步回根仓库，此前只同步了一部分；坐标表等四项有意不同步，见 PR #29）
 
-### Changed
+### 变更
 
-- **产物文档重新分层**：`template/docs/` 下模板预置的 5 项（`architecture.md` / `configuration.md` / `definition-of-done.md` / `releasing.md` / `adr/`）整体移入 **`template/docs/engineering/`**，把 `docs/` 根层让给**项目自己的文档**。原因是原先两类文档压在同一个平面：一类是「判定基准」（受红线与同改矩阵约束、生命周期稳定），一类面向使用者（随版本频繁重写）——读者与可变性正好相反；且 `docs/configuration.md` 与产品文档里几乎必然出现的「配置参考」页会撞名。现规则为「**模板在 `docs/` 下只占 `docs/engineering/` 一个目录**」，机械可判定、无例外。同步改写全部引用（13 个文件）以及 `ci.yml` 的 payload 权威清单 / smoke 正向断言 / 仓库结构自检，并把这条分工写进 `template/README.md` 的目录结构、`template/AGENTS.md` §1 与 `TEMPLATE.md`。CHANGELOG 中指向这些文件的路径一并改为当前位置，避免留下已不存在的路径。
-- `template/AGENTS.md` 把 CHANGELOG 接进工作流 / DoD / 同改矩阵，堵新项目 CHANGELOG 欠账
-- `template/AGENTS.md` §9 补齐发版命名三要素（tag 带 v、release title 跟 tag、CHANGELOG 不带 v）
-- `template/AGENTS.md` §3 新增「发版」小节（前置条件 / 命名 / 顺序）；§4 阻断级红线把 `tag`、`push --tags`、创建 Release 与 `commit` / `push` 并列禁止 —— 此前只禁 commit/push，AI 可辩称「规则没禁止打 tag」
-- `template/AGENTS.md` §8 的「版本号」坐标行由空白「（待填）」改为可填的中性指引（指向唯一版本号事实源，且不许另抄一份）
-- `template/AGENTS.md` §9 发版行改为指向 `docs/engineering/releasing.md`，并补「§8 坐标表指向的版本号事实源已同步」
-- `template/README.md` 去模板化：删「🤖 AI 编码助手」引导行、收敛「开发约定」，AI 入口移至 `template/CONTRIBUTING.md`
-- 同步该能力到工具层：根 `AGENTS.md` §4 红线（同禁 tag / Release）与 §5 DoD（新增「改了 `template/` 的规则能力已同步根 `AGENTS.md`」判据）、根 `CONTRIBUTING.md` 与 `template/CONTRIBUTING.md` 各增发版入口、`example/` 两份 `AGENTS.md` 各补发版条目
-- 说清「社区健康文件」的位置：`template/docs/engineering/configuration.md` §4 新增「仓库公开时再补的社区健康文件」小节、§6 补一条可选勾选项，`TEMPLATE.md` 第 8 步后加一句指针 —— 模板**有意不预置** `CODE_OF_CONDUCT` / `SECURITY` / `SUPPORT` / `ISSUE_TEMPLATE`（四者都需项目级信息，预置只会得到 TODO 存根），改为在仓库要公开时用 GitHub 的 Insights → Community Standards 一键套官方模板
-- 记一处静态站发布风险：`template/docs/engineering/configuration.md` **新增独立一节 §5「文档站与静态发布」**（原拟并入 §4，§4 标题是「CI（GitHub Actions）」，内容会跑题；落地配置清单与常见问题顺延为 §6 / §7）、§6 补一条可选勾选项，`TEMPLATE.md` 第 8 步后加一句指针（与社区健康文件那句并列）、「模板包含什么」表补「文档站」、指向清单的引用由 §5 改为 §6 —— 把 `docs/` 直接当发布源会让 `docs/engineering/` 一并发布，而发布内容**公网可访问、即使仓库是私有的**；给出两条处理（改用 Actions 只上传构建产物 / 在站点配置里排除 `engineering`），并声明这属构建层、不必为躲发布而搬动文档
+- 模板预置文档移入 `template/docs/engineering/`，`docs/` 根层留给项目自己的文档（理由：两类文档可变性相反，且 configuration.md 会与产品「配置参考」页撞名）
+- `template/AGENTS.md` 把 CHANGELOG 接进工作流、DoD 与同改矩阵
+- 发版命名三要素：tag 带 v、Release title 与 tag 相同、CHANGELOG 版本节不带 v
+- `template/AGENTS.md` §3 新增发版小节，红线把打 tag、推 tag、建 Release 与 commit/push 一并禁止
+- `template/AGENTS.md` §8 版本号坐标行改为可填指引，§9 发版行指向 `docs/engineering/releasing.md`
+- `template/README.md` 去模板化，AI 入口移至 `template/CONTRIBUTING.md`
+- 发版能力同步到工具层：根 AGENTS §4/§5、两份 CONTRIBUTING 发版入口、`example/` 两份 AGENTS 补发版条目
+- 社区健康文件不再预置，仓库公开时从 GitHub Community Standards 套官方模板（理由：预置只能得到 TODO 存根）
+- `template/docs/engineering/configuration.md` 新增「文档站与静态发布」一节（理由：docs/ 直接当发布源会把 engineering/ 一并公网可见）
 
-### Fixed
+### 修复
 
-- 修 `template/docs/engineering/configuration.md` §1 表格里一处**从未生效过**的失效引用：「由 `.gitattributes` 强制，见 §3」—— 该引用自 PR #2（`45e1867`）引入时就指错了（行尾一直写在 §2，§3 始终是「目录约定」），改为「见 §2「行尾」」
-- 补齐 `docs/engineering/releasing.md` 引入后需要同步的三处枚举：`TEMPLATE.md` 的「模板包含什么」表与「哪些文件不要改」表、`TEMPLATE.md` 自检脚本的正向断言列表、`ci.yml` 的 payload 权威清单与 smoke 正向断言（漏同步会让「开工清单与 payload 一致性」step 直接失败）
-- `Changelog gate (template/)` 的 diff 基准由 `pull_request.base.sha` 改为 `git merge-base`：前者会随 `main` 前进而变化，于是 `main` 在分叉点之后改过的文件（含 `CHANGELOG.md`）会被算进「本次 PR 的改动」—— 门禁会在 PR 根本没补记录的情况下**假绿**。已用四个场景对比验证：改 `template/` 且未记 CHANGELOG 且 main 已前进时，旧逻辑 PASS（漏放）、新逻辑 FAIL（正确拦截）；记了 CHANGELOG、只改工具层、只改 `docs/` 三种情况新旧一致
-- 占位符残留检查从笼统的 `{{` 精确到 `{{PROJECT_NAME}}` / `{{YEAR}}`：原写法会误伤 GitHub Actions 的 `${{ }}` 表达式。同步 `ci.yml`、`TEMPLATE.md` 两处自检命令与根 `AGENTS.md` 的 DoD 一行
-- `template/.github/workflows/build.yml` 的 `Changelog gate` job 做与工具层同样的修正：diff 与 `git log` 的基准由 `pull_request.base.sha` 改为 `git merge-base`。否则**每一个由本模板生成的项目都会继承这道会假绿的门禁**。用该 job 的真实脚本跑五场景对比验证：feat 改代码未记 CHANGELOG 且主分支已前进时，旧逻辑 PASS（漏放）、新逻辑 FAIL（拦截）；chore 改代码未记时，旧逻辑误报「CHANGELOG 已更新」、新逻辑给出正确的 warning；记了 CHANGELOG、只改文档、fix 未记且主分支未动三种情况新旧一致
+- 修 `configuration.md` 一处从未生效的引用：「见 §3」改为「见 §2「行尾」」
+- 补齐 `releasing.md` 引入后漏同步的清单枚举
+- `Changelog gate` 的 diff 基准改用 merge-base，修掉 main 前进时的假绿，`build.yml` 同名 job 同步修正
+- 占位符残留检查精确到 `{{PROJECT_NAME}}` / `{{YEAR}}`，不再误伤 GitHub Actions 的 `${{ }}`
 
 ## [0.1.0] - 2026-10-05
 
