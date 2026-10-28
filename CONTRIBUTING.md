@@ -15,6 +15,14 @@
 - 描述可用中文，简明；标题总长 ≤ 72 字符。
 - 本仓库的架构决策只记在 `CHANGELOG.md`，不维护工具层 ADR（`template/docs/engineering/adr/` 属生成物）。
 
+## CHANGELOG 条目写法
+
+条目即 Release 正文（发版时原样取自版本节），受机械断言与负面清单双重约束：
+
+- 一条一事，单行写完，单条 ≤ 150 字符（CI 断言，本地检查第 4 条可跑）。
+- 「（理由：…）」只给非显而易见的取舍，一句话说完；多数条目不带理由。
+- 不用破折号插入语展开条目，不写推导叙事与元叙述。行文负面清单见 [AGENTS.md](AGENTS.md) §4。
+
 ## 改动该放哪
 
 仓库分两层，**放错位置会被静默复制进用户的新项目**：
@@ -30,7 +38,7 @@
 
 ## 本地检查
 
-提交前至少跑这三条，完整清单见 [TEMPLATE.md](TEMPLATE.md)「改完模板后的自检」：
+提交前至少跑这四条，完整清单见 [TEMPLATE.md](TEMPLATE.md)「改完模板后的自检」：
 
 ```bash
 # 1) 脚本语法与 lint（CI 也会跑）
@@ -43,6 +51,16 @@ find "$T/proj" -maxdepth 1 -mindepth 1 -not -name '.git' | sort
 
 # 3) 常驻上下文档体积（CI 也会跑）：两份 AGENTS.md 各 ≤ 200 行
 for f in AGENTS.md template/AGENTS.md; do n=$(wc -l < "$f"); echo "$f: $n 行"; [ "$n" -le 200 ]; done
+
+# 4) CHANGELOG 条目体积（CI 也会跑）：每个条目单行 ≤ 150 字符
+grep '^[[:space:]]*- ' CHANGELOG.md | {
+  bad=0
+  while IFS= read -r line; do
+    n=$(printf '%s' "$line" | LC_ALL=C.UTF-8 wc -m)
+    [ "$n" -le 150 ] || { echo "条目超 150 字符（当前 $n 字符）：$line"; bad=1; }
+  done
+  [ "$bad" -eq 0 ]
+}
 ```
 
 期望：产物里**没有** `template/`、`TEMPLATE.md`、`example/`、`scripts/template-init.sh`、`.github/workflows/ci.yml`，但**有** `README.md`、`AGENTS.md`、`LICENSE`、`.github/workflows/build.yml`，且无 `.gitkeep`、保留 `src/` `tests/` `scripts/` 三个目录。

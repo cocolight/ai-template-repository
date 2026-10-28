@@ -113,6 +113,21 @@ jobs:
             [ "$n" -le 200 ] || { echo "$f 超过 200 行（当前 $n 行）：拆详细版下沉详细文档，AGENTS.md 只留入口与红线"; exit 1; }
           done
 
+      - name: CHANGELOG 条目体积断言
+        # 发布说明取自 CHANGELOG 版本节（AGENTS.md §3 发版），条目即 Release 正文。
+        # 单条 ≤ 150 字符（wc -m 按字符计），防多事项巨型长条目；
+        # 写法约定见 CONTRIBUTING.md「CHANGELOG 条目写法」。
+        run: |
+          set -eu
+          grep '^[[:space:]]*- ' CHANGELOG.md | {
+            bad=0
+            while IFS= read -r line; do
+              n=$(printf '%s' "$line" | LC_ALL=C.UTF-8 wc -m)
+              [ "$n" -le 150 ] || { echo "条目超 150 字符（当前 $n 字符）：$line"; bad=1; }
+            done
+            [ "$bad" -eq 0 ]
+          }
+
       - name: 开工清单与 payload 一致性
         # ROADMAP 第 4/6 项：TEMPLATE.md 的「新项目开工清单」与 template/ 实际内容
         # 需保持一致。此前只靠人工核对，改名/删文件/加文件都不会被发现。

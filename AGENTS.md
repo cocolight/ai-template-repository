@@ -50,6 +50,7 @@ Python / Rust 示例的真实检查命令见 `ci.yml` 的 `python-example` / `ru
 - **命名**（三处必须一致）：tag 用 `vX.Y.Z`（带 `v`）；Release title 与 tag 完全相同；根 `CHANGELOG.md` 版本节写 `[X.Y.Z] - 日期`（**不带** `v`）。
 - **版本号事实源**：本仓库不维护独立版本号文件，版本只由根 `CHANGELOG.md` 的版本节定义 —— 这是 `template/AGENTS.md` §8 坐标表「版本号」一行在工具层的对应答法。
 - **顺序**：改根 `CHANGELOG.md` → 提 PR 合入 `main`（type 用 `chore`）→ **在 `main` 上**打 tag → 建 Release，说明正文取自根 `CHANGELOG.md` 的对应版本节，不另写一套。
+- **正文复核**：Release 正文原样出自版本节，发版前按 §4 负面清单过一遍该节（CI 只拦条目长度，辩护墙 / 破折号这类文风靠这一步）。
 - 未经明确要求，不得 `git tag` / 推送 tag / 建 Release —— 见 §4 红线第 5 条。
 
 ## 4. 红线（违反即回滚）
@@ -78,7 +79,7 @@ Python / Rust 示例的真实检查命令见 `ci.yml` 的 `python-example` / `ru
     （`ci.yml` 行数断言）。超限先拆：细节下沉详细文档（工具层进 `TEMPLATE.md` / `CONTRIBUTING.md`；
     生成物进 `docs/engineering/` 详细版），本文件只留入口指针与红线。
 13. 决策即时沉淀：重要取舍 / 非显而易见的决定，落仓库即生效，不依赖会话记忆——
-    随改动记根 `CHANGELOG.md` 条目「（理由：…）」，重大决策可另记 `ROADMAP.md`「已知取舍」
+    随改动记根 `CHANGELOG.md` 条目「（理由：一句话）」，重大决策可另记 `ROADMAP.md`「已知取舍」
     （本仓库不维护工具层 ADR，见 §3）。对话会消失，仓库才是记忆。
 
 ## 5. 完成定义（DoD）
