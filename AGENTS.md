@@ -77,6 +77,9 @@ Python / Rust 示例的真实检查命令见 `ci.yml` 的 `python-example` / `ru
 12. 常驻上下文文档控体积：`AGENTS.md`（工具层）与 `template/AGENTS.md`（生成物）各不超过 200 行
     （`ci.yml` 行数断言）。超限先拆：细节下沉详细文档（工具层进 `TEMPLATE.md` / `CONTRIBUTING.md`；
     生成物进 `docs/engineering/` 详细版），本文件只留入口指针与红线。
+13. 决策即时沉淀：重要取舍 / 非显而易见的决定，落仓库即生效，不依赖会话记忆——
+    随改动记根 `CHANGELOG.md` 条目「（理由：…）」，重大决策可另记 `ROADMAP.md`「已知取舍」
+    （本仓库不维护工具层 ADR，见 §3）。对话会消失，仓库才是记忆。
 
 ## 5. 完成定义（DoD）
 
