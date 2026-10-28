@@ -137,7 +137,7 @@ git ls-files -s scripts/
 | `AGENTS.md` §1 上下文入口、§3 工作流、§4 红线、§5 DoD、§7 安全、§8 坐标表、§9 同改矩阵 | 不得删条目、不得放宽（例如把"不得删除测试"删掉）。§0 与 §2 留给项目搭建者填；§8 坐标表保留表头结构、只填「待填」处 |
 | `docs/engineering/definition-of-done.md` | 不得为了让某个功能"达标"而放宽条件 —— 这正是模板定义的「伪完成」 |
 | `docs/engineering/releasing.md` | 命名三要素（tag `vX.Y.Z` / Release title 跟 tag / CHANGELOG 不带 `v`）是硬规则，不得改；只能按项目实际情况**追加**预发布等约定 |
-| `.github/workflows/build.yml` | 要填真实命令，但不得删掉 lint / test 步骤、不得改成 `|| true`、不得把失败降级成警告 |
+| `.github/workflows/build.yml` | 要填真实命令，但不得删掉 lint / test / `AGENTS.md` 行数断言步骤、不得改成 `|| true`、不得把失败降级成警告 |
 | `.gitignore` | 可以追加语言相关规则，但不得删除密钥段（`.env`、`*.key`、`*.pem`） |
 
 确需调整流程类条文（例如 `CONTRIBUTING.md` 的分支策略）时，请在 PR 里写明理由，并同步 `AGENTS.md`，避免两份文档互相打架。
@@ -229,5 +229,8 @@ done
 
 diff .gitattributes template/.gitattributes || echo "警告：两份 .gitattributes 不一致"
 
-# CI 会执行：shellcheck scripts/*.sh + 上面这套断言 + 两个 example 的 lint/test
+# 常驻上下文档体积：AGENTS.md ≤ 150 行（超限先拆，见 AGENTS.md §4 红线）
+wc -l "$T/newproj/AGENTS.md"
+
+# CI 会执行：shellcheck scripts/*.sh + 上面这套断言 + AGENTS.md 行数断言 + 两个 example 的 lint/test
 ```

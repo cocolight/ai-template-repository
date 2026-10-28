@@ -30,7 +30,7 @@
 
 ## 本地检查
 
-提交前至少跑这两条，完整清单见 [TEMPLATE.md](TEMPLATE.md)「改完模板后的自检」：
+提交前至少跑这三条，完整清单见 [TEMPLATE.md](TEMPLATE.md)「改完模板后的自检」：
 
 ```bash
 # 1) 脚本语法与 lint（CI 也会跑）
@@ -40,6 +40,9 @@ shellcheck scripts/*.sh
 # 2) 真实生成一个项目并核对结构
 T=$(mktemp -d) && ./scripts/template-init.sh "$T/proj"
 find "$T/proj" -maxdepth 1 -mindepth 1 -not -name '.git' | sort
+
+# 3) 常驻上下文档体积（CI 也会跑）：两份 AGENTS.md 各 ≤ 150 行
+for f in AGENTS.md template/AGENTS.md; do n=$(wc -l < "$f"); echo "$f: $n 行"; [ "$n" -le 150 ]; done
 ```
 
 期望：产物里**没有** `template/`、`TEMPLATE.md`、`example/`、`scripts/template-init.sh`、`.github/workflows/ci.yml`，但**有** `README.md`、`AGENTS.md`、`LICENSE`、`.github/workflows/build.yml`，且无 `.gitkeep`、保留 `src/` `tests/` `scripts/` 三个目录。
