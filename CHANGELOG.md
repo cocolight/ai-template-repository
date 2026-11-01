@@ -12,6 +12,8 @@
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-01
+
 ### 新增
 
 - CHANGELOG 条目体积断言进 CI：两层 workflow 断言单条 ≤ 150 字符
