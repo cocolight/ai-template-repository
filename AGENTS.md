@@ -17,8 +17,9 @@
 2. `README.md` — 仓库自述与目录结构
 3. `TEMPLATE.md` — 模板使用手册：开工清单、哪些文件不能改
 4. `CONTRIBUTING.md` — 维护自检命令
-5. `template/AGENTS.md` — **生成物**里的规则（改模板时看它，别改它）
-6. 与任务相关的源码与测试
+5. `payload.txt` — payload 权威清单，唯一机器清单（门禁与 CI 都读它）
+6. `template/AGENTS.md` — **生成物**里的规则与路由表（改模板时看它，别改它）
+7. 与任务相关的源码与测试
 
 > 事实以源码为准：用 `read` 看结构、`grep` 查事实，文档只给坐标。
 
@@ -27,9 +28,11 @@
 | 目的 | 命令 |
 |------|------|
 | 安装依赖 | 无（仅需 POSIX `sh` + Git ≥ 2.28；Windows 用 Git Bash） |
+| 安装提交钩子 | `git config core.hooksPath .githooks`（每个 clone 一次） |
 | 运行 | `./scripts/template-init.sh --dry-run ../demo`（只打印不落盘） |
-| 测试 | 见 [CONTRIBUTING.md](CONTRIBUTING.md)「改完模板后的自检」—— 完整 11 条 |
-| Lint | `shellcheck scripts/*.sh` |
+| 结构类门禁 | `./scripts/check-fast.sh`（本地钩子与 CI 共用同一份） |
+| 产物核对 | 见 [CONTRIBUTING.md](CONTRIBUTING.md)「改完模板后的自检」 |
+| Lint | `shellcheck scripts/*.sh template/scripts/*.sh .githooks/* template/.githooks/*` |
 | 格式化检查 | 无（仓库统一 LF，由 `.gitattributes` 强制） |
 
 Python / Rust 示例的真实检查命令见 `ci.yml` 的 `python-example` / `rust-example` job。
@@ -40,13 +43,13 @@ Python / Rust 示例的真实检查命令见 `ci.yml` 的 `python-example` / `ru
 - 一个功能 = 一个 `feature/<名称>` 分支 = 一个 PR。
 - **推 commit 前先 `gh pr view <n> --json state` 确认 PR 仍 OPEN**；已 merge 就不要再往旧分支 push（commit 会成孤儿、不进 main）。
 - 提交：Conventional Commits，type 用英文前缀（`feat`/`fix`/`docs`/`test`/`chore`/`refactor`/`ci`）；描述可用中文；标题总长 ≤ 72 字符。
-- 本仓库的架构决策只记在 `CHANGELOG.md`；**不维护工具层 ADR**（`template/docs/engineering/adr/` 属生成物，不随工具层维护）。
+- 本仓库的架构决策只记在 `CHANGELOG.md`；**不维护工具层 ADR**（`template/.agents/adr/` 属生成物，不随工具层维护）。
 
 ### 发版（打 tag / 建 Release）
 
-> 本仓库自身也发版（已有 `v0.1.0`）。这份能力与 `template/docs/engineering/releasing.md` 对齐 —— 但工具层不产生 payload、不复制 `releasing.md`，所以要点直接写在这里。
+> 本仓库自身也发版（已有 `v0.1.0`）。这份能力与 `template/.agents/releasing.md` 对齐 —— 但工具层不产生 payload、不复制 `releasing.md`，所以要点直接写在这里。
 
-- **前置**：`ci.yml` 全绿；`ROADMAP.md` 无 `in-progress` 行；根 `CHANGELOG.md` 的 `[Unreleased]` 已写全。
+- **前置**：`ci.yml` 全绿；`ROADMAP.md` 无 `in-progress` 行；根 `CHANGELOG.md` 的 `[Unreleased]` 已写全。推送 tag 时 `ci.yml` 的 `Release guard` 会再校验一次版本节与 ROADMAP 状态。
 - **命名**（三处必须一致）：tag 用 `vX.Y.Z`（带 `v`）；Release title 与 tag 完全相同；根 `CHANGELOG.md` 版本节写 `[X.Y.Z] - 日期`（**不带** `v`）。
 - **版本号事实源**：本仓库不维护独立版本号文件，版本只由根 `CHANGELOG.md` 的版本节定义 —— 这是 `template/AGENTS.md` §8 坐标表「版本号」一行在工具层的对应答法。
 - **顺序**：改根 `CHANGELOG.md` → 提 PR 合入 `main`（type 用 `chore`）→ **在 `main` 上**打 tag → 建 Release，说明正文取自根 `CHANGELOG.md` 的对应版本节，不另写一套。
@@ -77,7 +80,7 @@ Python / Rust 示例的真实检查命令见 `ci.yml` 的 `python-example` / `ru
     无对应提交的「原先/之前」虚构历史；拟人化修辞对比；营销式分区标题；面向 AI 的过程说明与验证过程叙事。
 12. 常驻上下文文档控体积：`AGENTS.md`（工具层）与 `template/AGENTS.md`（生成物）各不超过 200 行
     （`ci.yml` 行数断言）。超限先拆：细节下沉详细文档（工具层进 `TEMPLATE.md` / `CONTRIBUTING.md`；
-    生成物进 `docs/engineering/` 详细版），本文件只留入口指针与红线。
+    生成物进 `.agents/` 详细版），本文件只留入口指针与红线。
 13. 决策即时沉淀：重要取舍 / 非显而易见的决定，落仓库即生效，不依赖会话记忆——
     随改动记根 `CHANGELOG.md` 条目「（理由：一句话）」，重大决策可另记 `ROADMAP.md`「已知取舍」
     （本仓库不维护工具层 ADR，见 §3）。对话会消失，仓库才是记忆。
@@ -85,12 +88,15 @@ Python / Rust 示例的真实检查命令见 `ci.yml` 的 `python-example` / `ru
 ## 5. 完成定义（DoD）
 
 - [ ] `template-init.sh` 能真实生成新项目，产物结构与 `TEMPLATE.md` 描述一致
-- [ ] 产物**不含**任何工具层文件（`template/`、`TEMPLATE.md`、`example/`、`scripts/template-init.sh`、`.github/workflows/ci.yml`）
-- [ ] 产物**不含** `.gitkeep`，但 `src/` `tests/` `scripts/` 三个目录都在
+- [ ] 产物**不含**任何工具层文件（`template/`、`TEMPLATE.md`、`payload.txt`、`example/`、`scripts/`、`.githooks/`、`.github/workflows/ci.yml`）
+- [ ] 产物**不含** `.gitkeep`，`src/` `tests/` 目录都在
+- [ ] 产物不预置 `docs/`：工程文档在 `.agents/`，`docs` 全归使用者
 - [ ] 产物无残留 `{{PROJECT_NAME}}` / `{{YEAR}}` 占位符，默认分支为 `main`
 - [ ] 根 `.gitattributes` 与 `template/.gitattributes` 内容一致
-- [ ] `shellcheck scripts/*.sh` 通过
-- [ ] 改动了 `example/` 的测试符合测试质量基线：断言行为而非实现、测试名说清场景、拒绝空转断言（详见 `template/docs/engineering/definition-of-done.md`）
+- [ ] `./scripts/check-fast.sh` 通过（工具层 + payload 门禁）
+- [ ] 产物在初始状态下能跑通自己的 `./scripts/check-fast.sh`
+- [ ] `shellcheck scripts/*.sh template/scripts/*.sh .githooks/* template/.githooks/*` 通过
+- [ ] 改动了 `example/` 的测试符合测试质量基线：断言行为而非实现、测试名说清场景、拒绝空转断言（详见 `template/.agents/definition-of-done.md`）
 - [ ] 改动了 `template/` 就已同步 `TEMPLATE.md` 中受影响的路径描述
 - [ ] 改动了 `template/` 的**规则或能力**（红线 / DoD / 工作流 / 矩阵），已同步到根 `AGENTS.md` 的对应章节 —— 见 §8
 - [ ] `CHANGELOG.md` 的 `Unreleased` 已记录
@@ -111,14 +117,15 @@ Python / Rust 示例的真实检查命令见 `ci.yml` 的 `python-example` / `ru
 
 | 改了什么 | 同一回合必须过一遍 |
 |---|---|
-| `template/` 里新增 / 删除 payload 文件 | `TEMPLATE.md`「模板包含什么」表 + `ci.yml` 的 payload 清单与 smoke 正向断言（漏了 CI 会红） |
+| `template/` 里新增 / 删除 payload 文件 | `payload.txt`（唯一机器清单，漏了门禁会红）+ `TEMPLATE.md`「模板包含什么」表 + `ci.yml` 的 smoke 正向断言 |
 | `template/` 里 payload 文件的**路径变化**（改名 / 移动） | 除上面一行外，还要过：`TEMPLATE.md`「新项目开工清单」与「哪些文件不要改」表、`TEMPLATE.md` 自检正向断言列表、`ci.yml` 的「仓库结构自检」；**payload 文档内的相对链接**（层级一变，`../x` 就会指空，由「产物内文档死链检查」判定）；以及根 `AGENTS.md` / `CONTRIBUTING.md` / `ROADMAP.md` / `CHANGELOG.md` 里的引用 |
 | `template/` 里的**规则 / 能力**（红线 / DoD / 工作流 / 矩阵） | 根 `AGENTS.md` 的对应章节；根 `CHANGELOG.md` 记录 |
 | `template/` 里的路径描述 | `TEMPLATE.md`「新项目开工清单」与「哪些文件不要改」 |
 | 根工具层文件的增 / 删 / 改名 | `README.md` 目录结构、`TEMPLATE.md`「不在你的项目里」、`ci.yml` 的「仓库结构自检」 |
 | 脚本行为或选项 | `README.md` + `TEMPLATE.md` + `CONTRIBUTING.md` 三处描述一致 |
-| 本地检查命令或门禁 | `CONTRIBUTING.md`「本地检查」→ `.github/workflows/ci.yml`，两者必须一致 |
-| 发版（打 tag / 建 Release） | §3「发版」；根 `CHANGELOG.md` 的 `[Unreleased]` 改名为 `[X.Y.Z] - 日期`（不带 v）并补回空节点。`template/docs/engineering/releasing.md` 是同一能力的详细版，**两处不得打架** |
+| `scripts/check-fast.sh` 或 `.githooks/` | 两侧同步：工具层的做工具层检查、payload 的只做技术栈无关检查；断言不得复制进 `ci.yml`，那里只调用 |
+| 本地检查命令或门禁 | `CONTRIBUTING.md`「本地检查」→ `scripts/check-fast.sh` → `.github/workflows/ci.yml`，三处必须一致 |
+| 发版（打 tag / 建 Release） | §3「发版」；根 `CHANGELOG.md` 的 `[Unreleased]` 改名为 `[X.Y.Z] - 日期`（不带 v）并补回空节点。`template/.agents/releasing.md` 是同一能力的详细版，**两处不得打架** |
 | 章节标题 / 编号 | 全仓扫一遍按「§N」引用本文件的地方（根 `AGENTS.md`、`CONTRIBUTING.md`、`TEMPLATE.md`） |
 
 两条边界：

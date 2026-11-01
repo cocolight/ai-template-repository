@@ -6,6 +6,7 @@ name: build
 on:
   push:
     branches: [main]
+    tags: ['v*']
   pull_request:
 
 permissions:
@@ -19,28 +20,12 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # 上下文预算：AGENTS.md 是每次 AI 会话开工必读的常驻文档，体积失控即上下文预算失控。
-      # 阈值 200 行，与 AGENTS.md §4「常驻上下文文档控体积」条目一致。
-      - name: AGENTS.md 行数断言（≤200）
-        run: |
-          set -eu
-          n=$(wc -l < AGENTS.md)
-          echo "AGENTS.md: $n 行"
-          [ "$n" -le 200 ] || { echo "::error::AGENTS.md 超过 200 行（当前 $n 行）。超限先拆：详细内容下沉 docs/engineering/ 详细版，AGENTS.md 只留入口指针与红线"; exit 1; }
-
-      # 发布说明取自 CHANGELOG 版本节，条目即 Release 正文。
-      # 单条 ≤ 150 字符，防多事项巨型长条目；写法约定见 CHANGELOG.md 头部注记。
-      - name: CHANGELOG 条目体积断言（单条 ≤150 字符）
-        run: |
-          set -eu
-          grep '^[[:space:]]*- ' CHANGELOG.md | {
-            bad=0
-            while IFS= read -r line; do
-              n=$(printf '%s' "$line" | LC_ALL=C.UTF-8 wc -m)
-              [ "$n" -le 150 ] || { echo "::error::条目超 150 字符（当前 $n 字符）：$line"; bad=1; }
-            done
-            [ "$bad" -eq 0 ]
-          }
+      # 结构类断言只有一份，在 scripts/check-fast.sh：本地 pre-commit 与这里跑同一个脚本。
+      # 覆盖 AGENTS.md 行数（≤200）、CHANGELOG 条目体积（≤150 字符）、
+      # .agents/ 文档是否都进了 AGENTS.md §1 路由表、skill frontmatter 字段。
+      # 不要把断言抄一份到这里 —— 两份必然漂移。
+      - name: 快速门禁
+        run: ./scripts/check-fast.sh
 
       # TODO: 按本项目技术栈补全以下三步（缺任一步，门禁即形同虚设）：
       #   1) 安装依赖
@@ -108,3 +93,28 @@ jobs:
             exit 1
           fi
           echo "::warning::本 PR 改了代码但未更新 CHANGELOG（非 feat/fix，仅提醒）"
+
+  # 发版守卫：tag 是不可逆的动作，把「前置条件」从文档里的自觉改成可回滚的失败。
+  # 只在推送 v* tag 时运行，与 AGENTS.md §3「发版」的前置清单对齐。
+  release-guard:
+    name: Release guard
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: tag 与 CHANGELOG / ROADMAP 一致性
+        run: |
+          set -eu
+          TAG="${GITHUB_REF#refs/tags/}"
+          VER="${TAG#v}"
+          printf 'tag=%s version=%s\n' "$TAG" "$VER"
+          if ! grep -qE "^## \[$VER\] - " CHANGELOG.md; then
+            printf '::error::CHANGELOG.md 缺少版本节 [%s] - 日期（tag 为 %s）\n' "$VER" "$TAG"
+            exit 1
+          fi
+          if grep -qE '\|[[:space:]]*in-progress[[:space:]]*\|' ROADMAP.md; then
+            printf '::error::ROADMAP.md 仍有 in-progress 行，发版前置未满足\n'
+            exit 1
+          fi
+          printf 'release guard 通过\n'

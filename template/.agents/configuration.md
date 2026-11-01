@@ -1,7 +1,7 @@
 # 仓库与项目配置说明
 
 本文面向**由本模板生成的项目**，说明代码之外还需要配置什么：环境、Git、行尾与权限、CI、分支保护、依赖安全、文档站。
-AI 的行为规则见 [AGENTS.md](../../AGENTS.md)。
+AI 的行为规则见 [AGENTS.md](../AGENTS.md)。
 
 ## 1. 环境要求
 
@@ -64,12 +64,16 @@ git update-index --chmod=+x scripts/x.sh       # 修复
 |------|------|
 | `src/` | 源码 |
 | `tests/` | 测试 |
-| `docs/` | 项目自己的文档（使用指南、参考、教程……） |
-| `docs/engineering/` | 工程协作文档：架构 / 配置 / 完成定义 / 发版 / ADR |
-| `scripts/` | 辅助脚本 |
+| `docs` | **只放使用者文档**：安装、使用、API 参考、教程。工程文档不进这里 |
+| `.agents/` | 工程协作文档：架构 / 配置 / 完成定义 / 发版 / ADR / 扩展点，AI 与人共读 |
+| `.agents/skills/` | 可复用的 AI skill，按需自建（契约见 `skills/README.md`） |
+| `scripts/` | 辅助脚本，含 `check-fast.sh` 快速门禁 |
+| `.githooks/` | 本地 git 钩子，clone 后需执行一次 `git config core.hooksPath .githooks` |
 | `.github/workflows/` | CI 工作流 |
 
-详见 `docs/engineering/architecture.md`；完成标准见 `docs/engineering/definition-of-done.md`。
+两个目录的边界只有一条判据：**不读它，AI 会做错事吗？** 会 → `.agents/`；不会 → `docs`。
+
+详见 `architecture.md`；完成标准见 `definition-of-done.md`；"要加 X 改哪里"见 `extension-points.md`。
 
 ## 4. CI（GitHub Actions）
 
@@ -110,7 +114,7 @@ git update-index --chmod=+x scripts/x.sh       # 修复
 
 ## 5. 依赖更新与漏洞防护
 
-许可证登记（`../../THIRD-PARTY.md`）解决「能不能用」，本节解决「用得安不安全」：要开的开关，以及漏洞出现后怎么响应。
+许可证登记（`../THIRD-PARTY.md`）解决「能不能用」，本节解决「用得安不安全」：要开的开关，以及漏洞出现后怎么响应。
 
 ### 平台侧开关
 
@@ -129,24 +133,23 @@ Secret scanning 与代码扫描在私有仓库要付费方案，按需取舍。�
 
 ### 漏洞响应约定
 
-- 收到漏洞告警先查 `../../THIRD-PARTY.md` 的「是否随分发」列：随分发的优先处理。
+- 收到漏洞告警先查 `../THIRD-PARTY.md` 的「是否随分发」列：随分发的优先处理。
 - 升级依赖后同步更新该表的「版本」列，登记与实际不符等于没登记。
 - 修复记入 `CHANGELOG.md`；已发版的库按 [`releasing.md`](releasing.md) 评估是否发补丁版本。
 
 ## 6. 文档站与静态发布
 
-新项目若要做文档站，有一处与**目录布局**直接相关的坑：把仓库的 `docs/` 直接当作发布源时，`docs/engineering/` 会被**一并发布** —— 它装的是工程协作文档（架构、配置、完成定义、发版、ADR），受众是协作者，不是对外读者。
+工程文档在 `.agents/`、不在 `docs` 下，所以把 `docs` 直接当发布源时它天然不会被带上。目录边界已经解决了这件事，站点配置里不需要再排除任何东西。
 
-这尤其要注意：发布出去的内容**在公网可访问，即使仓库是私有的**。两种处理都行 ——
+要留意的是反方向：`docs` 里**所有**内容都会被发布，而发布出去的内容**在公网可访问，即使仓库是私有的**。不要把内部草稿、未定稿的运营材料放进 `docs`；需要私有留存的放 `.agents/` 或仓库外。
 
-- **首选：改用 Actions 发布，只上传构建产物。** 上传路径是显式指定的，`docs/engineering/` 天然不在其中（这也是 GitHub 现在推荐的方式）。
-- **或者在站点配置里排除 `engineering` 目录。** 多数静态站生成器都提供排除开关。
-
-两种都只是**构建层**的事，与文件放在哪无关 —— 不要为了避开发布而把这些文档挪进点目录：那会连它们的可见性一起丢掉。
+`.agents/` 是点目录：git 与 GitHub 网页都能浏览、能搜索到，只是静态站生成器与 ripgrep 默认跳过它。协作者可见、不出现在站点上，这正是想要的效果；代价是 AI 用 `grep` 默认搜不到里面的内容，所以 `AGENTS.md` §1 的路由表是唯一可靠的入口。
 
 ## 7. 落地配置清单
 
 - [ ] 填写 `AGENTS.md` §2「常用命令」表（AI 依赖它）
+- [ ] 执行一次 `git config core.hooksPath .githooks`（否则提交时不跑门禁）
+- [ ] 确认 `./scripts/check-fast.sh` 通过
 - [ ] 填写 `README.md` 的安装 / 运行 / 测试命令
 - [ ] 在 `ROADMAP.md` 写入首批功能与**可判定的**验收标准
 - [ ] 用真实命令替换 `.github/workflows/build.yml` 的占位步骤
@@ -156,7 +159,7 @@ Secret scanning 与代码扫描在私有仓库要付费方案，按需取舍。�
 - [ ] GitHub：为 `main` 开启分支保护 + required status checks
 - [ ] GitHub：开启 Dependabot 漏洞告警与自动修复 —— 见 §5「依赖更新与漏洞防护」
 - [ ] （可选，仅仓库要公开时）补齐社区健康文件 —— 见 §4「仓库公开时再补的社区健康文件」
-- [ ] （可选，仅做文档站时）确认发布源不会带上 `docs/engineering/` —— 见 §6「文档站与静态发布」
+- [ ] （可选，仅做文档站时）确认 `docs` 里没有不该公开的内容 —— 见 §6「文档站与静态发布」
 
 ## 8. 常见问题
 

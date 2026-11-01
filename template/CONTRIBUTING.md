@@ -22,16 +22,28 @@
 
 ## 本地检查
 
-（按本项目技术栈填写，须与 `AGENTS.md` §2「常用命令」完全一致）
+克隆后安装一次钩子，否则 `git commit` 不会跑门禁：
+
+```bash
+git config core.hooksPath .githooks
+```
+
+结构类断言只有一份，在 `scripts/check-fast.sh`，CI 调同一个脚本：
+
+```bash
+./scripts/check-fast.sh
+```
+
+其余命令（安装依赖 / lint / 格式检查 / 测试）按本项目技术栈填写，须与 `AGENTS.md` §2「常用命令」完全一致。
 
 ## 发版
 
-发版**单独走一个 PR**，不要混进功能 PR 里顺手做。前置条件与步骤见 `AGENTS.md` §3「发版」，完整清单见 `docs/engineering/releasing.md`。
+发版**单独走一个 PR**，不要混进功能 PR 里顺手做。前置条件与步骤见 `AGENTS.md` §3「发版」，完整清单见 `.agents/releasing.md`。
 
 ## 红线与完成定义
 
 - 提交前请阅读 `AGENTS.md` 的「红线」。
-- 功能是否算完成，以 `docs/engineering/definition-of-done.md` 为准。
+- 功能是否算完成，以 `.agents/definition-of-done.md` 为准。
 
 ## 许可证
 

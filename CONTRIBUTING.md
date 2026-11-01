@@ -13,7 +13,7 @@
 - Conventional Commits，type 用英文前缀：
   `feat:`（新功能）`fix:`（修复）`docs:`（文档）`test:`（测试）`chore:`（杂项）`refactor:`（重构）`ci:`（CI）。
 - 描述可用中文，简明；标题总长 ≤ 72 字符。
-- 本仓库的架构决策只记在 `CHANGELOG.md`，不维护工具层 ADR（`template/docs/engineering/adr/` 属生成物）。
+- 本仓库的架构决策只记在 `CHANGELOG.md`，不维护工具层 ADR（`template/.agents/adr/` 属生成物）。
 
 ## CHANGELOG 条目写法
 
@@ -38,29 +38,24 @@
 
 ## 本地检查
 
-提交前至少跑这四条，完整清单见 [TEMPLATE.md](TEMPLATE.md)「改完模板后的自检」：
+提交前跑这两组，完整清单见 [TEMPLATE.md](TEMPLATE.md)「改完模板后的自检」：
 
 ```bash
-# 1) 脚本语法与 lint（CI 也会跑）
+# 1) 结构类断言：与 CI 同一份（AGENTS.md 行数、CHANGELOG 条目、
+#    payload 清单双向一致、索引模式、.agents 路由表覆盖、能力同步）
+./scripts/check-fast.sh
+
+# 2) 脚本语法与产物核对
 sh -n scripts/template-init.sh
 shellcheck scripts/*.sh
-
-# 2) 真实生成一个项目并核对结构
 T=$(mktemp -d) && ./scripts/template-init.sh "$T/proj"
 find "$T/proj" -maxdepth 1 -mindepth 1 -not -name '.git' | sort
+```
 
-# 3) 常驻上下文档体积（CI 也会跑）：两份 AGENTS.md 各 ≤ 200 行
-for f in AGENTS.md template/AGENTS.md; do n=$(wc -l < "$f"); echo "$f: $n 行"; [ "$n" -le 200 ]; done
+克隆后安装一次钩子，让 `git commit` 自动跑第一组（`--no-verify` 能绕过，不要用）：
 
-# 4) CHANGELOG 条目体积（CI 也会跑）：每个条目单行 ≤ 150 字符
-grep '^[[:space:]]*- ' CHANGELOG.md | {
-  bad=0
-  while IFS= read -r line; do
-    n=$(printf '%s' "$line" | LC_ALL=C.UTF-8 wc -m)
-    [ "$n" -le 150 ] || { echo "条目超 150 字符（当前 $n 字符）：$line"; bad=1; }
-  done
-  [ "$bad" -eq 0 ]
-}
+```bash
+git config core.hooksPath .githooks
 ```
 
 期望：产物里**没有** `template/`、`TEMPLATE.md`、`example/`、`scripts/template-init.sh`、`.github/workflows/ci.yml`，但**有** `README.md`、`AGENTS.md`、`LICENSE`、`.github/workflows/build.yml`，且无 `.gitkeep`、保留 `src/` `tests/` `scripts/` 三个目录。
@@ -71,7 +66,7 @@ CI 对 `example/` 的 lint/test 按改动范围触发：PR 只跑改动涉及的
 
 本仓库自身也发版（已有 `v0.1.0`）。发版**单独走一个 PR**，不要混进功能 PR：改根 `CHANGELOG.md` 的 `[Unreleased]` → 合入 `main` → 在 `main` 上打 tag → 建 Release。
 
-命名三要素：tag 用 `vX.Y.Z`（带 `v`）、Release title 与 tag 相同、`CHANGELOG.md` 版本节写 `[X.Y.Z] - 日期`（不带 `v`）。完整规则见 [AGENTS.md](AGENTS.md) §3「发版」；生成项目的同项能力见 `template/docs/engineering/releasing.md`。
+命名三要素：tag 用 `vX.Y.Z`（带 `v`）、Release title 与 tag 相同、`CHANGELOG.md` 版本节写 `[X.Y.Z] - 日期`（不带 `v`）。完整规则见 [AGENTS.md](AGENTS.md) §3「发版」；生成项目的同项能力见 `template/.agents/releasing.md`。
 
 ## 红线与完成定义
 
