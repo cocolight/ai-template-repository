@@ -30,7 +30,7 @@
 |------|------|
 | `docs` 全归使用者，工程文档进 `.agents/` | 取代 0.2.0 的 `docs/engineering/` 方案。判据只有一条：不读它 AI 会做错事吗？会 → `.agents/`，不会 → `docs`。规则比「模板在 `docs` 下只占一个目录」更强：模板一个字都不往 `docs` 放。代价：`.agents/` 是点目录，`grep` 默认搜不到，寻址只能靠 `AGENTS.md` §1 路由表 |
 | 不预置具体 skill，只给契约 | `.agents/skills/README.md` 定契约，`check-fast.sh` 校验 frontmatter，内容留给项目自建。预置只会得到一份写着 TODO 的存根，与「不预置社区健康文件」同一理由。厂商目录（`.claude/`、`.cursor/`）同理不预置，只给映射配方 |
-| 不维护工具层 ADR | ADR 整体属 payload（`template/docs/engineering/adr/`）；本仓库的架构决策记在 `CHANGELOG.md` |
+| 不维护工具层 ADR | ADR 整体属 payload（`template/.agents/adr/`）；本仓库的架构决策记在 `CHANGELOG.md` |
 | 关闭 GitHub Template 标记 | GitHub 打包整个仓库，「Use this template」会把工具层文件带进新项目；白名单只对 `template-init.sh` 生效。代价是失去「网页一键生成」 |
 | `example/` 与 `template/` 的内容同步靠人工 | 二者要展示「填空前后」的差异，不适合自动生成 |
 | `template/` → 根仓库的能力同步靠人工 | 两份 `AGENTS.md` 受众不同，同一能力需按各自视角表述，不适合逐字复制。机器只能兜住最低一层：`ci.yml` 的 changelog 门禁要求改 `template/` 必须记根 `CHANGELOG.md`；「是否已同步规则」由根 `AGENTS.md` §8 同改矩阵约束 |
