@@ -92,6 +92,37 @@ else
   bad "能力未同步回根仓库：$sync_bad"
 fi
 
+# 7. 工具层文档里的 `template/<path>` 必须真实存在。
+#    payload 内的相对链接由 build.yml 的死链检查兜；这一条兜的是工具层对 payload 的引用，
+#    目录一移动（如 docs/engineering → .agents）就会留一堆指向空处的旧路径。
+#    豁免两类：CHANGELOG 全篇是历史；ROADMAP 的 done / dropped 行是记录。二者都是「当时
+#    事实」，改了等于篡改历史，所以不参与判定。含通配符的 token 是示例，不是路径。
+ref_bad=""
+for f in *.md; do
+  [ "$f" = "CHANGELOG.md" ] || {
+    hit=$(awk '/\| *(done|dropped) *\|/ { next }
+               {
+                 s = $0
+                 while (match(s, /`template\/[^`]*`/)) {
+                   print substr(s, RSTART + 1, RLENGTH - 2)
+                   s = substr(s, RSTART + RLENGTH)
+                 }
+               }' "$f" | while IFS= read -r p; do
+                 case "$p" in
+                   *'*'*|*'{'*|*'<'*|*'$'*|*'~'*) continue ;;
+                 esac
+                 [ -e "$p" ] || printf '%s 引用不存在的路径：%s\n' "$f" "$p"
+               done)
+    [ -z "$hit" ] || ref_bad="$ref_bad
+$hit"
+  }
+done
+if [ -z "$ref_bad" ]; then
+  ok "工具层文档引用的 template/ 路径均存在"
+else
+  bad "工具层文档引用了不存在的 template/ 路径：$ref_bad"
+fi
+
 if [ "$fail" -ne 0 ]; then
   printf '\n工具层门禁未通过：修正后再提交。不要用 --no-verify 绕过。\n' >&2
   exit 1

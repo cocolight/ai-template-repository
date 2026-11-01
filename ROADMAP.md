@@ -23,6 +23,7 @@
 | 9 | 工程文档与 AI 工作区合并为 `.agents/`，`docs` 全归使用者 | done | 产物不含 `docs/`；`.agents/` 下每篇文档都在 `AGENTS.md` §1 路由表内（`scripts/check-fast.sh` 判定）；产物初始状态能跑通自身门禁 |
 | 10 | 提交前门禁与发版守卫 | done | `scripts/check-fast.sh` 在本地钩子与 CI 共用同一份，断言不复制进 `ci.yml`；`build.yml` 的 `Release guard` 在 tag 推送时校验版本节与 ROADMAP 状态 |
 | 11 | payload 清单独立为 `payload.txt` | done | 门禁与 `ci.yml` 都读同一份清单，`CHECKLIST` 不再硬编码在 workflow 里 |
+| 12 | 工具层文档对 payload 的路径引用纳入门禁 | done | 根 `scripts/check-fast.sh` 判定：反引号内 `template/<路径>` 必须存在；CHANGELOG 全篇与 ROADMAP 的 `done` / `dropped` 行豁免（历史记录不改写）。注入旧路径实测返回 `exit=1` |
 
 ## 已知取舍
 

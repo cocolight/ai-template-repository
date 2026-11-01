@@ -22,6 +22,7 @@
 - `build.yml` 新增 `Release guard`：tag 推送时校验 CHANGELOG 版本节存在、ROADMAP 无 in-progress
 - 根 `payload.txt`：payload 唯一机器清单，`ci.yml` 里硬编码的 CHECKLIST 改为读它
 - `ci.yml` 新增能力同步断言：`template/AGENTS.md` 有而根缺失的能力块会红
+- `scripts/check-fast.sh` 新增工具层文档断言：反引号里的 `template/<路径>` 必须存在，豁免 CHANGELOG 与 ROADMAP 的 done / dropped 行（理由：那两类是历史记录，改了等于篡改历史）
 
 ### 变更
 

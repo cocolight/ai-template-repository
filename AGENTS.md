@@ -118,7 +118,7 @@ Python / Rust 示例的真实检查命令见 `ci.yml` 的 `python-example` / `ru
 | 改了什么 | 同一回合必须过一遍 |
 |---|---|
 | `template/` 里新增 / 删除 payload 文件 | `payload.txt`（唯一机器清单，漏了门禁会红）+ `TEMPLATE.md`「模板包含什么」表 + `ci.yml` 的 smoke 正向断言 |
-| `template/` 里 payload 文件的**路径变化**（改名 / 移动） | 除上面一行外，还要过：`TEMPLATE.md`「新项目开工清单」与「哪些文件不要改」表、`TEMPLATE.md` 自检正向断言列表、`ci.yml` 的「仓库结构自检」；**payload 文档内的相对链接**（层级一变，`../x` 就会指空，由「产物内文档死链检查」判定）；以及根 `AGENTS.md` / `CONTRIBUTING.md` / `ROADMAP.md` / `CHANGELOG.md` 里的引用 |
+| `template/` 里 payload 文件的**路径变化**（改名 / 移动） | 除上面一行外，还要过：`TEMPLATE.md`「新项目开工清单」与「哪些文件不要改」表、`TEMPLATE.md` 自检正向断言列表、`ci.yml` 的「仓库结构自检」；**payload 文档内的相对链接**（层级一变，`../x` 就会指空，由「产物内文档死链检查」判定）；以及根 `AGENTS.md` / `CONTRIBUTING.md` / `ROADMAP.md` / `CHANGELOG.md` 里的引用 —— 工具层这侧的引用由 `scripts/check-fast.sh` 机械判定，漏改会红 |
 | `template/` 里的**规则 / 能力**（红线 / DoD / 工作流 / 矩阵） | 根 `AGENTS.md` 的对应章节；根 `CHANGELOG.md` 记录 |
 | `template/` 里的路径描述 | `TEMPLATE.md`「新项目开工清单」与「哪些文件不要改」 |
 | 根工具层文件的增 / 删 / 改名 | `README.md` 目录结构、`TEMPLATE.md`「不在你的项目里」、`ci.yml` 的「仓库结构自检」 |
@@ -128,7 +128,8 @@ Python / Rust 示例的真实检查命令见 `ci.yml` 的 `python-example` / `ru
 | 发版（打 tag / 建 Release） | §3「发版」；根 `CHANGELOG.md` 的 `[Unreleased]` 改名为 `[X.Y.Z] - 日期`（不带 v）并补回空节点。`template/.agents/releasing.md` 是同一能力的详细版，**两处不得打架** |
 | 章节标题 / 编号 | 全仓扫一遍按「§N」引用本文件的地方（根 `AGENTS.md`、`CONTRIBUTING.md`、`TEMPLATE.md`） |
 
-两条边界：
+三条边界：
 
 - **同步是单向的**：只从 `template/` 流向根仓库。工具层专属红线（「不得把 payload 文件放回仓库根目录」「不得让 `template/` 缺失」「占位符语义不可改」等）只对本仓库有意义，**不写进 `template/`**。
 - **同步的是「能力」，不是逐字复制**：两份 `AGENTS.md` 受众不同（根 = 维护本仓库，`template/` = 开发新项目），同一能力在两边用各自视角表述。开头的「两者内容不同，不要互相覆盖」指的是**不要互相覆盖文件**，不排斥能力同步。
+- **检查也是分层的**：工具层 `scripts/check-fast.sh` 比 payload 那份多一条「文档里的 `template/<路径>` 必须存在」。`template/` 这个前缀只在维护本仓库时存在，写进 payload 会让新项目对本不存在的路径报错，**不下沉**。回报是它替本仓库挡掉了目录移动后的残留旧路径。
