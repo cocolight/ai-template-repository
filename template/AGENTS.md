@@ -7,19 +7,27 @@
 
 {{PROJECT_NAME}} — （一句话说明本项目做什么）。
 
-## 1. 上下文入口（按此顺序阅读）
+## 1. 上下文入口（按任务路由，不要全读）
 
-1. `AGENTS.md`（本文件）— 规则与红线
-2. `ROADMAP.md` — 当前任务与「验收标准」
-3. `README.md` — 定位、安装、常用命令
-4. `docs/engineering/architecture.md` — 目录 / 分层 / 错误处理 / 日志 / 依赖规则
-5. `docs/engineering/definition-of-done.md` — 完成定义（DoD）
-6. `docs/engineering/adr/` — 已接受的架构决策（改动相关模块前先读）
-7. 与任务相关的源码与测试
+开任何任务先读本文件；其余按下表按需读，不要一次全读 —— 全读会挤掉代码上下文。
+
+| 你要做什么 | 先读 |
+|---|---|
+| 判断「算不算做完」 | `.agents/definition-of-done.md` |
+| 改代码前确认分层、依赖方向、腐化信号 | `.agents/architecture.md` |
+| 配置仓库 / CI / 分支保护 / 依赖安全 | `.agents/configuration.md` |
+| 打 tag、建 Release | `.agents/releasing.md` |
+| 动手前查「要加 X 改哪里」 | `.agents/extension-points.md` |
+| 改动涉及既有架构取舍 | `.agents/adr/`（先读索引） |
+| 加或改 AI skill | `.agents/skills/README.md` |
+| 确认当前任务与验收标准 | `ROADMAP.md` |
+| 安装、运行、给使用者的说明 | `README.md`、`docs` 目录 |
 
 > 事实以源码为准：用 `read` 看结构、`grep` 查事实，文档只给坐标。
+>
+> `.agents/` 是点目录，`grep` 默认搜不到它，所以上表是它唯一可靠的入口。
 
-> **文档落点**：`docs/engineering/` 是模板预置的工程协作文档（上面第 4–6 项，以及配置与发版），已由模板定稿，改动须走 §9 同改矩阵；**项目自己的文档放 `docs/` 下的其他位置** —— 按主题建子目录（使用指南、API 参考、教程等），不要写进 `docs/engineering/`。
+> **文档落点**：`.agents/` 是工程协作文档（AI 与人共读），改动须走 §9 同改矩阵；**`docs` 目录只放使用者文档**（安装、使用、API 参考、教程），工程文档一律不进 `docs`。`.agents/` 下新增 `.md` 必须在上表出现，否则 `scripts/check-fast.sh` 拦下。
 
 ## 2. 常用命令（可直接复制执行）
 
@@ -32,6 +40,7 @@
 | 测试 | （待填） |
 | Lint | （待填） |
 | 格式化检查 | （待填） |
+| 快速门禁（提交前与 CI 同跑，无需填写） | `./scripts/check-fast.sh` |
 
 ## 3. 工作流
 
@@ -43,7 +52,7 @@
 
 ### 发版（打 tag / 建 Release）
 
-> 发版不是「功能做完」的自然结果，而是一次独立动作：单独走一个 PR，合并后再打 tag。完整清单见 `docs/engineering/releasing.md`。
+> 发版不是「功能做完」的自然结果，而是一次独立动作：单独走一个 PR，合并后再打 tag。完整清单见 `.agents/releasing.md`。
 
 - **前置**：CI 全绿；`ROADMAP.md` 无 `in-progress` 行；`CHANGELOG.md` 的 `[Unreleased]` 已写全。
 - **命名**（三处必须一致）：tag 用 `vX.Y.Z`（带 `v`）；Release title 与 tag 完全相同；`CHANGELOG.md` 版本节写 `[X.Y.Z] - 日期`（**不带** `v`）。
@@ -60,7 +69,7 @@
 2. 大改动先确认：单次改动 > 5 个文件 或 > 200 行，先给方案，等确认再动手。
 3. 不得擅自 `git commit` / `push` / `push --tags` / `tag` / `rebase` / `reset` / `--force`、创建 Release、切分支或改远程；仅在明确要求时执行。**发版尤其如此**：tag 与 Release 面向使用者、发布后撤不干净，规则见 §3「发版」。
 4. 不得为了让检查「变绿」而修改 CI、hook、lint 配置或测试门禁。
-5. 不得修改 `docs/engineering/adr/` 中「已接受」的记录；变更须新增 ADR。
+5. 不得修改 `.agents/adr/` 中「已接受」的记录；变更须新增 ADR。
 6. 绝不提交密钥 / token / 私钥 / `.env`（用环境变量或仓库外文件）。
 
 **提醒级（须写明理由）**
@@ -72,14 +81,14 @@
     这类填充语。负面清单，命中即改：破折号插入语成墙；①②③④ 编号癖和多事项巨型长条目；辩护式长括号；
     无对应提交的「原先/之前」虚构历史；拟人化修辞对比；营销式分区标题；面向 AI 的过程说明与验证过程叙事。
 11. 常驻上下文文档控体积：`AGENTS.md` 不超过 200 行（CI 行数断言）。超限先拆：
-    详细内容下沉 `docs/engineering/` 详细版（同 `releasing.md` 之于 §3），本文件只留入口指针与红线。
+    详细内容下沉 `.agents/` 详细版（同 `releasing.md` 之于 §3），本文件只留入口指针与红线。
 12. 决策即时沉淀：重要取舍 / 非显而易见的决定，落仓库即生效，不依赖会话记忆——
     小决策随改动记 `CHANGELOG.md` 条目「（理由：一句话）」，需留痕的架构决策新增一条 ADR（§9）。
     对话会消失，仓库才是记忆。
 
 ## 5. 完成定义（DoD）
 
-详见 `docs/engineering/definition-of-done.md`。任一功能完成须同时满足：
+详见 `.agents/definition-of-done.md`。任一功能完成须同时满足：
 
 - [ ] `ROADMAP.md` 该行「验收标准」全部满足
 - [ ] 新增 / 更新对应测试符合测试质量基线（断言行为而非实现、测试名说清场景、拒绝空转断言），全量测试通过
@@ -119,10 +128,12 @@
 
 | 改了什么 | 同回合必须过一遍 |
 |---|---|
-| 架构 / 分层 / 不变式 | `docs/engineering/architecture.md`；需要留痕的追加 `docs/engineering/adr/` |
-| 配置项 / 设置键 / 命令行参数 | `docs/engineering/configuration.md` + §8 坐标表对应行 |
-| 命令或门禁 | §2 常用命令 → `CONTRIBUTING.md` → `.github/workflows/build.yml`，三者必须一致 |
-| 红线 / DoD | `docs/engineering/definition-of-done.md` 同步（不得放宽） |
+| `.agents/` 下新增 / 改名 / 删除 `.md` | §1 路由表（漏了 `scripts/check-fast.sh` 会拦） |
+| 架构 / 分层 / 不变式 | `.agents/architecture.md`；需要留痕的追加 `.agents/adr/` |
+| 配置项 / 设置键 / 命令行参数 | `.agents/configuration.md` + §8 坐标表对应行 |
+| 命令或门禁 | §2 常用命令 → `CONTRIBUTING.md` → `scripts/check-fast.sh` → `.github/workflows/build.yml`，四处必须一致 |
+| `scripts/check-fast.sh` 或 `.githooks/` | CI 调用同一步：本地与 CI 共用一份断言，不得各写一遍 |
+| 红线 / DoD | `.agents/definition-of-done.md` 同步（不得放宽） |
 | 章节标题 | 全仓扫一遍按「§N」引用本文件的地方 |
-| 决策理由变更 | 新增一条 ADR，`docs/engineering/adr/` 旧记录原样保留 |
-| 发版（打 tag / 建 Release） | 按 §3「发版」与 `docs/engineering/releasing.md` 的清单执行；同一回合过一遍：tag 与 Release title 都是 `vX.Y.Z`、`CHANGELOG.md` 版本节是 `[X.Y.Z] - 日期`（不带 v）且顶部已补回空的 `[Unreleased]`、§8 坐标表指向的版本号事实源已同步 |
+| 决策理由变更 | 新增一条 ADR，`.agents/adr/` 旧记录原样保留 |
+| 发版（打 tag / 建 Release） | 按 §3「发版」与 `.agents/releasing.md` 的清单执行；同一回合过一遍：tag 与 Release title 都是 `vX.Y.Z`、`CHANGELOG.md` 版本节是 `[X.Y.Z] - 日期`（不带 v）且顶部已补回空的 `[Unreleased]`、§8 坐标表指向的版本号事实源已同步 |

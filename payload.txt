@@ -1,0 +1,27 @@
+# payload 权威清单：template/ 下会被复制进新项目的全部文件。
+#
+# 本文件是唯一机器清单，scripts/check-fast.sh 与 ci.yml 都读它 —— 不要再往
+# workflow 或文档里硬编码第二份。
+# 增删 payload 文件时同步本文件；空目录（src/ tests/ scripts/）由 .gitkeep 维持，不列入。
+AGENTS.md
+CHANGELOG.md
+CONTRIBUTING.md
+LICENSE
+README.md
+ROADMAP.md
+THIRD-PARTY.md
+.agents/architecture.md
+.agents/configuration.md
+.agents/definition-of-done.md
+.agents/extension-points.md
+.agents/releasing.md
+.agents/adr/0001-record-architecture-decisions.md
+.agents/adr/README.md
+.agents/adr/template.md
+.agents/skills/README.md
+.githooks/pre-commit
+.github/pull_request_template.md
+.github/workflows/build.yml
+.gitattributes
+.gitignore
+scripts/check-fast.sh

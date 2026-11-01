@@ -12,6 +12,28 @@
 
 ## [Unreleased]
 
+### 新增
+
+- `.agents/` 取代 `docs/engineering/`：工程文档与 AI 工作区合并，`docs` 全归使用者（理由：两类文档的读者与加载时机相反，混住必然杂糅）
+- `template/AGENTS.md` §1 改为任务路由表，`.agents/` 下文档漏登记即被 `scripts/check-fast.sh` 拦下
+- `.agents/extension-points.md`：「要加 X 改哪里」，覆盖规则 / 文档 / CI 检查 / 决策 / skill / 换技术栈
+- `.agents/skills/` 插槽：契约加 frontmatter 校验，不预置具体 skill 与厂商目录
+- `scripts/check-fast.sh` 与 `.githooks/pre-commit`：本地钩子与 CI 共用一份断言，不重复实现
+- `build.yml` 新增 `Release guard`：tag 推送时校验 CHANGELOG 版本节存在、ROADMAP 无 in-progress
+- 根 `payload.txt`：payload 唯一机器清单，`ci.yml` 里硬编码的 CHECKLIST 改为读它
+- `ci.yml` 新增能力同步断言：`template/AGENTS.md` 有而根缺失的能力块会红
+- `scripts/check-fast.sh` 新增工具层文档断言：反引号里的 `template/<路径>` 必须存在，豁免 CHANGELOG 与 ROADMAP 的 done / dropped 行（理由：那两类是历史记录，改了等于篡改历史）
+
+### 变更
+
+- 工具层门禁收敛：行数、CHANGELOG 条目、索引模式、清单一致性等断言从 `ci.yml` 移入 `scripts/check-fast.sh`
+- `configuration.md` §6 重写：工程文档移出 `docs` 后，文档站误发布的问题消失，改为提示 `docs` 内容全部公开
+- `TEMPLATE.md` 三张表与自检断言同步新路径；产物断言新增「不得存在 `docs/`」
+
+### 修复
+
+- 产物死链检查：`.claude/`、`.cursor/` 属外部工具约定路径，加豁免避免 skill 文档必然报死链
+
 ## [0.4.0] - 2026-11-01
 
 ### 新增

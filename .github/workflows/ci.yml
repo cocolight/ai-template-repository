@@ -6,6 +6,7 @@ name: CI
 on:
   push:
     branches: [main]
+    tags: ['v*']
   pull_request:
 
 permissions:
@@ -18,11 +19,20 @@ jobs:
   template:
     # 注意：本 job 的 name 被 main 的分支保护（required status checks）引用，改名前先改保护设置
     name: Template (shellcheck + init dry-run)
+    # tag 推送只走 release-guard，不重跑全量
+    if: ${{ !startsWith(github.ref, 'refs/tags/') }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
       - name: ShellCheck
-        run: shellcheck scripts/*.sh
+        run: shellcheck scripts/*.sh template/scripts/*.sh template/.githooks/* .githooks/*
+
+      # 结构类断言只有一份，在 scripts/check-fast.sh：本地 pre-commit 与这里跑同一个脚本。
+      # 覆盖 AGENTS.md 行数、CHANGELOG 条目体积、payload 清单双向一致、索引模式、
+      # .agents/ 路由表覆盖、两份 .gitattributes 一致、工具层文件不得混入 template/、能力同步。
+      # 下面不再逐条重复这些断言 —— 两份必然漂移。
+      - name: 快速门禁（工具层 + payload）
+        run: ./scripts/check-fast.sh
       - name: template-init smoke test
         # dry-run 只验证参数解析；真实生成才能覆盖复制逻辑（占位文件跳过、空目录保留）。
         # 每条断言都写成"失败即 exit 1"，不依赖 errexit 的生效范围。
@@ -45,11 +55,13 @@ jobs:
           # 复制源是 template/，这些文件物理上就不在复制源里。
           # 注意：不要把 .github/pull_request_template.md 加进本清单 ——
           # 产物里有 payload 自带的同名文件，加了必假阳。
-          for f in template TEMPLATE.md example scripts/template-init.sh .github/workflows/ci.yml; do
+          for f in template TEMPLATE.md payload.txt example scripts/template-init.sh .github/workflows/ci.yml; do
             [ ! -e "$DST/$f" ] || { echo "产物泄露了工具层文件：$f"; exit 1; }
           done
           # .workbuddy 是本地 AI 工具数据，在仓库根；白名单已天然排除，此处显式断言
           [ ! -e "$DST/.workbuddy" ] || { echo "产物泄露了 .workbuddy/"; exit 1; }
+          # 工程文档在 .agents/，docs/ 全归使用者，模板不预置任何文件
+          [ ! -e "$DST/docs" ] || { echo "产物不应预置 docs/：工程文档属于 .agents/"; exit 1; }
 
           # --- 正向断言：payload 必须真的复制到位 ---
           # 仅有反向断言时，复制阶段整体失效会全绿通过（例如 .gitkeep 数=0、
@@ -58,13 +70,21 @@ jobs:
                    THIRD-PARTY.md \
                    .gitignore .gitattributes \
                    .github/workflows/build.yml \
-                   docs/engineering/architecture.md docs/engineering/configuration.md docs/engineering/definition-of-done.md \
-                   docs/engineering/releasing.md \
-                   docs/engineering/adr/README.md docs/engineering/adr/0001-record-architecture-decisions.md; do
+                   .githooks/pre-commit scripts/check-fast.sh \
+                   .agents/architecture.md .agents/configuration.md .agents/definition-of-done.md \
+                   .agents/releasing.md .agents/extension-points.md \
+                   .agents/skills/README.md \
+                   .agents/adr/README.md .agents/adr/0001-record-architecture-decisions.md; do
             [ -f "$DST/$f" ] || { echo "产物缺少文件：$f"; exit 1; }
           done
           [ -d "$DST/.github/workflows" ] || { echo "产物缺少目录：.github/workflows"; exit 1; }
           [ "$(ls "$DST/.github/workflows" | wc -l)" -eq 1 ] || { echo "产物里不止 build.yml 一个 workflow"; exit 1; }
+
+          # --- 产物自身的门禁必须能跑 ---
+          # 可执行位缺失在 Windows 上本地测不出，这里连权限一起验证。
+          [ -x "$DST/scripts/check-fast.sh" ] || { echo "产物里 check-fast.sh 没有可执行位"; exit 1; }
+          [ -x "$DST/.githooks/pre-commit" ] || { echo "产物里 pre-commit 没有可执行位"; exit 1; }
+          ( cd "$DST" && ./scripts/check-fast.sh ) || { echo "产物在初始状态下就过不了自己的门禁"; exit 1; }
 
           # --- 行尾规则一致性：两份 .gitattributes 必须相同 ---
           # 根那份递归覆盖 template/**（已实测），内容一致时无歧义。
@@ -73,109 +93,29 @@ jobs:
           git check-attr eol -- scripts/template-init.sh | grep -q 'eol: lf' \
             || { echo "scripts/template-init.sh 未被 eol=lf 覆盖"; exit 1; }
 
-      - name: payload 索引模式
-        # template/ 下的文件全部应是 100644；可执行位变化会影响新项目里的脚本
-        run: |
-          set -eu
-          test -z "$(git ls-files -s template/ | grep -v '^100644 ')" \
-            || { echo "template/ 下存在非 100644 的文件"; git ls-files -s template/ | grep -v '^100644 '; exit 1; }
-          git ls-files -s scripts/template-init.sh | grep -q '^100755 ' \
-            || { echo "scripts/template-init.sh 索引模式不是 100755"; exit 1; }
-
       - name: 仓库结构自检
         # 守住「两层结构」这个核心性质：根是工具层，template/ 是数据层
         run: |
           set -eu
           for p in template/README.md template/AGENTS.md template/LICENSE \
-                   template/docs/engineering/architecture.md template/.github/workflows/build.yml; do
+                   template/.agents/architecture.md template/.github/workflows/build.yml \
+                   template/scripts/check-fast.sh template/.githooks/pre-commit; do
             [ -e "$p" ] || { echo "仓库结构异常，缺少：$p"; exit 1; }
           done
+          # 工程文档在 .agents/，template/ 下不该再有 docs/
+          [ ! -e template/docs ] || { echo "template/ 下不该有 docs/：工程文档属 .agents/，docs/ 归使用者"; exit 1; }
           # 工具层文件不得出现在 template/ 里（放错位置会被复制进新项目）
-          for f in TEMPLATE.md example .gitkeep.bak; do
+          for f in TEMPLATE.md payload.txt example .gitkeep.bak; do
             [ ! -e "template/$f" ] || { echo "template/ 里混入了工具层文件：$f"; exit 1; }
           done
           [ -e TEMPLATE.md ] || { echo "根 TEMPLATE.md 丢失"; exit 1; }
+          [ -e payload.txt ] || { echo "根 payload.txt 丢失（唯一机器清单）"; exit 1; }
           [ -e .github/pull_request_template.md ] || { echo "根 .github/pull_request_template.md 丢失"; exit 1; }
           [ -e example/README.md ] || { echo "example/ 丢失"; exit 1; }
           # build.yml 必须只在 template/ 下（留在根上会让本仓库跑一个空壳 job）
           [ ! -e .github/workflows/build.yml ] || { echo "build.yml 仍在根 .github/workflows/，必须移入 template/"; exit 1; }
           [ -e .github/workflows/ci.yml ] || { echo "根 ci.yml 丢失"; exit 1; }
-
-      - name: 常驻上下文档体积断言
-        # AGENTS.md 是每次 AI 会话开工必读的常驻文档，体积即上下文预算。
-        # 阈值 200 行，与两份 AGENTS.md §4「常驻上下文文档控体积」条目一致；
-        # 超限先拆：细节下沉详细文档，AGENTS.md 只留入口指针与红线。
-        run: |
-          set -eu
-          for f in AGENTS.md template/AGENTS.md; do
-            n=$(wc -l < "$f")
-            echo "$f: $n 行"
-            [ "$n" -le 200 ] || { echo "$f 超过 200 行（当前 $n 行）：拆详细版下沉详细文档，AGENTS.md 只留入口与红线"; exit 1; }
-          done
-
-      - name: CHANGELOG 条目体积断言
-        # 发布说明取自 CHANGELOG 版本节（AGENTS.md §3 发版），条目即 Release 正文。
-        # 单条 ≤ 150 字符（wc -m 按字符计），防多事项巨型长条目；
-        # 写法约定见 CONTRIBUTING.md「CHANGELOG 条目写法」。
-        run: |
-          set -eu
-          grep '^[[:space:]]*- ' CHANGELOG.md | {
-            bad=0
-            while IFS= read -r line; do
-              n=$(printf '%s' "$line" | LC_ALL=C.UTF-8 wc -m)
-              [ "$n" -le 150 ] || { echo "条目超 150 字符（当前 $n 字符）：$line"; bad=1; }
-            done
-            [ "$bad" -eq 0 ]
-          }
-
-      - name: 开工清单与 payload 一致性
-        # ROADMAP 第 4/6 项：TEMPLATE.md 的「新项目开工清单」与 template/ 实际内容
-        # 需保持一致。此前只靠人工核对，改名/删文件/加文件都不会被发现。
-        #
-        # 双向校验：
-        #   1) 下面这份权威清单里的每个文件都必须在 template/ 下真实存在
-        #   2) template/ 下的每个非 .gitkeep 文件都必须在这份清单里
-        # 两个方向都查 —— 只查 1) 漏了新文件，只查 2) 漏了删除。
-        #
-        # 改 payload 时：若新增文件，把对应路径加进 CHECKLIST；若删除，
-        # 从 CHECKLIST 移除。清单与 TEMPLATE.md 的开工清单应同步更新。
-        run: |
-          set -eu
-          CHECKLIST="AGENTS.md
-          CHANGELOG.md
-          CONTRIBUTING.md
-          LICENSE
-          THIRD-PARTY.md
-          README.md
-          ROADMAP.md
-          .gitattributes
-          .gitignore
-          .github/workflows/build.yml
-          .github/pull_request_template.md
-          docs/engineering/adr/0001-record-architecture-decisions.md
-          docs/engineering/adr/README.md
-          docs/engineering/adr/template.md
-          docs/engineering/architecture.md
-          docs/engineering/configuration.md
-          docs/engineering/definition-of-done.md
-          docs/engineering/releasing.md"
-
-          # 1) 清单里的文件必须存在
-          echo "$CHECKLIST" | while IFS= read -r f; do
-            [ -n "$f" ] || continue
-            [ -f "template/$f" ] || { echo "清单里的文件不存在：template/$f"; exit 1; }
-          done
-
-          # 2) template/ 下的文件必须在清单里（.gitkeep 是占位文件，不算 payload）
-          miss=0
-          for f in $(cd template && find . -type f ! -name '.gitkeep' | sed 's|^\./||' | sort); do
-            if ! echo "$CHECKLIST" | grep -qxF "$f"; then
-              echo "template/$f 未列入 payload 清单"
-              miss=1
-            fi
-          done
-          [ "$miss" -eq 0 ] || exit 1
-          echo "payload 清单与 template/ 内容一致"
+          [ -e .githooks/pre-commit ] || { echo "根 .githooks/pre-commit 丢失"; exit 1; }
 
       - name: 产物内文档死链检查
         # 生成本身不校验文档引用：payload 里的文件被复制进新项目后，
@@ -184,7 +124,7 @@ jobs:
         #
         # 校验两种写法：
         #   1) Markdown 链接 ](path)
-        #   2) 反引号路径 `path.ext`（文档里更常见，例如 AGENTS.md 里的 docs/engineering/architecture.md）
+        #   2) 反引号路径 `path.ext`（文档里更常见，例如 AGENTS.md 里的 .agents/architecture.md）
         # 路径按「相对当前目录」与「相对仓库根」两种方式解析——payload 里的文档
         # 习惯写仓库根相对路径。
         #
@@ -211,6 +151,8 @@ jobs:
                   case "$base" in
                     http*|mailto:*|"") continue ;;
                     NNNN-*|*.example|./scripts/*) continue ;;
+                    # 其他 AI 工具的目录约定：文档里说明映射位置用，仓库不预置，不是死链
+                    .claude/*|.cursor/*) continue ;;
                   esac
                   [ -e "$d/$base" ] || [ -e "$base" ] || echo "${f#./} → ${l}"
                 done
@@ -226,6 +168,7 @@ jobs:
   # 跳过的 job 报 Success（GitHub 官方语义），不阻塞分支保护的 required check。
   changes:
     name: Change detection
+    if: ${{ !startsWith(github.ref, 'refs/tags/') }}
     runs-on: ubuntu-24.04
     outputs:
       python: ${{ steps.detect.outputs.python }}
@@ -266,7 +209,7 @@ jobs:
     name: Python example (ruff + pytest)
     needs: changes
     # 只有显式 false 才跳过（见 changes job 的 fail-safe 说明）；拿不准 → 照跑。
-    if: needs.changes.outputs.python != 'false'
+    if: needs.changes.outputs.python != 'false' && !startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-24.04
     defaults:
       run:
@@ -292,7 +235,7 @@ jobs:
     name: Rust example (fmt + clippy + test)
     needs: changes
     # 只有显式 false 才跳过（见 changes job 的 fail-safe 说明）；拿不准 → 照跑。
-    if: needs.changes.outputs.rust != 'false'
+    if: needs.changes.outputs.rust != 'false' && !startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-24.04
     defaults:
       run:
@@ -351,3 +294,28 @@ jobs:
           fi
           echo "::error::改动了 template/ 必须在根 CHANGELOG.md 的 [Unreleased] 记录（或 PR 描述加 [skip changelog]）"
           exit 1
+
+  # 发版守卫：与本仓库教给生成项目的能力对齐（template/.github/workflows/build.yml 的同名 job）。
+  # tag 不可逆，把 §3「发版」的前置条件从文档里的自觉改成可回滚的失败。
+  release-guard:
+    name: Release guard
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: tag 与 CHANGELOG / ROADMAP 一致性
+        run: |
+          set -eu
+          TAG="${GITHUB_REF#refs/tags/}"
+          VER="${TAG#v}"
+          printf 'tag=%s version=%s\n' "$TAG" "$VER"
+          if ! grep -qE "^## \[$VER\] - " CHANGELOG.md; then
+            printf '::error::根 CHANGELOG.md 缺少版本节 [%s] - 日期（tag 为 %s）\n' "$VER" "$TAG"
+            exit 1
+          fi
+          if grep -qE '\|[[:space:]]*in-progress[[:space:]]*\|' ROADMAP.md; then
+            printf '::error::ROADMAP.md 仍有 in-progress 行，发版前置未满足\n'
+            exit 1
+          fi
+          printf 'release guard 通过\n'

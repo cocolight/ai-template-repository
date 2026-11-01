@@ -43,12 +43,16 @@ ai-template-repository/
 ├── README.md            # 本文件：仓库自述
 ├── AGENTS.md            # 维护本仓库的行为规则
 ├── TEMPLATE.md          # 模板使用手册：开工清单、哪些文件不能改
+├── payload.txt          # payload 权威清单：门禁与 CI 都读它，不要再硬编码第二份
 ├── CONTRIBUTING.md      # 贡献指南 + 维护自检命令
 ├── ROADMAP.md           # 本仓库功能路线
 ├── CHANGELOG.md         # 本仓库变更记录
 ├── LICENSE              # 本仓库许可证
 ├── scripts/
-│   └── template-init.sh # 项目生成器
+│   ├── template-init.sh # 项目生成器
+│   └── check-fast.sh    # 工具层 + payload 门禁（本地钩子与 CI 共用）
+├── .githooks/
+│   └── pre-commit       # 提交前门禁（git config core.hooksPath .githooks）
 ├── .github/
 │   ├── workflows/
 │   │   └── ci.yml       # 校验脚本 + 按改动范围跑 example/ 的 lint 与测试
@@ -56,10 +60,12 @@ ai-template-repository/
 ├── example/             # 填好的示例项目（Python / Rust），仅供参照，不会进新项目
 └── template/            # ★ 项目骨架，整目录复制进新项目
     ├── README.md / AGENTS.md / ROADMAP.md / CONTRIBUTING.md / CHANGELOG.md
-    ├── LICENSE / .gitignore / .gitattributes
-    ├── docs/            # 架构、配置、DoD、ADR
+    ├── LICENSE / THIRD-PARTY.md / .gitignore / .gitattributes
+    ├── .agents/         # 工程协作文档：架构、配置、DoD、发版、扩展点、ADR、skills
+    ├── .githooks/       # 提交前门禁
     ├── .github/workflows/build.yml
-    ├── src/  tests/  scripts/   # 空目录占位
+    ├── scripts/check-fast.sh
+    └── src/  tests/     # 空目录占位
 ```
 
 ## 想改模板内容？
@@ -69,10 +75,12 @@ ai-template-repository/
 
 | 想做的事 | 放哪 |
 |---------|------|
-| 让文件进新项目 | `template/` 下 |
+| 让文件进新项目 | `template/` 下，并在 [`payload.txt`](payload.txt) 加一行 |
 | 只服务于本仓库 | 仓库根目录 |
 | 给新项目换 CI 骨架 | `template/.github/workflows/` |
-| 给本仓库加检查 | `.github/workflows/ci.yml` |
+| 给本仓库加检查 | `scripts/check-fast.sh`（本地钩子与 CI 共用）或 `.github/workflows/ci.yml` |
+
+`payload.txt` 是**正向清单**（列有什么），不是排除清单。它原本硬编码在 `ci.yml` 的一个 step 里，现在挪成独立文件，负担没有增加，只是位置集中、门禁与文档都能读同一份。生成器仍然不用改：复制是白名单，清单只服务于校验。
 
 ## 下一步
 

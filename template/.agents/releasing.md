@@ -1,7 +1,7 @@
 # 发版（Releasing）
 
 > 本文是 `AGENTS.md` §3「发版」的详细版，也是 §9 同改矩阵「发版」行的落点。
-> 本文只展开步骤，**不得放宽** `AGENTS.md` 的红线与 `docs/engineering/definition-of-done.md` 的完成定义。
+> 本文只展开步骤，**不得放宽** `AGENTS.md` 的红线与 `definition-of-done.md` 的完成定义。
 
 ## 1. 什么条件才可发版
 
@@ -12,6 +12,8 @@
 - [ ] CI 在待发版的那个 commit 上全绿
 - [ ] `CHANGELOG.md` 的 `[Unreleased]` 已写全本次要发的改动，且分类（Added / Changed / Fixed …）正确
 - [ ] 待发版 commit 已经合入 `main`（只在 `main` 上发版，不在功能分支上发）
+
+> 这份清单有机械兜底：推送 `v*` tag 时 `build.yml` 的 `Release guard` 会校验 `CHANGELOG.md` 有对应版本节、`ROADMAP.md` 无 `in-progress` 行。漏了前置条件，流水线直接红。
 
 ## 2. 命名 —— 本次唯一的硬规则
 

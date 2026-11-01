@@ -51,24 +51,28 @@ cd my-project
 
 | 文件 | 作用 |
 |------|------|
-| `AGENTS.md` | 给 AI 编码助手的规则：上下文入口、常用命令、红线（分级）、DoD、单一事实源坐标、同改矩阵 |
+| `AGENTS.md` | 给 AI 编码助手的规则：路由表、常用命令、红线（分级）、DoD、单一事实源坐标、同改矩阵 |
 | `README.md` | 项目说明骨架（含 TODO 占位） |
 | `ROADMAP.md` | 功能清单 + **验收标准** 列 |
-| `CONTRIBUTING.md` | 分支 / 提交 / PR 规范 |
+| `CONTRIBUTING.md` | 分支 / 提交 / PR 规范、本地检查与钩子安装 |
 | `CHANGELOG.md` | 变更记录骨架（Keep a Changelog） |
-| `docs/engineering/architecture.md` | 架构与代码约定 |
-| `docs/engineering/configuration.md` | 仓库与项目配置说明（环境 / Git / 行尾 / CI / 分支保护 / 依赖安全 / 文档站） |
-| `docs/engineering/definition-of-done.md` | 完成定义（DoD） |
-| `docs/engineering/releasing.md` | 发版流程：前置条件、命名规则（tag / Release title / CHANGELOG 版本节）、常见错误 |
-| `docs/engineering/adr/` | 架构决策记录（含模板与首条记录） |
+| `.agents/architecture.md` | 架构与代码约定 |
+| `.agents/configuration.md` | 仓库与项目配置说明（环境 / Git / 行尾 / CI / 分支保护 / 依赖安全 / 文档站） |
+| `.agents/definition-of-done.md` | 完成定义（DoD）+ 测试质量基线 |
+| `.agents/extension-points.md` | 「要加 X 改哪里」：加规则 / 文档 / CI 检查 / 决策 / skill / 换技术栈 |
+| `.agents/releasing.md` | 发版流程：前置条件、命名规则（tag / Release title / CHANGELOG 版本节）、常见错误 |
+| `.agents/adr/` | 架构决策记录（含模板与首条记录） |
+| `.agents/skills/README.md` | AI skill 的契约与工具映射（模板不预置具体 skill） |
 | `LICENSE` | MIT 许可证正文（年份与项目名已由脚本填好） |
 | `THIRD-PARTY.md` | 第三方依赖许可证记录（每引入一个直接依赖须登记：许可证 / 用途 / 是否随分发） |
 | `.gitignore` / `.gitattributes` | 依赖忽略规则；强制库内 LF，防止脚本在 Windows 被检出为 CRLF |
-| `.github/workflows/build.yml` | CI 门禁骨架（需按技术栈补全） |
+| `.github/workflows/build.yml` | CI 门禁骨架：快速门禁 + 发版守卫（测试步骤需按技术栈补全） |
 | `.github/pull_request_template.md` | PR 描述骨架：做了什么 / 关联 ROADMAP 行 / 检查项（含 CHANGELOG） |
-| `src/` `tests/` `scripts/` | 空目录（占位文件不复制，目录保留） |
+| `.githooks/pre-commit` | 提交前门禁，调 `scripts/check-fast.sh`（需 `git config core.hooksPath .githooks`） |
+| `scripts/check-fast.sh` | 结构类断言，本地钩子与 CI 共用同一份 |
+| `src/` `tests/` | 空目录（占位文件不复制，目录保留） |
 
-> `docs/` 下**只有 `docs/engineering/` 是模板预置的**（工程协作文档：架构 / 配置 / DoD / 发版 / ADR）。其余位置留给**项目自己的文档** —— 使用指南、API 参考、教程等按主题建子目录。分开的理由：前者是「判定基准」，受红线与同改矩阵约束、生命周期稳定；后者面向使用者、随版本频繁重写，两者的读者与可变性正好相反。这条分工同时写进了产物里的 `README.md` 与 `AGENTS.md`。
+> 模板**不往 `docs` 放任何东西**：`docs` 全归使用者文档，按需自建。工程协作文档一律在 `.agents/`。判据只有一条：**不读它 AI 会做错事吗？** 会 → `.agents/`；不会 → `docs`。这条分工同时写进了产物里的 `README.md` 与 `AGENTS.md`。
 
 `example/` 下两个填好的示例（Python / Rust）在**仓库根**，仅供参照，**不会**复制进新项目。
 
@@ -78,9 +82,9 @@ cd my-project
 
 > **就绪门槛**：第 2 步的 §2/§8、第 5 步的 build.yml 未填实前，项目处于未就绪状态——AI 不得声称「已跑过测试 / 检查」（`template/AGENTS.md` §2 已有此护栏），验证结论一律标注「未验证」。
 
-> `.gitkeep` 占位文件只服务于模板仓库自身（让 Git 能跟踪空目录），`template-init.sh` **在复制阶段就跳过它们**，所以产物里**不含任何 `.gitkeep`**；而"只含占位文件的空目录"（`src/`、`tests/`、`scripts/`）仍然保留，只是里面没有占位文件。新项目里不用再手工清理占位文件。
+> `.gitkeep` 占位文件只服务于模板仓库自身（让 Git 能跟踪空目录），`template-init.sh` **在复制阶段就跳过它们**，所以产物里**不含任何 `.gitkeep`**；而只含占位文件的空目录（`src/`、`tests/`）仍然保留，只是里面没有占位文件。`scripts/` 已有真实文件，不涉及占位。新项目里不用再手工清理占位文件。
 >
-> 唯一残留限制：Git 本身不跟踪空目录，所以这三个空目录不会进入新项目的**首次提交**。往 `src/`、`tests/` 里放进第一个真实文件（例如初始化骨架、写第一个测试）就会被自动纳入版本控制，无需额外操作。
+> 唯一残留限制：Git 本身不跟踪空目录，所以 `src/`、`tests/` 不会进入新项目的**首次提交**。往里面放进第一个真实文件（例如初始化骨架、写第一个测试）就会被自动纳入版本控制，无需额外操作。
 >
 > 下表所有路径都是**新项目内**的路径（产物里已不含 `template/` 这一层）。
 
@@ -91,15 +95,15 @@ cd my-project
 | 3 | `README.md` | 开头的简介、`## 功能` 列表，以及 3 处 `<!-- TODO -->`（安装 / 运行 / 测试命令） | 文件里不再有 `TODO` |
 | 4 | `ROADMAP.md` | 写首批功能；每条「验收标准」必须**能被命令或明确检查验证** | 每条你都能说出"怎么验证它完成了" |
 | 5 | `.github/workflows/build.yml` | 把占位 step 换成真实命令（文件里的 TODO 注释已列出要填哪几步） | 本地跑一遍同样的命令，全绿 |
-| 6 | `docs/engineering/architecture.md` | §1 补目录分层；§3 补本项目技术栈的错误处理策略 | 与代码实际结构一致 |
+| 6 | `.agents/architecture.md` | §1 补目录分层；§3 补本项目技术栈的错误处理策略 | 与代码实际结构一致 |
 | 7 | `CONTRIBUTING.md` | 「本地检查」那一行填成本项目的真实命令 | 与 `AGENTS.md` §2 完全一致 |
-| 8 | GitHub 仓库设置（不是文件） | 启用 Actions → 收紧 Workflow permissions → 为 `main` 开分支保护 + required status checks | 见 [docs/engineering/configuration.md](template/docs/engineering/configuration.md) §4 |
+| 8 | GitHub 仓库设置（不是文件） | 启用 Actions → 收紧 Workflow permissions → 为 `main` 开分支保护 + required status checks | 见 [.agents/configuration.md](template/.agents/configuration.md) §4 |
 
 第 8 步的坑：required status checks 的名字**必须等于 workflow 里的 job 名**。`build.yml` 的 job id 是 `test` 且未设 `name`，所以在列表里搜 `test`；一旦改了 job 名，这里要同步改。
 
-**若仓库要公开（可选，不属于上面 8 步）**：GitHub 还推荐一组社区健康文件（行为准则、安全策略、求助渠道、issue 表单），新项目里**没带** —— 这是有意不预置：它们全都要项目级信息（举报渠道、求助渠道、issue 字段），预置只会得到一份写着 TODO 的存根，对私有仓库也没有意义。真要公开时，GitHub 在 **Insights → Community Standards** 会列出缺哪几项，每项都有 **Add** 按钮可直接套官方模板新建。详见 [docs/engineering/configuration.md](template/docs/engineering/configuration.md) §4。
+**若仓库要公开（可选，不属于上面 8 步）**：GitHub 还推荐一组社区健康文件（行为准则、安全策略、求助渠道、issue 表单），新项目里**没带** —— 这是有意不预置：它们全都要项目级信息（举报渠道、求助渠道、issue 字段），预置只会得到一份写着 TODO 的存根，对私有仓库也没有意义。真要公开时，GitHub 在 **Insights → Community Standards** 会列出缺哪几项，每项都有 **Add** 按钮可直接套官方模板新建。详见 [.agents/configuration.md](template/.agents/configuration.md) §4。
 
-**若要做文档站（可选，不属于上面 8 步）**：把仓库的 `docs/` 直接当作静态站发布源时，`docs/engineering/` 会被一并发布 —— 它装的是工程协作文档，不是对外内容；而且发布出去的内容**在公网可访问，即使仓库是私有的**。这只跟构建有关、与文件放哪无关：首选改用 Actions 发布、只上传构建产物，或在站点配置里排除该目录。详见 [docs/engineering/configuration.md](template/docs/engineering/configuration.md) §6。
+**若要做文档站（可选，不属于上面 8 步）**：`docs` 可以整体当作静态站发布源 —— 工程文档在 `.agents/`，不会被带上。要注意发布出去的内容**在公网可访问，即使仓库是私有的**，所以 `docs` 里不要放内部草稿。详见 [.agents/configuration.md](template/.agents/configuration.md) §6。
 
 **开工前先跑这两条自检**：
 
@@ -114,7 +118,7 @@ grep -rnE '\{\{(PROJECT_NAME|YEAR)\}\}' . --exclude-dir=.git
 git ls-files -s scripts/
 ```
 
-环境 / Git / 行尾 / CI / 分支保护 / 依赖安全 / 文档站的完整核对清单见 [docs/engineering/configuration.md](template/docs/engineering/configuration.md) §7。
+环境 / Git / 行尾 / CI / 分支保护 / 依赖安全 / 文档站的完整核对清单见 [.agents/configuration.md](template/.agents/configuration.md) §7。
 
 ## 哪些文件不要改
 
@@ -128,16 +132,16 @@ git ls-files -s scripts/
 |------|------------|-----------|
 | `LICENSE` | MIT 正文是法律文本，逐字固定；开头的年份与项目名已由脚本填好 | 换许可证 = 整体替换成另一份官方文本，不做局部编辑 |
 | `.gitattributes` | 它强制库内 LF；改了会让 Windows 检出脚本变成 CRLF（报 `bad interpreter`） | 只增不改，且必须保留 `*.sh text eol=lf` |
-| `docs/engineering/adr/` 中「已接受」的记录 | 决策记录的价值就在于不可篡改，改了就无从回溯当时为什么这样定 | 新增一条 ADR 说明变更，旧记录原样保留 |
+| `.agents/adr/` 中「已接受」的记录 | 决策记录的价值就在于不可篡改，改了就无从回溯当时为什么这样定 | 新增一条 ADR 说明变更，旧记录原样保留 |
 
 ### 二、可以补，但不得削弱
 
 | 文件 / 位置 | 不许做的事 |
 |------------|-----------|
-| `AGENTS.md` §1 上下文入口、§3 工作流、§4 红线、§5 DoD、§7 安全、§8 坐标表、§9 同改矩阵 | 不得删条目、不得放宽（例如把"不得删除测试"删掉）。§0 与 §2 留给项目搭建者填；§8 坐标表保留表头结构、只填「待填」处 |
-| `docs/engineering/definition-of-done.md` | 不得为了让某个功能"达标"而放宽条件 —— 这正是模板定义的「伪完成」 |
-| `docs/engineering/releasing.md` | 命名三要素（tag `vX.Y.Z` / Release title 跟 tag / CHANGELOG 不带 `v`）是硬规则，不得改；只能按项目实际情况**追加**预发布等约定 |
-| `.github/workflows/build.yml` | 要填真实命令，但不得删掉 lint / test / `AGENTS.md` 行数断言 / `CHANGELOG.md` 条目体积断言步骤、不得改成 `|| true`、不得把失败降级成警告 |
+| `AGENTS.md` §1 路由表、§3 工作流、§4 红线、§5 DoD、§7 安全、§8 坐标表、§9 同改矩阵 | 不得删条目、不得放宽（例如把"不得删除测试"删掉）。§0 与 §2 留给项目搭建者填；§8 坐标表保留表头结构、只填「待填」处。§1 路由表可以加行，但删行会让 `check-fast.sh` 失败 |
+| `.agents/definition-of-done.md` | 不得为了让某个功能"达标"而放宽条件 —— 这正是模板定义的「伪完成」 |
+| `.agents/releasing.md` | 命名三要素（tag `vX.Y.Z` / Release title 跟 tag / CHANGELOG 不带 `v`）是硬规则，不得改；只能按项目实际情况**追加**预发布等约定 |
+| `.github/workflows/build.yml` | 要填真实命令，但不得删掉 `scripts/check-fast.sh` 调用与 `Release guard` job、不得改成 `|| true`、不得把失败降级成警告 |
 | `.gitignore` | 可以追加语言相关规则，但不得删除密钥段（`.env`、`*.key`、`*.pem`） |
 
 确需调整流程类条文（例如 `CONTRIBUTING.md` 的分支策略）时，请在 PR 里写明理由，并同步 `AGENTS.md`，避免两份文档互相打架。
@@ -152,17 +156,17 @@ git ls-files -s scripts/
 
 ### 四、不在你的项目里（别去找）
 
-`template/`、`TEMPLATE.md`、`scripts/template-init.sh`、`.github/workflows/ci.yml`、`example/`、`.workbuddy/` 是**工具层**文件，物理上就不在复制源 `template/` 里，生成新项目时被自然排除 —— 新项目里**根本不存在**。根 `.github/pull_request_template.md` 也是工具层（本仓库自己的 PR 骨架）；注意产物里的 `.github/pull_request_template.md` 是 `template/` 下那份 payload，**不是**它。
+`template/`、`TEMPLATE.md`、`payload.txt`、根的 `scripts/`（生成器与门禁）、根的 `.githooks/`、`.github/workflows/ci.yml`、`example/`、`.workbuddy/` 是**工具层**文件，物理上就不在复制源 `template/` 里，生成新项目时被自然排除 —— 新项目里**根本不存在**。根 `.github/pull_request_template.md` 也是工具层（本仓库自己的 PR 骨架）；注意产物里的 `.github/pull_request_template.md` 是 `template/` 下那份 payload，**不是**它。
 
 ## 维护模板仓库自身
 
-**复制规则是白名单**：只有 `template/` 下的内容会被复制进新项目。根目录的 `README.md`、`AGENTS.md`、`CONTRIBUTING.md`、`ROADMAP.md`、`CHANGELOG.md`、`LICENSE`、`.gitignore`、`.gitattributes`、`TEMPLATE.md`、`scripts/`、`example/`、`.github/workflows/ci.yml`、`.github/pull_request_template.md` 全部是工具层，物理上不在 `template/` 里。
+**复制规则是白名单**：只有 `template/` 下的内容会被复制进新项目。根目录的 `README.md`、`AGENTS.md`、`CONTRIBUTING.md`、`ROADMAP.md`、`CHANGELOG.md`、`LICENSE`、`.gitignore`、`.gitattributes`、`TEMPLATE.md`、`payload.txt`、`scripts/`、`.githooks/`、`example/`、`.github/workflows/ci.yml`、`.github/pull_request_template.md` 全部是工具层，物理上不在 `template/` 里。
 
 因此：
 
 - 新增「仅供模板自用」的文件 → **直接放仓库根，不用改脚本**；
-- 新增「要进新项目」的文件 → **直接放 `template/` 下，不用改脚本**；
-- 维护成本为零：不存在需要同步的排除清单。
+- 新增「要进新项目」的文件 → **直接放 `template/` 下**，并在 [`payload.txt`](payload.txt) 加一行；
+- 生成器永远不用改：复制是白名单，清单只服务于校验。清单原本硬编码在 `ci.yml` 的一个 step 里，挪成独立文件后负担没增加，只是位置集中、门禁与文档都能读同一份。
 
 **必须保持的仓库性质**：
 
@@ -171,15 +175,16 @@ git ls-files -s scripts/
 | 通用文件不绑定具体技术栈 | 本模板对所有技术栈通用；语言 / 工具的具体示例**只放 `example/`**，不写进 `template/` 下的任何文件。通用文件里只写"该填什么"，不写"用什么填" | 见下方"通用文件技术栈中性自检" |
 | 库内一律 LF | Windows 检出脚本变 CRLF 会导致 `bad interpreter` | `git check-attr eol -- scripts/template-init.sh` → `eol: lf`<br>`git check-attr eol -- template/README.md` → `eol: lf` |
 | 两份 `.gitattributes` 内容一致 | 根那份**递归覆盖** `template/**`（已实测），内容一致时属性无歧义 | `diff .gitattributes template/.gitattributes` |
-| `scripts/*.sh` 索引模式 `100755` | 否则 CI 的 `./scripts/template-init.sh` 报 `Permission denied`（Windows 上 `core.filemode=false`，本地测不出） | `git ls-files -s scripts/` |
-| `template/` 下索引模式全为 `100644` | 可执行位会跟着进新项目 | `git ls-files -s template/ \| grep -v '^100644 '` → 无输出 |
+| `scripts/*.sh` 与 `.githooks/pre-commit` 索引模式 `100755` | 否则 `./scripts/x.sh` 报 `Permission denied`，钩子被 git 静默忽略（Windows 上 `core.filemode=false`，本地测不出） | `git ls-files -s scripts/ .githooks/` |
+| `template/` 下索引模式：脚本与钩子 755，其余 644 | 可执行位会跟着进新项目 | `./scripts/check-fast.sh` 的「索引模式」一项 |
 | `build.yml` 只在 `template/` 下 | 留在根上会让本仓库跑一个「只打 warning」的空壳 job，门禁形同虚设 | `ls .github/workflows/` → 只有 `ci.yml` |
 | 交付文件里不写占位符字面 | 生成新项目时，**`template/` 下的所有文件**都会参与占位符替换，文档里写占位符字面会被改写 | 见下方"改完模板后的自检" |
 
 修复权限位丢失：
 
 ```bash
-git update-index --chmod=+x scripts/template-init.sh
+git update-index --chmod=+x scripts/template-init.sh scripts/check-fast.sh \
+  .githooks/pre-commit template/scripts/check-fast.sh template/.githooks/pre-commit
 ```
 
 **通用文件技术栈中性自检**（`template/` 下的文件用于指导任何技术栈的新项目，不得出现具体语言 / 工具名；示例一律放 `example/`）：
@@ -188,14 +193,14 @@ git update-index --chmod=+x scripts/template-init.sh
 # 先确认待扫路径存在 —— grep 对不存在的路径会返回退出码 2，
 # 但 `|| echo OK` 照样执行，路径写错时这个检查会「假绿」
 for p in template/README.md template/AGENTS.md template/ROADMAP.md \
-         template/CONTRIBUTING.md template/CHANGELOG.md template/docs \
+         template/.agents template/CONTRIBUTING.md template/CHANGELOG.md \
          template/.github/workflows/build.yml; do
   [ -e "$p" ] || { echo "中性自检路径不存在：$p"; exit 1; }
 done
 
 grep -rn -i -e cargo -e pyproject -e pytest -e ruff -e "npm " -e "pip " \
   template/README.md template/AGENTS.md template/ROADMAP.md template/CONTRIBUTING.md \
-  template/CHANGELOG.md template/docs template/.github/workflows/build.yml \
+  template/CHANGELOG.md template/.agents template/.github/workflows/build.yml \
   || echo "OK: 通用文件保持技术栈中性"
 ```
 
@@ -204,33 +209,38 @@ grep -rn -i -e cargo -e pyproject -e pytest -e ruff -e "npm " -e "pip " \
 **改完模板后的自检**（在生成产物上检查；模板自身的 `template/` 含占位符，直接 grep 仓库会误报）：
 
 ```bash
+./scripts/check-fast.sh                            # 工具层 + payload 门禁，与 CI 同一份
 sh -n scripts/template-init.sh                     # 语法
 T=$(mktemp -d)
 ./scripts/template-init.sh "$T/newproj"            # 真实生成
 grep -rnE '\{\{(PROJECT_NAME|YEAR)\}\}' "$T/newproj" --exclude-dir=.git || echo "OK: 产物无残留占位符"
 find "$T/newproj" -name '.gitkeep' -not -path '*/.git/*' | wc -l  # 期望 0
-ls -d "$T/newproj"/src "$T/newproj"/tests "$T/newproj"/scripts  # 期望三个目录都在
+ls -d "$T/newproj"/src "$T/newproj"/tests "$T/newproj"/scripts     # 期望三个目录都在
 git -C "$T/newproj" branch --show-current          # 期望 main
 
 # 白名单反向断言：工具层文件不得进入产物
-for f in template TEMPLATE.md example scripts/template-init.sh .github/workflows/ci.yml; do
+for f in template TEMPLATE.md payload.txt example scripts/template-init.sh \
+         .github/workflows/ci.yml; do
   [ ! -e "$T/newproj/$f" ] || { echo "泄露：$f"; exit 1; }
 done
+# 产物不预置 docs/：工程文档在 .agents/，docs 全归使用者
+[ ! -e "$T/newproj/docs" ] || { echo "产物不应预置 docs/"; exit 1; }
 
 # 正向断言：payload 必须真的复制到位
 #（只有反向断言时，复制阶段整体失效会全绿通过）
 for f in README.md AGENTS.md ROADMAP.md CONTRIBUTING.md CHANGELOG.md LICENSE \
          THIRD-PARTY.md \
          .gitignore .gitattributes .github/workflows/build.yml \
-         docs/engineering/architecture.md docs/engineering/configuration.md docs/engineering/definition-of-done.md \
-         docs/engineering/releasing.md; do
+         .githooks/pre-commit scripts/check-fast.sh \
+         .agents/architecture.md .agents/configuration.md .agents/definition-of-done.md \
+         .agents/releasing.md .agents/extension-points.md .agents/skills/README.md; do
   [ -f "$T/newproj/$f" ] || { echo "缺少：$f"; exit 1; }
 done
 
+# 产物自身的门禁必须能跑（顺带验证可执行位）
+( cd "$T/newproj" && ./scripts/check-fast.sh )
+
 diff .gitattributes template/.gitattributes || echo "警告：两份 .gitattributes 不一致"
 
-# 常驻上下文档体积：AGENTS.md ≤ 200 行（超限先拆，见 AGENTS.md §4 红线）
-wc -l "$T/newproj/AGENTS.md"
-
-# CI 会执行：shellcheck scripts/*.sh + 上面这套断言 + AGENTS.md 行数断言 + CHANGELOG 条目体积断言 + 两个 example 的 lint/test
+# CI 会执行：./scripts/check-fast.sh + shellcheck + 上面这套断言 + 两个 example 的 lint/test
 ```

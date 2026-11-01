@@ -1,7 +1,7 @@
 # 第三方依赖许可证记录（THIRD-PARTY）
 
 本文件记录本项目**直接引入的开源 / 第三方依赖**及其许可证，供合规审查使用。
-新增依赖时**必须**在此登记一行（规则见 [`AGENTS.md`](AGENTS.md) §8 坐标表与 [`docs/engineering/architecture.md`](docs/engineering/architecture.md) §5）。
+新增依赖时**必须**在此登记一行（规则见 [`AGENTS.md`](AGENTS.md) §8 坐标表与 [`.agents/architecture.md`](.agents/architecture.md) §5）。
 
 ## 为什么需要
 
@@ -23,7 +23,7 @@
 - **许可证**填 SPDX 标识符（如 `MIT`、`Apache-2.0`、`GPL-3.0-only`），多个许可证用 `OR` / `AND` 连接。
 - **是否随分发**决定合规义务强度：随二进制分发的（静态链接、固件打包、打包进镜像）义务最重，需重点核对"署名 / 源码提供 / 修改声明"；仅开发期依赖（构建工具、linter）一般不随产物分发，义务较轻，但仍建议登记。
 - **版本**填当前生效的版本号；升级依赖时同步改这一行。登记与实际不符，审计时等于没登记。
-- **漏洞响应**：收到依赖漏洞告警时先看「是否随分发」列，随分发的优先修复；修复与升级记入 `CHANGELOG.md`。开关与流程见 [`docs/engineering/configuration.md`](docs/engineering/configuration.md) §5。
+- **漏洞响应**：收到依赖漏洞告警时先看「是否随分发」列，随分发的优先修复；修复与升级记入 `CHANGELOG.md`。开关与流程见 [`.agents/configuration.md`](.agents/configuration.md) §5。
 
 ## 与 LICENSE 的区别
 
